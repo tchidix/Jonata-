@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EliteSmart - Depositar</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary: #00c9ff;
+            --secondary: #92fe9d;
+            --dark: #0f2027;
+            --dark-light: #203a43;
+            --darker: #2c5364;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--dark), var(--dark-light), var(--darker));
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        .back-btn {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-50%) translateX(-5px);
+        }
+        
+        .logo {
+            margin-bottom: 15px;
+            animation: pulse 3s infinite alternate;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.05); }
+        }
+        
+        .logo h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 2px;
+        }
+        
+        .logo span {
+            color: var(--secondary);
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+        
+        .page-title {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        
+        .page-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        /* Rules */
+        .rules {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: slideInUp 0.7s;
+        }
+        
+        @keyframes slideInUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .rules h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .rules-list {
+            margin-bottom: 25px;
+        }
+        
+        .rule-item {
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+            border-left: 5px solid var(--primary);
+        }
+        
+        .rule-item i {
+            font-size: 1.2rem;
+            color: var(--primary);
+            margin-right: 15px;
+            margin-top: 3px;
+        }
+        
+        .rule-item p {
+            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        /* Deposit Details */
+        .deposit-details {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: slideInUp 0.9s;
+            text-align: center;
+        }
+        
+        .deposit-details h2 {
+            color: var(--primary);
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .detail-box {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+        }
+        
+        .detail-box:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0, 201, 255, 0.3);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .detail-label {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .detail-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--secondary);
+            font-family: monospace;
+            letter-spacing: 1px;
+            word-break: break-all;
+        }
+        
+        .copy-btn {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            color: var(--dark);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .copy-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 201, 255, 0.3);
+        }
+        
+        .copy-btn:active {
+            transform: translateY(-1px);
+        }
+        
+        .copy-btn.copied {
+            background: var(--secondary);
+        }
+        
+        .info-note {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 10px;
+            border-left: 5px solid #ffd700;
+        }
+        
+        .info-note p {
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.5;
+        }
+        
+        /* Upload Section */
+        .upload-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: slideInUp 1.1s;
+        }
+        
+        .upload-section h2 {
+            color: var(--primary);
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .upload-area {
+            border: 3px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 50px 30px;
+            text-align: center;
+            margin-bottom: 25px;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(0, 201, 255, 0.05);
+        }
+        
+        .upload-area.dragover {
+            border-color: var(--secondary);
+            background: rgba(146, 254, 157, 0.05);
+            transform: scale(1.02);
+        }
+        
+        .upload-icon {
+            font-size: 4rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            animation: float 3s infinite alternate;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-10px); }
+        }
+        
+        .upload-area h3 {
+            margin-bottom: 15px;
+            color: var(--secondary);
+        }
+        
+        .upload-area p {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 20px;
+        }
+        
+        .browse-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .browse-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        #fileInput {
+            display: none;
+        }
+        
+        .file-preview {
+            margin-top: 25px;
+            display: none;
+        }
+        
+        .preview-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .file-icon {
+            font-size: 3rem;
+            color: var(--primary);
+        }
+        
+        .file-info h4 {
+            margin-bottom: 5px;
+            color: var(--secondary);
+        }
+        
+        .file-info p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+        
+        .remove-file {
+            background: rgba(255, 107, 107, 0.2);
+            border: 1px solid rgba(255, 107, 107, 0.5);
+            color: #ff6b6b;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-left: auto;
+        }
+        
+        .remove-file:hover {
+            background: rgba(255, 107, 107, 0.3);
+            transform: rotate(90deg);
+        }
+        
+        .validation-rules {
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(255, 107, 107, 0.1);
+            border-radius: 10px;
+            border-left: 5px solid #ff6b6b;
+        }
+        
+        .validation-rules h4 {
+            color: #ff6b6b;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .validation-rules ul {
+            padding-left: 20px;
+        }
+        
+        .validation-rules li {
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 10px;
+            color: var(--dark);
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 201, 255, 0.3);
+        }
+        
+        .submit-btn:active {
+            transform: translateY(-1px);
+        }
+        
+        .submit-btn.disabled {
+            background: rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.5);
+            cursor: not-allowed;
+        }
+        
+        .submit-btn.disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s;
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, var(--dark), var(--dark-light));
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            animation: scaleUp 0.5s;
+            border: 1px solid rgba(0, 201, 255, 0.3);
+            text-align: center;
+        }
+        
+        @keyframes scaleUp {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
+        .success-icon {
+            font-size: 5rem;
+            color: var(--secondary);
+            margin-bottom: 20px;
+            animation: checkmark 0.5s ease-out;
+        }
+        
+        @keyframes checkmark {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .modal h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+        }
+        
+        .modal p {
+            margin-bottom: 25px;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .modal-btn {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            color: var(--dark);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            font-size: 1.1rem;
+        }
+        
+        .modal-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 201, 255, 0.3);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .back-btn {
+                position: relative;
+                left: 0;
+                top: 0;
+                transform: none;
+                margin-bottom: 20px;
+                display: inline-flex;
+            }
+            
+            .header {
+                text-align: center;
+            }
+            
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .page-title {
+                font-size: 1.5rem;
+            }
+            
+            .rules, .deposit-details, .upload-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <a href="index.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            
+            <div class="logo">
+                <h1>ELITESMART</h1>
+                <span>INVESTIMENTOS INTELIGENTES</span>
+            </div>
+            
+            <h1 class="page-title">Depositar</h1>
+            <p class="page-subtitle">Adicione fundos à sua conta para começar a investir e maximizar seus rendimentos.</p>
+        </div>
+        
+        <!-- Rules -->
+        <div class="rules">
+            <h2><i class="fas fa-clipboard-check"></i> Regras de Depósito</h2>
+            
+            <div class="rules-list">
+                <div class="rule-item">
+                    <i class="fas fa-info-circle"></i>
+                    <p>O depósito mínimo é de 1.000 Kz. Não há valor máximo para depósito.</p>
+                </div>
+                
+                <div class="rule-item">
+                    <i class="fas fa-clock"></i>
+                    <p>Os depósitos são processados em até 24 horas úteis após a confirmação do pagamento.</p>
+                </div>
+                
+                <div class="rule-item">
+                    <i class="fas fa-money-check-alt"></i>
+                    <p>Use exatamente a referência fornecida abaixo para garantir que o depósito seja creditado na sua conta.</p>
+                </div>
+                
+                <div class="rule-item">
+                    <i class="fas fa-history"></i>
+                    <p>Após realizar o pagamento, faça o upload do comprovante para agilizar a validação.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Deposit Details -->
+        <div class="deposit-details">
+            <h2><i class="fas fa-university"></i> Dados para Depósito</h2>
+            
+            <div class="details-grid">
+                <div class="detail-box">
+                    <div class="detail-label">
+                        <i class="fas fa-building"></i> Entidade
+                    </div>
+                    <div class="detail-value" id="entity">10116</div>
+                    <button class="copy-btn" data-copy="10116">
+                        <i class="fas fa-copy"></i> Copiar Entidade
+                    </button>
+                </div>
+                
+                <div class="detail-box">
+                    <div class="detail-label">
+                        <i class="fas fa-hashtag"></i> Referência
+                    </div>
+                    <div class="detail-value" id="reference">937359561</div>
+                    <button class="copy-btn" data-copy="937359561">
+                        <i class="fas fa-copy"></i> Copiar Referência
+                    </button>
+                </div>
+            </div>
+            
+            <div class="info-note">
+                <p><i class="fas fa-exclamation-triangle"></i> <strong>Importante:</strong> Use exatamente esta referência ao fazer o pagamento. Caso contrário, o depósito não será identificado e creditado na sua conta.</p>
+            </div>
+        </div>
+        
+        <!-- Upload Section -->
+        <div class="upload-section">
+            <h2><i class="fas fa-file-upload"></i> Enviar Comprovante</h2>
+            
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <h3>Arraste e solte o comprovante aqui</h3>
+                <p>ou clique para procurar no seu dispositivo</p>
+                <button class="browse-btn" id="browseBtn">Procurar Arquivo</button>
+                <input type="file" id="fileInput" accept="image/*,.pdf">
+            </div>
+            
+            <div class="file-preview" id="filePreview">
+                <div class="preview-container">
+                    <div class="file-icon">
+                        <i class="fas fa-file-invoice"></i>
+                    </div>
+                    <div class="file-info">
+                        <h4 id="fileName">comprovante.jpg</h4>
+                        <p id="fileSize">2.5 MB</p>
+                    </div>
+                    <div class="remove-file" id="removeFile">
+                        <i class="fas fa-times"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="validation-rules">
+                <h4><i class="fas fa-exclamation-circle"></i> Validação do Comprovante</h4>
+                <ul>
+                    <li>Foto original, sem edições ou cortes</li>
+                    <li>Comprovante deve estar legível e completo</li>
+                    <li>Apenas imagens (JPG, PNG) ou PDF são aceitos</li>
+                    <li>Tamanho máximo: 5 MB</li>
+                    <li>Certifique-se que a referência esteja visível</li>
+                </ul>
+            </div>
+            
+            <button class="submit-btn disabled" id="submitDeposit" disabled>
+                <i class="fas fa-paper-plane"></i> Enviar Comprovante
+            </button>
+        </div>
+    </div>
+    
+    <!-- Success Modal -->
+    <div class="modal" id="successModal">
+        <div class="modal-content">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            
+            <h3>Comprovante Enviado!</h3>
+            <p>Seu comprovante de depósito foi enviado com sucesso e será processado em até 24 horas úteis.</p>
+            <p style="color: var(--secondary); font-weight: 600;">Você será notificado por e-mail quando o depósito for confirmado.</p>
+            
+            <button class="modal-btn" id="closeSuccessModal">
+                <i class="fas fa-check"></i> Entendido
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC8OBZQm2dbUGeyuCTHCRgEwKhplCarxco",
+            authDomain: "luno-money.firebaseapp.com",
+            projectId: "luno-money",
+            storageBucket: "luno-money.firebasestorage.app",
+            messagingSenderId: "307225462580",
+            appId: "1:307225462580:web:5068a443fc54ee4b448761"
+        };
+        
+        // Initialize Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+        
+        // File upload state
+        let selectedFile = null;
+        let currentUser = null;
+        let userData = null;
+        
+        // DOM Elements
+        const uploadArea = document.getElementById('uploadArea');
+        const browseBtn = document.getElementById('browseBtn');
+        const fileInput = document.getElementById('fileInput');
+        const filePreview = document.getElementById('filePreview');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const removeFile = document.getElementById('removeFile');
+        const submitDeposit = document.getElementById('submitDeposit');
+        const successModal = document.getElementById('successModal');
+        const closeSuccessModal = document.getElementById('closeSuccessModal');
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication state
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    currentUser = user;
+                    await initializeUserData();
+                } else {
+                    // Redirect to signup if not logged in
+                    window.location.href = 'signup.html';
+                }
+            });
+            
+            // Setup copy buttons
+            document.querySelectorAll('.copy-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const textToCopy = this.getAttribute('data-copy');
+                    copyToClipboard(textToCopy, this);
+                });
+            });
+            
+            // File upload handlers
+            browseBtn.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            uploadArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            fileInput.addEventListener('change', handleFileSelect);
+            
+            // Drag and drop handlers
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                
+                if (e.dataTransfer.files.length) {
+                    handleFileSelect({ target: { files: e.dataTransfer.files } });
+                }
+            });
+            
+            // Remove file handler
+            removeFile.addEventListener('click', removeSelectedFile);
+            
+            // Submit deposit handler
+            submitDeposit.addEventListener('click', submitDepositProof);
+            
+            // Close success modal
+            closeSuccessModal.addEventListener('click', () => {
+                successModal.style.display = 'none';
+                window.location.href = 'index.html';
+            });
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', (e) => {
+                if (e.target === successModal) {
+                    successModal.style.display = 'none';
+                    window.location.href = 'index.html';
+                }
+            });
+        });
+        
+        // Initialize user data
+        async function initializeUserData() {
+            try {
+                const userDoc = await db.collection('users').doc(currentUser.uid).get();
+                if (userDoc.exists) {
+                    userData = userDoc.data();
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+        
+        // Handle file selection
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            
+            if (!file) return;
+            
+            // Validate file type
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+            if (!validTypes.includes(file.type)) {
+                alert('Tipo de arquivo não suportado. Use JPG, PNG ou PDF.');
+                return;
+            }
+            
+            // Validate file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Arquivo muito grande. O tamanho máximo é 5 MB.');
+                return;
+            }
+            
+            selectedFile = file;
+            
+            // Update preview
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+            filePreview.style.display = 'block';
+            
+            // Enable submit button
+            submitDeposit.classList.remove('disabled');
+            submitDeposit.disabled = false;
+            
+            // Scroll to preview
+            filePreview.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        
+        // Remove selected file
+        function removeSelectedFile() {
+            selectedFile = null;
+            filePreview.style.display = 'none';
+            fileInput.value = '';
+            
+            // Disable submit button
+            submitDeposit.classList.add('disabled');
+            submitDeposit.disabled = true;
+        }
+        
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // Copy to clipboard
+        function copyToClipboard(text, button) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check"></i> Copiado!';
+                button.classList.add('copied');
+                
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Erro ao copiar: ', err);
+                alert('Não foi possível copiar o texto. Tente manualmente.');
+            });
+        }
+        
+        // Submit deposit proof
+        async function submitDepositProof() {
+            if (!selectedFile) return;
+            
+            submitDeposit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+            submitDeposit.disabled = true;
+            
+            try {
+                // Generate unique filename
+                const timestamp = Date.now();
+                const fileExtension = selectedFile.name.split('.').pop();
+                const fileName = `deposit_${currentUser.uid}_${timestamp}.${fileExtension}`;
+                
+                // Upload file to Firebase Storage
+                const storageRef = storage.ref();
+                const fileRef = storageRef.child(`deposits/${fileName}`);
+                const uploadTask = fileRef.put(selectedFile);
+                
+                uploadTask.on('state_changed',
+                    (snapshot) => {
+                        // Progress tracking (optional)
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        console.log('Upload progress:', progress + '%');
+                    },
+                    (error) => {
+                        console.error('Upload error:', error);
+                        alert('Erro ao enviar arquivo. Tente novamente.');
+                        submitDeposit.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Comprovante';
+                        submitDeposit.disabled = false;
+                    },
+                    async () => {
+                        // Upload complete
+                        const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+                        
+                        // Create deposit record in Firestore
+                        const depositData = {
+                            userId: currentUser.uid,
+                            userEmail: userData.email,
+                            userName: userData.fullName,
+                            amount: 0, // To be confirmed by admin
+                            entity: '10116',
+                            reference: '937359561',
+                            fileName: fileName,
+                            fileURL: downloadURL,
+                            status: 'pending',
+                            submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            processedAt: null,
+                            processedBy: null
+                        };
+                        
+                        await db.collection('deposits').add(depositData);
+                        
+                        // Create transaction record for user
+                        await db.collection('users').doc(currentUser.uid).collection('transactions').add({
+                            type: 'deposit',
+                            amount: 0,
+                            description: 'Depósito pendente de confirmação',
+                            status: 'pending',
+                            fileURL: downloadURL,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                        
+                        // Create notification for user
+                        await db.collection('users').doc(currentUser.uid).collection('notifications').add({
+                            title: 'Depósito Pendente',
+                            message: 'Seu comprovante de depósito foi recebido e está em análise.',
+                            type: 'deposit',
+                            read: false,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                        
+                        // Reset form
+                        removeSelectedFile();
+                        
+                        // Show success modal
+                        successModal.style.display = 'flex';
+                    }
+                );
+                
+            } catch (error) {
+                console.error('Error submitting deposit:', error);
+                alert('Erro ao processar depósito. Tente novamente.');
+                submitDeposit.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Comprovante';
+                submitDeposit.disabled = false;
+            }
+        }
+        
+        // Add animation to elements on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+        
+        // Observe all sections for animation
+        document.querySelectorAll('.rules, .deposit-details, .upload-section').forEach(section => {
+            section.style.opacity = '0';
+            section.style.transform = 'translateY(30px)';
+            section.style.transition = 'opacity 0.5s, transform 0.5s';
+            observer.observe(section);
+        });
+    </script>
+</body>
+</html>
