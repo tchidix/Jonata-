@@ -2051,7 +2051,7 @@
             const copyInviteLink = modal.querySelector('#copyInviteLink');
             if (copyInviteLink) {
                 copyInviteLink.addEventListener('click', function() {
-                    const link = `https://elite-smart.great-site.net/signup.html?ref=${userData.userId}`;
+                    const link = `https://elite-smart.onrender.com/signup.html?ref=${userData.userId}`;
                     navigator.clipboard.writeText(link).then(() => {
                         const originalText = this.innerHTML;
                         this.innerHTML = '<i class="fas fa-check"></i> Link Copiado!';
@@ -2627,7 +2627,7 @@
                         <div style="margin-bottom: 20px;">
                             <div style="font-size: 0.9rem; color: rgba(255,255,255,0.7); margin-bottom: 8px;">Seu link de convite:</div>
                             <div style="background: rgba(255,255,255,0.1); padding: 12px; border-radius: 8px; font-family: monospace; word-break: break-all; font-size: 0.9rem;">
-                                https://elite-smart.great-site.net/signup.html?ref=${userData.userId}
+                                https://elite-smart.onrender.com/signup.html?ref=${userData.userId}
                             </div>
                         </div>
                         
