@@ -903,6 +903,22 @@
             font-size: 0.9rem;
             opacity: 0.8;
         }
+
+        /* Commission Counter */
+        .commission-card {
+            background: linear-gradient(45deg, rgba(46, 204, 113, 0.1), rgba(39, 174, 96, 0.1));
+            border: 1px solid rgba(46, 204, 113, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .commission-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2ecc71;
+        }
     </style>
 </head>
 <body>
@@ -999,7 +1015,7 @@
             </a>
         </div>
 
-        <!-- Stats Grid - EMOJIS REMOVIDOS -->
+        <!-- Stats Grid - COM CORREÇÃO PARA COMISSÕES -->
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-icon">
@@ -1021,6 +1037,32 @@
                 </div>
                 <div class="stat-value" id="totalReferrals">0</div>
                 <div class="stat-label">Indicações</div>
+            </div>
+        </div>
+
+        <!-- Commission Stats -->
+        <div class="level-section">
+            <div class="level-header">
+                <div class="level-title">Comissões de Indicação</div>
+                <div class="current-level" style="background: linear-gradient(45deg, #2ecc71, #27ae60);" id="totalCommission">
+                    0 Kz
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 15px;">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <div class="stat-value" id="activeReferrals">0</div>
+                    <div class="stat-label">Ativos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <div class="stat-value">15%</div>
+                    <div class="stat-label">Comissão</div>
+                </div>
             </div>
         </div>
     </div>
@@ -1134,6 +1176,9 @@
         const db = firebase.firestore();
 
         let userData = null;
+        let referralsData = [];
+        let totalCommission = 0;
+        let activeReferralsCount = 0;
 
         // Check authentication
         auth.onAuthStateChanged(async (user) => {
@@ -1152,12 +1197,17 @@
                 const doc = await db.collection('users').doc(uid).get();
                 if (doc.exists) {
                     userData = doc.data();
+                    
+                    // Load referrals data
+                    await loadReferralsData(uid, userData.referrals || []);
+                    
                     updateDashboard(userData);
                     
                     // Start real-time updates
-                    db.collection('users').doc(uid).onSnapshot((snapshot) => {
+                    db.collection('users').doc(uid).onSnapshot(async (snapshot) => {
                         if (snapshot.exists) {
                             userData = snapshot.data();
+                            await loadReferralsData(uid, userData.referrals || []);
                             updateDashboard(userData);
                         }
                     });
@@ -1167,55 +1217,110 @@
             }
         }
 
+        // CORREÇÃO: Carregar dados dos referidos
+        async function loadReferralsData(userId, referralsList) {
+            referralsData = [];
+            totalCommission = 0;
+            activeReferralsCount = 0;
+
+            if (!referralsList || referralsList.length === 0) {
+                return;
+            }
+
+            try {
+                // Carregar dados de cada usuário referido
+                for (const referralId of referralsList) {
+                    try {
+                        const referralDoc = await db.collection('users').doc(referralId).get();
+                        if (referralDoc.exists) {
+                            const data = referralDoc.data();
+                            referralsData.push({
+                                id: referralId,
+                                name: data.name,
+                                userId: data.userId,
+                                level: data.level || 1,
+                                totalDeposited: data.totalDeposited || 0,
+                                totalInvestment: data.totalInvestment || 0,
+                                balance: data.balance || 0,
+                                createdAt: data.createdAt
+                            });
+
+                            // Calcular comissões (15% do primeiro investimento/depósito)
+                            const firstInvestment = Math.max(data.totalDeposited || 0, data.totalInvestment || 0);
+                            const commission = firstInvestment * 0.15;
+                            if (commission > 0) {
+                                totalCommission += commission;
+                                activeReferralsCount++;
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error loading referral data:', error);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading referrals:', error);
+            }
+        }
+
         function updateDashboard(data) {
             // Update user info
             document.getElementById('userName').textContent = `Olá, ${data.name}`;
             document.getElementById('userId').textContent = data.userId;
             
             // Update balance
-            document.getElementById('balanceAmount').textContent = `${data.balance?.toLocaleString('pt-AO') || 0} Kz`;
-            document.getElementById('totalEarned').textContent = `${data.totalEarned?.toLocaleString('pt-AO') || 0} Kz`;
-            document.getElementById('totalWithdrawn').textContent = `${data.totalWithdrawn?.toLocaleString('pt-AO') || 0} Kz`;
+            document.getElementById('balanceAmount').textContent = `${(data.balance || 0).toLocaleString('pt-AO')} Kz`;
+            document.getElementById('totalEarned').textContent = `${(data.totalEarned || 0).toLocaleString('pt-AO')} Kz`;
+            document.getElementById('totalWithdrawn').textContent = `${(data.totalWithdrawn || 0).toLocaleString('pt-AO')} Kz`;
             document.getElementById('totalReferrals').textContent = data.referrals?.length || 0;
+            
+            // Update commission stats
+            document.getElementById('totalCommission').textContent = `${totalCommission.toLocaleString('pt-AO')} Kz`;
+            document.getElementById('activeReferrals').textContent = activeReferralsCount;
             
             // Update level
             const level = data.level || 1;
             document.getElementById('currentLevel').textContent = `Nível ${level}`;
             
             // Update progress bar based on level
-            updateProgressBar(level);
+            updateProgressBar(level, data.totalInvestment || 0);
             
             // Update referral code
             document.getElementById('referralCode').textContent = data.userId;
         }
 
-        function updateProgressBar(level) {
+        function updateProgressBar(level, totalInvestment) {
             const progressFill = document.getElementById('progressFill');
             const nextLevelInfo = document.getElementById('nextLevelInfo');
             
             // Define level thresholds
             const levelThresholds = [
-                { level: 1, next: 2, investment: 7000 },
-                { level: 2, next: 3, investment: 12000 },
-                { level: 3, next: 4, investment: 17000 },
-                { level: 4, next: 5, investment: 25000 },
-                { level: 5, next: 6, investment: 40000 },
-                { level: 6, next: 7, investment: 70000 },
-                { level: 7, next: 8, investment: 100000 },
-                { level: 8, next: 9, investment: 200000 },
-                { level: 9, next: 10, investment: 1000000 }
+                { level: 1, next: 2, required: 7000 },
+                { level: 2, next: 3, required: 12000 },
+                { level: 3, next: 4, required: 17000 },
+                { level: 4, next: 5, required: 25000 },
+                { level: 5, next: 6, required: 40000 },
+                { level: 6, next: 7, required: 70000 },
+                { level: 7, next: 8, required: 100000 },
+                { level: 8, next: 9, required: 200000 },
+                { level: 9, next: 10, required: 1000000 }
             ];
             
-            // Calculate progress (simplified)
-            const progress = Math.min(100, ((level - 1) / 9) * 100);
-            progressFill.style.width = `${progress}%`;
+            // Find current level threshold
+            const currentLevelThreshold = levelThresholds.find(item => item.level === level);
             
-            // Show next level requirement
-            const nextLevel = levelThresholds.find(item => item.level === level);
-            if (nextLevel) {
-                nextLevelInfo.textContent = `Nível ${nextLevel.next}: ${nextLevel.investment.toLocaleString('pt-AO')} Kz`;
-            } else {
+            if (currentLevelThreshold) {
+                // Calculate progress for current level
+                const progress = Math.min(100, (totalInvestment / currentLevelThreshold.required) * 100);
+                progressFill.style.width = `${progress}%`;
+                
+                // Show next level requirement
+                nextLevelInfo.textContent = `Nível ${currentLevelThreshold.next}: ${currentLevelThreshold.required.toLocaleString('pt-AO')} Kz`;
+            } else if (level >= 10) {
+                progressFill.style.width = '100%';
                 nextLevelInfo.textContent = 'Nível máximo alcançado!';
+            } else {
+                progressFill.style.width = '0%';
+                nextLevelInfo.textContent = 'Nível 1: 4.000 Kz';
             }
         }
 
@@ -1316,7 +1421,19 @@
                     </div>
                     <div class="info-row">
                         <div class="info-label">Saldo Actual</div>
-                        <div class="info-value">${userData.balance?.toLocaleString('pt-AO') || 0} Kz</div>
+                        <div class="info-value">${(userData.balance || 0).toLocaleString('pt-AO')} Kz</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Total Ganho</div>
+                        <div class="info-value">${(userData.totalEarned || 0).toLocaleString('pt-AO')} Kz</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Total Investido</div>
+                        <div class="info-value">${(userData.totalInvestment || 0).toLocaleString('pt-AO')} Kz</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Comissões de Indicação</div>
+                        <div class="info-value">${totalCommission.toLocaleString('pt-AO')} Kz</div>
                     </div>
                 </div>
             `;
@@ -1332,6 +1449,9 @@
                     <div class="promotion-content">
                         <p>Ganhe 15% do primeiro investimento de cada amigo que você convidar!</p>
                         <p>Compartilhe seu código: <strong>${userData?.userId || 'PF0000'}</strong></p>
+                        <p style="margin-top: 10px; font-weight: bold; color: #2ecc71;">
+                            Total em comissões: ${totalCommission.toLocaleString('pt-AO')} Kz
+                        </p>
                     </div>
                 </div>
                 <div class="promotion-card">
@@ -1339,6 +1459,10 @@
                     <div class="promotion-content">
                         <p>Invista mais para subir de nível e desbloquear mais tarefas diárias!</p>
                         <p>Cada nível traz benefícios exclusivos e maiores ganhos.</p>
+                        <p style="margin-top: 10px;">
+                            <strong>Nível Actual:</strong> ${userData?.level || 1}<br>
+                            <strong>Próximo nível:</strong> ${getNextLevelRequirement(userData?.level || 1)}
+                        </p>
                     </div>
                 </div>
                 <div class="promotion-card">
@@ -1352,6 +1476,22 @@
             
             showModal('Promoções Ativas', content);
             closeMenu();
+        }
+
+        function getNextLevelRequirement(currentLevel) {
+            const thresholds = {
+                1: '7.000 Kz',
+                2: '12.000 Kz',
+                3: '17.000 Kz',
+                4: '25.000 Kz',
+                5: '40.000 Kz',
+                6: '70.000 Kz',
+                7: '100.000 Kz',
+                8: '200.000 Kz',
+                9: '1.000.000 Kz',
+                10: 'Nível máximo'
+            };
+            return thresholds[currentLevel] || 'Nível máximo';
         }
 
         function showAchievements() {
@@ -1410,17 +1550,23 @@
         }
 
         function showReferrals() {
-            const referrals = userData?.referrals || [];
             let referralsList = '';
             
-            if (referrals.length > 0) {
-                referrals.forEach((ref, index) => {
+            if (referralsData.length > 0) {
+                referralsData.forEach((ref, index) => {
+                    const investment = Math.max(ref.totalDeposited, ref.totalInvestment);
+                    const commission = investment * 0.15;
+                    
                     referralsList += `
                         <div class="referral-item">
-                            <div class="referral-avatar">${index + 1}</div>
+                            <div class="referral-avatar">${ref.userId?.substring(2) || index + 1}</div>
                             <div class="referral-details">
-                                <div class="referral-name">Amigo ${index + 1}</div>
-                                <div class="referral-status status-invested">ID: ${ref}</div>
+                                <div class="referral-name">${ref.name}</div>
+                                <div class="referral-status">
+                                    <div>ID: ${ref.userId}</div>
+                                    <div>Investimento: ${investment.toLocaleString('pt-AO')} Kz</div>
+                                    <div style="color: #2ecc71;">Sua comissão: ${commission.toLocaleString('pt-AO')} Kz</div>
+                                </div>
                             </div>
                         </div>
                     `;
@@ -1439,14 +1585,27 @@
                 <div class="referrals-list">
                     ${referralsList}
                 </div>
-                <div style="margin-top: 20px;">
-                    <div class="info-row">
-                        <div class="info-label">Total de Amigos</div>
-                        <div class="info-value">${referrals.length}</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Comissão por Indicação</div>
-                        <div class="info-value">15%</div>
+                <div class="commission-card">
+                    <div class="commission-title">Resumo de Comissões</div>
+                    <div style="display: grid; gap: 10px; margin-top: 15px;">
+                        <div class="info-row">
+                            <div class="info-label">Total de Amigos</div>
+                            <div class="info-value">${referralsData.length}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Amigos Ativos</div>
+                            <div class="info-value">${activeReferralsCount}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Comissão por Indicação</div>
+                            <div class="info-value">15%</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Total em Comissões</div>
+                            <div class="info-value" style="color: #2ecc71; font-weight: bold;">
+                                ${totalCommission.toLocaleString('pt-AO')} Kz
+                            </div>
+                        </div>
                     </div>
                 </div>
             `;
@@ -1458,17 +1617,9 @@
         function showQRCode() {
             if (!userData) return;
             
-            const qrData = JSON.stringify({
-                name: userData.name,
-                userId: userData.userId,
-                phone: userData.phone,
-                level: userData.level || 1
-            });
-            
             const content = `
                 <div class="qr-container">
                     <div class="qr-code">
-                        <!-- In a real app, you would generate a QR code here -->
                         <div style="text-align: center;">
                             <div style="font-size: 2rem; margin-bottom: 10px;">
                                 <i class="fas fa-qrcode"></i>
@@ -1489,9 +1640,13 @@
                             <div class="info-label">Nível</div>
                             <div class="info-value">${userData.level || 1}</div>
                         </div>
+                        <div class="info-row">
+                            <div class="info-label">Comissões Ganhas</div>
+                            <div class="info-value">${totalCommission.toLocaleString('pt-AO')} Kz</div>
+                        </div>
                     </div>
                     <p style="text-align: center; margin-top: 20px; opacity: 0.8;">
-                        Compartilhe este QR Code para convidar amigos!
+                        Compartilhe este QR Code para convidar amigos e ganhar 15%!
                     </p>
                 </div>
             `;
@@ -1645,4 +1800,4 @@
         setInterval(updateTimeBasedFeatures, 60000);
     </script>
 </body>
-</html>
+                        </html>
