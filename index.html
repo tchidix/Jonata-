@@ -1246,8 +1246,14 @@
                             });
 
                             // Calcular comissões (15% do primeiro investimento/depósito)
-                            const firstInvestment = Math.max(data.totalDeposited || 0, data.totalInvestment || 0);
-                            const commission = firstInvestment * 0.15;
+                            // Verifica qual foi o primeiro investimento: depósito ou investimento
+                            const firstDeposit = data.totalDeposited || 0;
+                            const firstInvestment = data.totalInvestment || 0;
+                            
+                            // Usa o maior valor entre depósito e investimento para calcular a comissão
+                            const firstAmount = Math.max(firstDeposit, firstInvestment);
+                            const commission = firstAmount * 0.15;
+                            
                             if (commission > 0) {
                                 totalCommission += commission;
                                 activeReferralsCount++;
@@ -1798,6 +1804,16 @@
 
         // Update every minute
         setInterval(updateTimeBasedFeatures, 60000);
+        
+        // Inicializar quando a página carregar
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar se há um usuário logado
+            auth.onAuthStateChanged((user) => {
+                if (!user) {
+                    window.location.href = 'signup.html';
+                }
+            });
+        });
     </script>
 </body>
-                        </html>
+    </html>
