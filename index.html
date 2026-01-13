@@ -386,6 +386,34 @@
             color: var(--gray);
         }
 
+        /* Friends Stats */
+        .friends-stats {
+            display: flex;
+            justify-content: space-around;
+            background: var(--white);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 25px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .friend-stat {
+            text-align: center;
+        }
+
+        .friend-stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent);
+            margin-bottom: 5px;
+        }
+
+        .friend-stat-label {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
         /* Comission Section */
         .comission-card {
             background: linear-gradient(135deg, #ffd700, #ff9f1a);
@@ -557,12 +585,23 @@
         }
 
         /* Recent Activity */
+        .activity-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
         .activity-item {
             display: flex;
             justify-content: space-between;
             padding: 15px;
             border-bottom: 1px solid #eee;
             align-items: center;
+            transition: background 0.2s;
+        }
+
+        .activity-item:hover {
+            background: rgba(0, 0, 0, 0.02);
         }
 
         .activity-item:last-child {
@@ -576,16 +615,29 @@
         .activity-title {
             font-weight: 600;
             color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .activity-description {
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin-bottom: 3px;
         }
 
         .activity-time {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: var(--gray);
         }
 
         .activity-amount {
             font-weight: bold;
             font-size: 1.1rem;
+        }
+
+        .no-activity {
+            text-align: center;
+            padding: 30px;
+            color: var(--gray);
         }
 
         /* Responsive */
@@ -600,6 +652,11 @@
             
             .stats-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .friends-stats {
+                flex-direction: column;
+                gap: 20px;
             }
             
             .progress-container {
@@ -626,6 +683,17 @@
             0% { opacity: 1; }
             50% { opacity: 0.7; }
             100% { opacity: 1; }
+        }
+
+        /* Status colors */
+        .status-completed {
+            color: var(--success);
+        }
+        .status-pending {
+            color: var(--warning);
+        }
+        .status-failed {
+            color: var(--danger);
         }
     </style>
 </head>
@@ -666,6 +734,12 @@
 
     <!-- Main Content -->
     <div class="main-content">
+        <!-- Platform Name -->
+        <div class="platform-name">
+            <h1>Kriola <span class="highlight">Yield Pro</span></h1>
+            <div class="tagline">Crescendo Juntos, Ganhando Juntos</div>
+        </div>
+
         <!-- Status Card -->
         <div class="status-card">
             <div class="status-header">
@@ -750,8 +824,39 @@
             <div style="margin-top: 15px;">Carregando dados...</div>
         </div>
 
-        <!-- Main Actions Grid -->
+        <!-- Main Content (shown after loading) -->
         <div id="main-content" style="display: none;">
+            <!-- Friends Statistics -->
+            <div class="friends-stats">
+                <div class="friend-stat">
+                    <div class="friend-stat-value" id="total-friends">0</div>
+                    <div class="friend-stat-label">Amigos Convidados</div>
+                </div>
+                <div class="friend-stat">
+                    <div class="friend-stat-value" id="friends-invested">0</div>
+                    <div class="friend-stat-label">Amigos Investiram</div>
+                </div>
+                <div class="friend-stat">
+                    <div class="friend-stat-value" id="total-friends-investment">0,00</div>
+                    <div class="friend-stat-label">Total Investido</div>
+                </div>
+            </div>
+
+            <!-- Comission Section -->
+            <div class="comission-card">
+                <h3 class="comission-title">
+                    <i class="fas fa-gift"></i> BÔNUS DE 15%
+                </h3>
+                <div class="comission-amount" id="comission-earned">0,00 CVE</div>
+                <div style="font-size: 1rem; margin-bottom: 15px;">
+                    Ganhe 15% do primeiro investimento<br>de cada amigo convidado!
+                </div>
+                <div style="font-size: 0.9rem; opacity: 0.9;">
+                    <i class="fas fa-user-friends"></i> Rede ativa: <span id="network-size">0</span> pessoas
+                </div>
+            </div>
+
+            <!-- Action Grid -->
             <div class="action-grid">
                 <a href="tarefas.html" class="action-card">
                     <div class="action-icon">
@@ -792,20 +897,6 @@
                         Escolha o melhor plano
                     </div>
                 </a>
-            </div>
-
-            <!-- Comission Section -->
-            <div class="comission-card">
-                <h3 class="comission-title">
-                    <i class="fas fa-gift"></i> COMISSÃO 15%
-                </h3>
-                <div class="comission-amount" id="comission-earned">0,00 CVE</div>
-                <div style="font-size: 1rem; margin-bottom: 15px;">
-                    Ganhe 15% do primeiro investimento<br>de cada amigo convidado!
-                </div>
-                <div style="font-size: 0.9rem; opacity: 0.9;">
-                    <i class="fas fa-user-friends"></i> Rede ativa: <span id="network-size">0</span> pessoas
-                </div>
             </div>
 
             <!-- Stats Grid -->
@@ -865,12 +956,15 @@
             <div class="status-card" style="margin-top: 25px;">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
                     <h3 style="color: var(--primary);">
-                        <i class="fas fa-history"></i> Atividade Recente
+                        <i class="fas fa-history"></i> Atividades Recentes
                     </h3>
+                    <button onclick="refreshActivities()" style="background: none; border: none; color: var(--accent); cursor: pointer;">
+                        <i class="fas fa-sync-alt"></i> Atualizar
+                    </button>
                 </div>
                 
-                <div id="recent-activity">
-                    <div style="color: var(--gray); text-align: center; padding: 30px;">
+                <div class="activity-list" id="recent-activity">
+                    <div class="no-activity">
                         <i class="fas fa-history fa-2x" style="margin-bottom: 10px;"></i><br>
                         Nenhuma atividade recente
                     </div>
@@ -925,7 +1019,7 @@
         const loadingElement = document.getElementById('loading');
         const notificationElement = document.getElementById('notification');
 
-        // Níveis da plataforma (RETORNO DIÁRIO FIXO CONFORME PLANO)
+        // Níveis da plataforma
         const levels = [
             { name: "INICIANTE", investment: 205.80, daily: 10.28, tasks: 3 },
             { name: "BASIC", investment: 617.23, daily: 22.66, tasks: 4 },
@@ -942,6 +1036,10 @@
         // Formatar números
         function formatNumber(num) {
             return Number(num).toFixed(2).replace('.', ',');
+        }
+
+        function formatCurrency(num) {
+            return formatNumber(num) + ' CVE';
         }
 
         // Mostrar notificação
@@ -997,21 +1095,21 @@
             }
         }
 
-        // FUNÇÃO NOVA: Carregar comissões de 15% do primeiro investimento
-        async function loadComissions(userId) {
+        // FUNÇÃO NOVA: Carregar estatísticas de amigos
+        async function loadFriendsStats(userId) {
             try {
                 // Buscar todos os usuários que indicou
                 const referralsSnapshot = await db.collection('users')
                     .where('referrerId', '==', userId)
                     .get();
                 
-                let totalComissions = 0;
-                let networkSize = 0;
+                let totalFriends = referralsSnapshot.size;
+                let friendsInvested = 0;
+                let totalFriendsInvestment = 0;
                 let comissionDetails = [];
                 
                 for (const doc of referralsSnapshot.docs) {
                     const referredUser = doc.data();
-                    networkSize++;
                     
                     // Verificar se o usuário indicado já fez um investimento
                     const depositsSnapshot = await db.collection('deposits')
@@ -1021,12 +1119,13 @@
                         .get();
                     
                     if (!depositsSnapshot.empty) {
+                        friendsInvested++;
                         const firstDeposit = depositsSnapshot.docs[0].data();
                         const depositAmount = firstDeposit.amount || 0;
+                        totalFriendsInvestment += depositAmount;
                         
                         // Calcular 15% do primeiro investimento
                         const comissionAmount = depositAmount * 0.15;
-                        totalComissions += comissionAmount;
                         
                         comissionDetails.push({
                             userId: doc.id,
@@ -1039,23 +1138,47 @@
                 }
                 
                 // Atualizar estatísticas na interface
-                document.getElementById('network-size').textContent = networkSize;
-                document.getElementById('comission-earned').textContent = formatNumber(totalComissions) + ' CVE';
-                document.getElementById('total-comissions').textContent = formatNumber(totalComissions) + ' CVE';
+                document.getElementById('total-friends').textContent = totalFriends;
+                document.getElementById('friends-invested').textContent = friendsInvested;
+                document.getElementById('total-friends-investment').textContent = formatNumber(totalFriendsInvestment);
+                document.getElementById('network-size').textContent = totalFriends;
                 
                 return {
-                    totalComissions,
-                    networkSize,
+                    totalFriends,
+                    friendsInvested,
+                    totalFriendsInvestment,
                     comissionDetails
                 };
                 
             } catch (error) {
-                console.error('Erro ao carregar comissões:', error);
+                console.error('Erro ao carregar estatísticas de amigos:', error);
                 return {
-                    totalComissions: 0,
-                    networkSize: 0,
+                    totalFriends: 0,
+                    friendsInvested: 0,
+                    totalFriendsInvestment: 0,
                     comissionDetails: []
                 };
+            }
+        }
+
+        // FUNÇÃO NOVA: Calcular comissões de 15%
+        async function calculateComissions(friendsData) {
+            try {
+                let totalComissions = 0;
+                
+                // Calcular comissões com base nos investimentos dos amigos
+                friendsData.comissionDetails.forEach(detail => {
+                    totalComissions += detail.comissionAmount;
+                });
+                
+                // Atualizar interface
+                document.getElementById('comission-earned').textContent = formatCurrency(totalComissions);
+                document.getElementById('total-comissions').textContent = formatNumber(totalComissions);
+                
+                return totalComissions;
+            } catch (error) {
+                console.error('Erro ao calcular comissões:', error);
+                return 0;
             }
         }
 
@@ -1103,7 +1226,7 @@
             }
         }
 
-        // Carregar atividade recente (INCLUINDO COMISSÕES)
+        // FUNÇÃO NOVA: Carregar atividade recente
         async function loadRecentActivity(userId) {
             try {
                 const activityElement = document.getElementById('recent-activity');
@@ -1112,95 +1235,168 @@
                 const transactionsSnapshot = await db.collection('transactions')
                     .where('userId', '==', userId)
                     .orderBy('createdAt', 'desc')
-                    .limit(5)
+                    .limit(10)
                     .get();
 
-                // Buscar comissões também
+                // Buscar comissões
                 const comissionsSnapshot = await db.collection('comissions')
                     .where('referrerId', '==', userId)
                     .orderBy('createdAt', 'desc')
-                    .limit(5)
+                    .limit(10)
+                    .get();
+
+                // Buscar tarefas completadas
+                const tasksSnapshot = await db.collection('taskCompletions')
+                    .where('userId', '==', userId)
+                    .orderBy('completedAt', 'desc')
+                    .limit(10)
                     .get();
 
                 let allActivities = [];
 
+                // Adicionar transações
                 transactionsSnapshot.forEach(doc => {
                     const transaction = doc.data();
                     allActivities.push({
                         ...transaction,
-                        type: transaction.type,
-                        source: 'transaction'
+                        id: doc.id,
+                        type: 'transaction',
+                        activityType: transaction.type,
+                        source: 'transaction',
+                        timestamp: transaction.createdAt
                     });
                 });
 
+                // Adicionar comissões
                 comissionsSnapshot.forEach(doc => {
                     const comission = doc.data();
                     allActivities.push({
                         ...comission,
+                        id: doc.id,
                         type: 'comission',
-                        amount: comission.amount,
-                        description: `Comissão de ${comission.referredUserName}`,
-                        source: 'comission'
+                        activityType: 'comission',
+                        description: `Comissão de indicação`,
+                        source: 'comission',
+                        timestamp: comission.createdAt
                     });
                 });
 
-                // Ordenar por data
+                // Adicionar tarefas
+                tasksSnapshot.forEach(doc => {
+                    const task = doc.data();
+                    allActivities.push({
+                        ...task,
+                        id: doc.id,
+                        type: 'task',
+                        activityType: 'task',
+                        description: `Tarefa: ${task.taskName || 'Tarefa diária'}`,
+                        source: 'task',
+                        timestamp: task.completedAt
+                    });
+                });
+
+                // Ordenar por data (mais recente primeiro)
                 allActivities.sort((a, b) => {
-                    const dateA = a.createdAt?.toDate() || new Date(0);
-                    const dateB = b.createdAt?.toDate() || new Date(0);
+                    const dateA = a.timestamp?.toDate() || new Date(0);
+                    const dateB = b.timestamp?.toDate() || new Date(0);
                     return dateB - dateA;
                 });
 
-                // Limitar a 5 itens
-                allActivities = allActivities.slice(0, 5);
+                // Limitar a 8 itens para mostrar
+                allActivities = allActivities.slice(0, 8);
 
                 if (allActivities.length > 0) {
                     let activityHTML = '';
                     allActivities.forEach(activity => {
-                        const date = activity.createdAt?.toDate() || new Date();
-                        const formattedDate = date.toLocaleDateString('pt-PT');
-                        const formattedTime = date.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+                        const date = activity.timestamp?.toDate() || new Date();
+                        const formattedDate = date.toLocaleDateString('pt-PT', { 
+                            day: '2-digit', 
+                            month: 'short' 
+                        });
+                        const formattedTime = date.toLocaleTimeString('pt-PT', { 
+                            hour: '2-digit', 
+                            minute: '2-digit' 
+                        });
                         
                         let icon = 'fas fa-exchange-alt';
                         let color = 'var(--accent)';
-                        let typeText = activity.description || 'Transação';
+                        let typeText = '';
+                        let amountText = '';
                         
-                        if (activity.type === 'task') {
-                            icon = 'fas fa-tasks';
-                            color = 'var(--success)';
-                            typeText = 'Tarefa completa';
-                        } else if (activity.type === 'deposit') {
-                            icon = 'fas fa-arrow-down';
-                            color = 'var(--accent)';
-                            typeText = 'Depósito';
-                        } else if (activity.type === 'withdrawal') {
-                            icon = 'fas fa-arrow-up';
-                            color = 'var(--warning)';
-                            typeText = 'Saque';
-                        } else if (activity.type === 'comission') {
-                            icon = 'fas fa-user-friends';
-                            color = 'var(--success)';
-                            typeText = `Comissão 15% - ${activity.description || 'Indicação'}`;
+                        // Determinar ícone e cor baseado no tipo de atividade
+                        switch(activity.activityType) {
+                            case 'deposit':
+                                icon = 'fas fa-arrow-down';
+                                color = 'var(--success)';
+                                typeText = 'Depósito realizado';
+                                amountText = `+${formatNumber(activity.amount || 0)} CVE`;
+                                break;
+                            case 'withdrawal':
+                                icon = 'fas fa-arrow-up';
+                                color = 'var(--warning)';
+                                typeText = 'Saque solicitado';
+                                amountText = `-${formatNumber(activity.amount || 0)} CVE`;
+                                break;
+                            case 'task':
+                                icon = 'fas fa-tasks';
+                                color = 'var(--accent)';
+                                typeText = activity.description || 'Tarefa completa';
+                                amountText = `+${formatNumber(activity.amount || 0)} CVE`;
+                                break;
+                            case 'comission':
+                                icon = 'fas fa-user-friends';
+                                color = 'var(--success)';
+                                typeText = 'Comissão de indicação';
+                                amountText = `+${formatNumber(activity.amount || 0)} CVE`;
+                                break;
+                            default:
+                                icon = 'fas fa-exchange-alt';
+                                color = 'var(--gray)';
+                                typeText = activity.description || 'Atividade';
+                                amountText = `${activity.amount >= 0 ? '+' : ''}${formatNumber(activity.amount || 0)} CVE`;
                         }
                         
                         activityHTML += `
                             <div class="activity-item">
                                 <div class="activity-info">
                                     <div class="activity-title">${typeText}</div>
-                                    <div class="activity-time">${formattedDate} ${formattedTime}</div>
+                                    <div class="activity-description">${activity.description || ''}</div>
+                                    <div class="activity-time">${formattedDate} • ${formattedTime}</div>
                                 </div>
                                 <div class="activity-amount" style="color: ${color};">
-                                    ${activity.amount > 0 ? '+' : ''}${formatNumber(activity.amount || 0)} CVE
+                                    ${amountText}
                                 </div>
                             </div>
                         `;
                     });
                     
                     activityElement.innerHTML = activityHTML;
+                } else {
+                    activityElement.innerHTML = `
+                        <div class="no-activity">
+                            <i class="fas fa-history fa-2x" style="margin-bottom: 10px;"></i><br>
+                            Nenhuma atividade recente
+                        </div>
+                    `;
                 }
 
             } catch (error) {
                 console.error('Erro ao carregar atividade:', error);
+                activityElement.innerHTML = `
+                    <div class="no-activity" style="color: var(--danger);">
+                        <i class="fas fa-exclamation-triangle fa-2x" style="margin-bottom: 10px;"></i><br>
+                        Erro ao carregar atividades
+                    </div>
+                `;
+            }
+        }
+
+        // FUNÇÃO NOVA: Atualizar atividades
+        function refreshActivities() {
+            const user = auth.currentUser;
+            if (user) {
+                loadRecentActivity(user.uid);
+                showNotification('Atividades atualizadas!', 'success');
             }
         }
 
@@ -1234,26 +1430,19 @@
                         
                         // Atualizar saldo
                         const balance = userData.balance || 0;
-                        userBalanceElement.textContent = formatNumber(balance) + ' CVE';
+                        userBalanceElement.textContent = formatCurrency(balance);
                         
                         // Atualizar estatísticas básicas
-                        document.getElementById('total-earned').textContent = formatNumber(userData.totalEarned || 0) + ' CVE';
-                        document.getElementById('total-earned-2').textContent = formatNumber(userData.totalEarned || 0) + ' CVE';
+                        document.getElementById('total-earned').textContent = formatCurrency(userData.totalEarned || 0);
+                        document.getElementById('total-earned-2').textContent = formatNumber(userData.totalEarned || 0);
                         document.getElementById('streak-days').textContent = userData.streak || 0;
                         document.getElementById('tasks-total').textContent = userData.totalTasksCompleted || 0;
                         
-                        // CARREGAR COMISSÕES DE 15% - CHAMADA CORRIGIDA
-                        const comissionsData = await loadComissions(user.uid);
+                        // CARREGAR ESTATÍSTICAS DE AMIGOS
+                        const friendsData = await loadFriendsStats(user.uid);
                         
-                        // Atualizar campo de comissões
-                        document.getElementById('total-comissions').textContent = formatNumber(comissionsData.totalComissions) + ' CVE';
-                        document.getElementById('comission-earned').textContent = formatNumber(comissionsData.totalComissions) + ' CVE';
-                        
-                        // Se o usuário não tiver comissões no documento principal, usar o valor calculado
-                        let userComissions = userData.comissions || 0;
-                        if (comissionsData.totalComissions > 0) {
-                            userComissions = comissionsData.totalComissions;
-                        }
+                        // CALCULAR COMISSÕES DE 15%
+                        const totalComissions = await calculateComissions(friendsData);
                         
                         // Verificar plano ativo
                         const activePlan = userData.activePlan || null;
@@ -1283,8 +1472,8 @@
                             document.getElementById('daily-earnings').textContent = formatNumber(dailyEarningsFixed);
                             document.getElementById('current-plan').textContent = `KRIOLA ${levelData.name}`;
                             
-                            document.getElementById('partial-earnings').textContent = formatNumber(partialEarnings) + ' CVE';
-                            document.getElementById('today-earnings').textContent = formatNumber(partialEarnings) + ' CVE';
+                            document.getElementById('partial-earnings').textContent = formatCurrency(partialEarnings);
+                            document.getElementById('today-earnings').textContent = formatCurrency(partialEarnings);
                             document.getElementById('tasks-today').textContent = `${tasksCompletedToday}/${totalTasks}`;
                             
                             // Atualizar círculo de progresso
@@ -1295,7 +1484,7 @@
                             if (tasksCompletedToday < totalTasks) {
                                 const tasksRemaining = totalTasks - tasksCompletedToday;
                                 document.getElementById('alert-title').textContent = `Complete ${tasksRemaining} tarefa(s)`;
-                                document.getElementById('alert-message').textContent = `Para liberar 100% dos ganhos diários (${formatNumber(dailyEarningsFixed)} CVE)`;
+                                document.getElementById('alert-message').textContent = `Para liberar 100% dos ganhos diários (${formatCurrency(dailyEarningsFixed)})`;
                                 alertBox.style.display = 'flex';
                             } else {
                                 alertBox.style.display = 'none';
@@ -1316,7 +1505,7 @@
                             updateProgressCircle(0, 1);
                         }
                         
-                        // Carregar atividade recente (incluindo comissões)
+                        // Carregar atividade recente
                         loadRecentActivity(user.uid);
                         
                         // Esconder loading e mostrar conteúdo
@@ -1370,7 +1559,7 @@
             }
         });
 
-        console.log('✅ Dashboard corrigido - Comissões de 15% funcionando!');
+        console.log('✅ Dashboard completo - Comissões de 15% e histórico funcionando!');
     </script>
 </body>
 </html>
