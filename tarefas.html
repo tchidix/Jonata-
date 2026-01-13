@@ -838,81 +838,91 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // Níveis da plataforma com retorno diário FIXO
+        // Níveis da plataforma com os valores EXATOS da tabela
         const ALL_LEVELS = [
             { 
                 id: 0,
-                name: "INICIANTE", 
+                name: "BASIC", 
                 investment: 205.80, 
-                daily: 10.28,  // Retorno diário FIXO
-                tasks: 3
+                daily: 10.28,
+                tasks: 3,
+                dailyRate: 5.0
             },
             { 
                 id: 1,
-                name: "BASIC", 
+                name: "BRONZE", 
                 investment: 617.23, 
-                daily: 22.66,  // Retorno diário FIXO
-                tasks: 4
+                daily: 22.66,
+                tasks: 4,
+                dailyRate: 5.5
             },
             { 
                 id: 2,
-                name: "BRONZE", 
+                name: "SILVER", 
                 investment: 1030.24, 
-                daily: 41.21,  // Retorno diário FIXO
-                tasks: 5
+                daily: 41.21,
+                tasks: 5,
+                dailyRate: 6.0
             },
             { 
                 id: 3,
-                name: "SILVER", 
+                name: "GOLD", 
                 investment: 2575.60, 
-                daily: 103.02,  // Retorno diário FIXO
-                tasks: 6
+                daily: 103.02,
+                tasks: 6,
+                dailyRate: 6.5
             },
             { 
                 id: 4,
-                name: "GOLD", 
+                name: "PLATINUM", 
                 investment: 5151.20, 
-                daily: 257.56,  // Retorno diário FIXO
-                tasks: 7
+                daily: 257.56,
+                tasks: 7,
+                dailyRate: 7.0
             },
             { 
                 id: 5,
-                name: "PLATINUM", 
+                name: "DIAMOND", 
                 investment: 10302.40, 
-                daily: 515.12,  // Retorno diário FIXO
-                tasks: 8
+                daily: 515.12,
+                tasks: 8,
+                dailyRate: 7.5
             },
             { 
                 id: 6,
-                name: "DIAMOND", 
+                name: "ELITE", 
                 investment: 25756.00, 
-                daily: 1545.36,  // Retorno diário FIXO
-                tasks: 9
+                daily: 1545.36,
+                tasks: 9,
+                dailyRate: 8.0
             },
             { 
                 id: 7,
-                name: "ELITE", 
+                name: "MASTER", 
                 investment: 51512.00, 
-                daily: 3605.84,  // Retorno diário FIXO
-                tasks: 10
+                daily: 3605.84,
+                tasks: 10,
+                dailyRate: 8.5
             },
             { 
                 id: 8,
-                name: "MASTER", 
+                name: "KRIOLA PRO", 
                 investment: 103024.00, 
-                daily: 9272.16,  // Retorno diário FIXO
-                tasks: 12
+                daily: 9272.16,
+                tasks: 12,
+                dailyRate: 9.0
             },
             { 
                 id: 9,
-                name: "KRIOLA PRO", 
+                name: "MASTER", 
                 investment: 257560.00, 
-                daily: 28331.60,  // Retorno diário FIXO
-                tasks: 15
+                daily: 28331.60,
+                tasks: 15,
+                dailyRate: 9.5
             }
         ];
 
-        // Tarefas padrão para todos os níveis (sem tarefas extras)
+        // Tarefas padrão para todos os níveis
         const DEFAULT_TASKS = [
             { 
                 id: 1, 
@@ -953,6 +963,86 @@
                 reward: 2.00, 
                 type: "required",
                 action: "feedback"
+            },
+            { 
+                id: 6, 
+                title: "Notícias do Dia", 
+                description: "Leia as notícias financeiras", 
+                reward: 3.00, 
+                type: "required",
+                action: "read"
+            },
+            { 
+                id: 7, 
+                title: "Quiz Avançado", 
+                description: "Responda um quiz avançado", 
+                reward: 3.50, 
+                type: "required",
+                action: "quiz"
+            },
+            { 
+                id: 8, 
+                title: "Indicação", 
+                description: "Indique um amigo", 
+                reward: 4.00, 
+                type: "required",
+                action: "referral"
+            },
+            { 
+                id: 9, 
+                title: "Análise de Mercado", 
+                description: "Analise o mercado financeiro", 
+                reward: 4.50, 
+                type: "required",
+                action: "analyze"
+            },
+            { 
+                id: 10, 
+                title: "Relatório Semanal", 
+                description: "Complete o relatório semanal", 
+                reward: 5.00, 
+                type: "required",
+                action: "report"
+            },
+            { 
+                id: 11, 
+                title: "Planejamento", 
+                description: "Faça seu planejamento financeiro", 
+                reward: 4.00, 
+                type: "required",
+                action: "plan"
+            },
+            { 
+                id: 12, 
+                title: "Webinar", 
+                description: "Assista a um webinar", 
+                reward: 5.50, 
+                type: "required",
+                action: "webinar"
+            },
+            { 
+                id: 13, 
+                title: "Simulação", 
+                description: "Faça uma simulação de investimento", 
+                reward: 4.50, 
+                type: "required",
+                action: "simulation"
+            },
+            { 
+                id: 14, 
+                title: "Pesquisa", 
+                description: "Participe de uma pesquisa", 
+                reward: 3.50, 
+                type: "required",
+                action: "survey"
+            },
+            { 
+                id: 15, 
+                title: "Meta do Dia", 
+                description: "Defina sua meta do dia", 
+                reward: 3.00, 
+                type: "required",
+                action: "goal"
             }
         ];
 
@@ -960,7 +1050,6 @@
         let userLevel = null;
         let completedTasks = [];
         let userData = null;
-        let currentTask = null;
         let taskModalCallback = null;
 
         // Elementos DOM
@@ -1200,25 +1289,28 @@
             if (!userLevel || !userData) return;
 
             // Atualizar informações do plano
-            document.getElementById('plan-name').textContent = `KRIOLA ${userLevel.name}`;
+            document.getElementById('plan-name').textContent = `PLANO ${userLevel.name}`;
             
             // Verificar se temos dados do plano ativo
             const activePlan = userData.activePlan;
             if (activePlan) {
                 document.getElementById('plan-details').innerHTML = `
                     Investimento: ${formatNumber(activePlan.investment || userLevel.investment)} CVE • 
-                    Ganho Diário: ${formatNumber(activePlan.dailyEarnings || userLevel.daily)} CVE
+                    Ganho Diário: ${formatNumber(activePlan.dailyEarnings || userLevel.daily)} CVE •
+                    Taxa: ${userLevel.dailyRate || ((userLevel.daily / userLevel.investment) * 100).toFixed(1)}%
                 `;
             } else {
+                const dailyRate = ((userLevel.daily / userLevel.investment) * 100).toFixed(1);
                 document.getElementById('plan-details').innerHTML = `
                     Investimento: ${formatNumber(userLevel.investment)} CVE • 
-                    Ganho Diário: ${formatNumber(userLevel.daily)} CVE
+                    Ganho Diário: ${formatNumber(userLevel.daily)} CVE •
+                    Taxa: ${dailyRate}%
                 `;
             }
 
             // Calcular tarefas completadas
             const completedCount = completedTasks.length;
-            const totalRequired = userLevel.tasks || 5;
+            const totalRequired = userLevel.tasks || 3;
             const progress = Math.min(completedCount / totalRequired, 1);
             
             // Atualizar estatísticas
@@ -1252,21 +1344,24 @@
             if (!userLevel) return;
 
             const requiredList = document.getElementById('required-task-list');
-            
             requiredList.innerHTML = '';
             
-            // Usar tarefas padrão (não tem tarefas extras)
-            const tasks = DEFAULT_TASKS.slice(0, userLevel.tasks || 5);
+            // Pegar apenas o número exato de tarefas baseado no plano
+            const totalTasksNeeded = userLevel.tasks || 3;
+            const tasks = DEFAULT_TASKS.slice(0, totalTasksNeeded);
             
-            tasks.forEach(task => {
+            // Calcular recompensa por tarefa (dividir ganho diário igualmente)
+            const rewardPerTask = userLevel.daily / totalTasksNeeded;
+            
+            tasks.forEach((task, index) => {
                 const isCompleted = completedTasks.includes(task.id);
-                const taskElement = createTaskElement(task, isCompleted);
+                const taskElement = createTaskElement(task, isCompleted, rewardPerTask);
                 requiredList.appendChild(taskElement);
             });
         }
 
         // Criar elemento de tarefa
-        function createTaskElement(task, isCompleted) {
+        function createTaskElement(task, isCompleted, rewardPerTask) {
             const div = document.createElement('div');
             div.className = `task-item ${isCompleted ? 'completed' : ''}`;
             div.dataset.taskId = task.id;
@@ -1279,11 +1374,11 @@
                 <div class="task-content">
                     <div class="task-title">${task.title}</div>
                     <div class="task-description">${task.description}</div>
-                    <div class="task-reward">+${formatNumber(task.reward)} CVE</div>
+                    <div class="task-reward">+${formatNumber(rewardPerTask)} CVE</div>
                 </div>
                 <div class="task-actions">
                     <button class="task-btn ${isCompleted ? 'completed' : ''}" 
-                            onclick="completeTask(${task.id})" 
+                            onclick="completeTask(${task.id}, ${rewardPerTask})" 
                             ${isCompleted ? 'disabled' : ''}>
                         ${isCompleted ? '<i class="fas fa-check"></i> Concluído' : '<i class="fas fa-play"></i> Iniciar'}
                     </button>
@@ -1294,7 +1389,7 @@
         }
 
         // Completar tarefa
-        async function completeTask(taskId) {
+        async function completeTask(taskId, rewardPerTask) {
             const user = auth.currentUser;
             if (!user) return;
 
@@ -1331,7 +1426,7 @@
                     taskId: taskId,
                     taskTitle: task.title,
                     taskType: task.type,
-                    reward: task.reward,
+                    reward: rewardPerTask,
                     level: userLevel.name,
                     completedAt: firebase.firestore.FieldValue.serverTimestamp(),
                     date: new Date().toISOString().split('T')[0]
@@ -1341,7 +1436,7 @@
                 await db.collection('users').doc(user.uid).update({
                     'tasksCompletedToday': firebase.firestore.FieldValue.increment(1),
                     'totalTasksCompleted': firebase.firestore.FieldValue.increment(1),
-                    'todayEarnings': firebase.firestore.FieldValue.increment(task.reward),
+                    'todayEarnings': firebase.firestore.FieldValue.increment(rewardPerTask),
                     'lastTaskCompletion': firebase.firestore.FieldValue.serverTimestamp()
                 });
 
@@ -1369,22 +1464,22 @@
 
                 // Adicionar ganho ao saldo
                 await db.collection('users').doc(user.uid).update({
-                    balance: firebase.firestore.FieldValue.increment(task.reward),
-                    totalEarned: firebase.firestore.FieldValue.increment(task.reward)
+                    balance: firebase.firestore.FieldValue.increment(rewardPerTask),
+                    totalEarned: firebase.firestore.FieldValue.increment(rewardPerTask)
                 });
 
                 // Registrar transação
                 await db.collection('transactions').add({
                     userId: user.uid,
                     type: 'task',
-                    amount: task.reward,
-                    description: `Tarefa concluída: ${task.title}`,
+                    amount: rewardPerTask,
+                    description: `Tarefa concluída: ${task.title} (Plano ${userLevel.name})`,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     status: 'completed'
                 });
 
                 // Mostrar confirmação com modal bonito
-                showSuccessModal(task.reward, task.title);
+                showSuccessModal(rewardPerTask, task.title);
                 
             } catch (error) {
                 console.error('Erro ao completar tarefa:', error);
@@ -1447,6 +1542,27 @@
                     );
                     return feedback && feedback.length >= 10;
                     
+                case 'read':
+                    return await showTaskModal(
+                        task.title,
+                        'Leia as notícias financeiras do dia.\n\nClique em "Confirmar" quando terminar.',
+                        false
+                    );
+                    
+                case 'referral':
+                    return await showTaskModal(
+                        task.title,
+                        'Indique um amigo para a plataforma.\n\nClique em "Confirmar" quando indicar.',
+                        false
+                    );
+                    
+                case 'analyze':
+                    return await showTaskModal(
+                        task.title,
+                        'Analise o mercado financeiro atual.\n\nClique em "Confirmar" quando terminar.',
+                        false
+                    );
+                    
                 default:
                     return await showTaskModal(
                         task.title,
@@ -1462,7 +1578,7 @@
 
             const activePlan = userData.activePlan;
             const completedCount = completedTasks.length;
-            const totalRequired = userLevel.tasks || 5;
+            const totalRequired = userLevel.tasks || 3;
             
             // Ganho diário FIXO do plano
             const dailyEarnings = activePlan ? activePlan.dailyEarnings : userLevel.daily;
@@ -1482,7 +1598,7 @@
             }
         });
 
-        console.log('✅ Sistema de tarefas corrigido - Sem tarefas extras!');
+        console.log('✅ Sistema de tarefas corrigido com valores exatos da tabela!');
     </script>
 </body>
 </html>
