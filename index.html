@@ -89,18 +89,38 @@
         }
 
         .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--success));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            border: 2px solid var(--gold);
+        }
+
+        .user-text-info {
             text-align: right;
         }
 
         .user-name {
-            font-size: 1.2rem;
+            font-size: 1rem;
             font-weight: bold;
             color: var(--primary);
             margin-bottom: 2px;
         }
 
         .user-id {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             color: var(--gray);
         }
 
@@ -335,17 +355,6 @@
             transform: translateY(-5px);
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             border-color: var(--accent);
-        }
-
-        .action-icon {
-            font-size: 2rem;
-            margin-bottom: 10px;
-            color: var(--accent);
-        }
-
-        .action-text {
-            font-weight: 600;
-            font-size: 1rem;
         }
 
         /* Stats Grid */
@@ -607,6 +616,17 @@
                 font-size: 1.8rem;
             }
         }
+
+        /* Pulse Animation */
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
     </style>
 </head>
 <body>
@@ -621,8 +641,13 @@
         </div>
         
         <div class="user-info">
-            <div class="user-name" id="user-name">Carregando...</div>
-            <div class="user-id" id="user-kriola-id">KRI-XXXXXX</div>
+            <div class="user-text-info">
+                <div class="user-name" id="user-name">Carregando...</div>
+                <div class="user-id" id="user-kriola-id">KRI-XXXXXX</div>
+            </div>
+            <div class="user-avatar" id="user-avatar" onclick="window.location.href='perfil.html'">
+                <i class="fas fa-user"></i>
+            </div>
         </div>
     </div>
 
@@ -895,6 +920,7 @@
         // Elementos DOM
         const userBalanceElement = document.getElementById('user-balance');
         const userNameElement = document.getElementById('user-name');
+        const userAvatarElement = document.getElementById('user-avatar');
         const mainContent = document.getElementById('main-content');
         const loadingElement = document.getElementById('loading');
         const notificationElement = document.getElementById('notification');
@@ -961,6 +987,14 @@
             const percent = Math.min((completed / total) * 270, 270);
             const circle = document.getElementById('progress-circle');
             circle.style.background = `conic-gradient(var(--accent) 0deg, var(--success) ${percent}deg, #e0e0e0 ${percent}deg)`;
+        }
+
+        // Atualizar avatar do usuário
+        function updateUserAvatar(name) {
+            if (name && userAvatarElement) {
+                const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+                userAvatarElement.innerHTML = initials;
+            }
         }
 
         // Carregar tamanho da rede
@@ -1103,7 +1137,10 @@
                         const userData = doc.data();
                         
                         // Atualizar informações básicas
-                        userNameElement.textContent = userData.name || user.email.split('@')[0];
+                        const userName = userData.name || user.email.split('@')[0];
+                        userNameElement.textContent = userName;
+                        updateUserAvatar(userName);
+                        
                         document.getElementById('user-kriola-id').textContent = userData.kriolaId || 'KRI-XXXXXX';
                         document.getElementById('user-id-code').textContent = userData.kriolaId || 'KRI-XXXXXX';
                         document.getElementById('referral-link').textContent = `https://kriolayield.cv/?ref=${userData.kriolaId || 'KRI-XXXXXX'}`;
@@ -1113,10 +1150,10 @@
                         userBalanceElement.textContent = formatNumber(balance) + ' CVE';
                         
                         // Atualizar estatísticas
-                        document.getElementById('total-earned').textContent = formatNumber(userData.totalEarned || 0);
-                        document.getElementById('total-earned-2').textContent = formatNumber(userData.totalEarned || 0);
-                        document.getElementById('comission-earned').textContent = formatNumber(userData.comissions || 0);
-                        document.getElementById('total-comissions').textContent = formatNumber(userData.comissions || 0);
+                        document.getElementById('total-earned').textContent = formatNumber(userData.totalEarned || 0) + ' CVE';
+                        document.getElementById('total-earned-2').textContent = formatNumber(userData.totalEarned || 0) + ' CVE';
+                        document.getElementById('comission-earned').textContent = formatNumber(userData.comissions || 0) + ' CVE';
+                        document.getElementById('total-comissions').textContent = formatNumber(userData.comissions || 0) + ' CVE';
                         document.getElementById('streak-days').textContent = userData.streak || 0;
                         document.getElementById('tasks-total').textContent = userData.totalTasksCompleted || 0;
                         
@@ -1242,4 +1279,4 @@
         console.log('✅ Dashboard corrigido - Tarefas resetam às 00h00!');
     </script>
 </body>
-</html>
+    </html>
