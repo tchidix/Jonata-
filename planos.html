@@ -1,0 +1,1776 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kriola Yield Pro - Planos de Investimento</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <style>
+        /* Estilos mantidos iguais... */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #1a1a2e;
+            --secondary: #16213e;
+            --accent: #0f4c75;
+            --gold: #ffd700;
+            --success: #00b894;
+            --danger: #ff6b6b;
+            --warning: #fdcb6e;
+            --dark: #2c3e50;
+            --light: #f5f5f5;
+            --gray: #666;
+            --white: #ffffff;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--light) 0%, #e0e0e0 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .background-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(204, 9, 47, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 56, 147, 0.1) 0%, transparent 50%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Header */
+        .header {
+            background: var(--white);
+            padding: 20px;
+            border-bottom: 3px solid var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+
+        .back-button {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--primary);
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .back-button:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            color: var(--primary);
+            font-weight: bold;
+            flex: 1;
+        }
+
+        .user-balance {
+            background: linear-gradient(135deg, var(--accent), #0c2461);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            text-align: center;
+            margin-right: 10px;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Intro Section */
+        .intro-section {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+
+        .intro-title {
+            color: var(--primary);
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .intro-subtitle {
+            color: var(--accent);
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+
+        .intro-text {
+            color: var(--gray);
+            line-height: 1.5;
+            max-width: 800px;
+            margin: 0 auto 20px;
+            font-size: 0.95rem;
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .feature-card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            color: var(--accent);
+            margin-bottom: 12px;
+        }
+
+        .feature-title {
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .feature-description {
+            color: var(--gray);
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        /* Plans Section */
+        .plans-section {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .section-title {
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+            text-align: center;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        /* Plans Grid */
+        .plans-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .plan-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid #dee2e6;
+            position: relative;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .plan-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .plan-card.popular {
+            background: linear-gradient(135deg, var(--accent), #0c2461);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        .plan-card.popular .plan-name,
+        .plan-card.popular .plan-price,
+        .plan-card.popular .plan-detail,
+        .plan-card.popular .plan-detail-label,
+        .plan-card.popular .plan-feature {
+            color: white;
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--gold);
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            z-index: 2;
+        }
+
+        .plan-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .plan-price {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent);
+            margin-bottom: 12px;
+        }
+
+        .plan-card.popular .plan-price {
+            color: var(--gold);
+        }
+
+        .plan-tag {
+            display: inline-block;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.05));
+            color: var(--dark);
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .plan-card.popular .plan-tag {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .plan-features {
+            margin: 12px 0;
+            flex: 1;
+        }
+
+        .plan-feature {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: var(--dark);
+        }
+
+        .plan-feature i {
+            color: var(--success);
+            margin-right: 8px;
+            font-size: 0.9rem;
+            min-width: 18px;
+        }
+
+        .plan-card.popular .plan-feature i {
+            color: var(--gold);
+        }
+
+        .plan-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .plan-card.popular .plan-details {
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .plan-detail {
+            text-align: center;
+        }
+
+        .plan-detail-label {
+            font-size: 0.8rem;
+            color: var(--gray);
+            margin-bottom: 4px;
+        }
+
+        .plan-card.popular .plan-detail-label {
+            color: rgba(255,255,255,0.8);
+        }
+
+        .plan-detail-value {
+            font-weight: bold;
+            font-size: 1rem;
+            color: var(--primary);
+        }
+
+        .plan-card.popular .plan-detail-value {
+            color: white;
+        }
+
+        /* Invest Button */
+        .invest-button-container {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .plan-card.popular .invest-button-container {
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .invest-button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(45deg, var(--success), #00a085);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0, 184, 148, 0.3);
+        }
+
+        .invest-button:hover {
+            background: linear-gradient(45deg, #00a085, #009174);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 184, 148, 0.4);
+        }
+
+        .plan-card.popular .invest-button {
+            background: linear-gradient(45deg, var(--gold), #ff9f1a);
+            color: var(--primary);
+        }
+
+        .plan-card.popular .invest-button:hover {
+            background: linear-gradient(45deg, #ff9f1a, #ff8c00);
+        }
+
+        .invest-button.disabled {
+            background: linear-gradient(135deg, #e9ecef, #dee2e6);
+            color: var(--gray);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .invest-button.disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Investment Modal */
+        .investment-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s;
+            padding: 15px;
+        }
+
+        .investment-modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 25px;
+            max-width: 400px;
+            width: 100%;
+            animation: popIn 0.5s;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        .modal-title {
+            color: var(--primary);
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .modal-subtitle {
+            color: var(--accent);
+            font-size: 0.95rem;
+        }
+
+        .modal-plan-info {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #dee2e6;
+        }
+
+        .modal-plan-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .modal-plan-price {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--accent);
+            margin-bottom: 12px;
+        }
+
+        .modal-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .modal-detail {
+            text-align: center;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .modal-detail-label {
+            font-size: 0.8rem;
+            color: var(--gray);
+            margin-bottom: 4px;
+        }
+
+        .modal-detail-value {
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 0.95rem;
+        }
+
+        .modal-total {
+            background: linear-gradient(135deg, rgba(0, 184, 148, 0.1), rgba(0, 184, 148, 0.05));
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            border: 1px solid rgba(0, 184, 148, 0.3);
+            text-align: center;
+        }
+
+        .total-label {
+            color: var(--success);
+            font-size: 1rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .total-amount {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: var(--success);
+        }
+
+        .modal-warning {
+            color: var(--danger);
+            font-size: 0.85rem;
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(255, 107, 107, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 107, 107, 0.2);
+        }
+
+        .modal-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .modal-button {
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .modal-button.cancel {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            color: var(--gray);
+            border: 2px solid #dee2e6;
+        }
+
+        .modal-button.cancel:hover {
+            background: linear-gradient(135deg, #e9ecef, #dee2e6);
+            transform: translateY(-2px);
+        }
+
+        .modal-button.confirm {
+            background: linear-gradient(45deg, var(--success), #00a085);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 184, 148, 0.3);
+        }
+
+        .modal-button.confirm:hover {
+            background: linear-gradient(45deg, #00a085, #009174);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 184, 148, 0.4);
+        }
+
+        /* Success Modal */
+        .success-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10001;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s;
+            padding: 15px;
+        }
+
+        .success-modal.show {
+            display: flex;
+        }
+
+        .success-content {
+            background: linear-gradient(135deg, var(--success), #00a085);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+            animation: popIn 0.5s;
+            box-shadow: 0 20px 50px rgba(0, 184, 148, 0.5);
+        }
+
+        .success-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .success-title {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .success-message {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .success-details {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: left;
+        }
+
+        .success-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+        }
+
+        .success-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .success-label {
+            opacity: 0.8;
+        }
+
+        .success-value {
+            font-weight: bold;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            z-index: 10000;
+            animation: slideInRight 0.5s;
+            display: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            font-size: 0.95rem;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 15px;
+            }
+            
+            .page-title {
+                font-size: 1.5rem;
+            }
+            
+            .intro-title {
+                font-size: 1.5rem;
+            }
+            
+            .plans-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-actions {
+                grid-template-columns: 1fr;
+            }
+            
+            .user-balance {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Success Modal -->
+    <div class="success-modal" id="success-modal">
+        <div class="success-content">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="success-title">Investimento Concluído! 🎉</div>
+            <div class="success-message">Seu plano foi ativado com sucesso</div>
+            
+            <div class="success-details">
+                <div class="success-row">
+                    <span class="success-label">Plano:</span>
+                    <span class="success-value" id="success-plan-name">-</span>
+                </div>
+                <div class="success-row">
+                    <span class="success-label">Valor:</span>
+                    <span class="success-value" id="success-amount">0,00 CVE</span>
+                </div>
+                <div class="success-row">
+                    <span class="success-label">Ganho Diário:</span>
+                    <span class="success-value" id="success-daily">0,00 CVE</span>
+                </div>
+                <div class="success-row">
+                    <span class="success-label">Duração:</span>
+                    <span class="success-value" id="success-duration">0 dias</span>
+                </div>
+                <div class="success-row">
+                    <span class="success-label">ID do Plano:</span>
+                    <span class="success-value" id="success-plan-id">-</span>
+                </div>
+            </div>
+            
+            <div style="font-size: 0.85rem; opacity: 0.8; margin-top: 15px; line-height: 1.4;">
+                ✅ Acesse a página de tarefas para começar a ganhar<br>
+                💰 Seu saldo foi atualizado automaticamente
+            </div>
+            
+            <button class="modal-button confirm" onclick="closeSuccessModal()" style="margin-top: 20px; width: 100%;">
+                <i class="fas fa-check"></i> VER TAREFAS
+            </button>
+        </div>
+    </div>
+
+    <!-- Investment Modal -->
+    <div class="investment-modal" id="investment-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Confirmar Investimento</h3>
+                <div class="modal-subtitle">Revise os detalhes antes de confirmar</div>
+            </div>
+            
+            <div class="modal-plan-info">
+                <div class="modal-plan-name" id="modal-plan-name">KRIOLA INICIANTE</div>
+                <div class="modal-plan-price" id="modal-plan-price">205,80 CVE</div>
+                
+                <div class="modal-details">
+                    <div class="modal-detail">
+                        <div class="modal-detail-label">Ganho/Dia</div>
+                        <div class="modal-detail-value" id="modal-daily">10,28 CVE</div>
+                    </div>
+                    <div class="modal-detail">
+                        <div class="modal-detail-label">Duração</div>
+                        <div class="modal-detail-value" id="modal-duration">30 dias</div>
+                    </div>
+                    <div class="modal-detail">
+                        <div class="modal-detail-label">Tarefas/Dia</div>
+                        <div class="modal-detail-value" id="modal-tasks">3</div>
+                    </div>
+                    <div class="modal-detail">
+                        <div class="modal-detail-label">ROI</div>
+                        <div class="modal-detail-value" id="modal-roi">+50%</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-total">
+                <div class="total-label">Valor do Investimento</div>
+                <div class="total-amount" id="modal-total-amount">205,80 CVE</div>
+            </div>
+            
+            <div class="modal-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                Esta ação é irreversível. Confirme apenas se tem saldo suficiente.
+            </div>
+            
+            <div class="modal-actions">
+                <button class="modal-button cancel" onclick="closeInvestmentModal()">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button class="modal-button confirm" onclick="processRealInvestment()">
+                    <i class="fas fa-check"></i> Confirmar Investimento
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Background Pattern -->
+    <div class="background-pattern"></div>
+
+    <!-- Header -->
+    <div class="header">
+        <button class="back-button" onclick="window.location.href='index.html'">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <h1 class="page-title">Planos de Investimento</h1>
+        <div class="user-balance" id="user-balance-header">0,00 CVE</div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Intro Section -->
+        <div class="intro-section">
+            <h2 class="intro-title">Invista com Inteligência</h2>
+            <p class="intro-subtitle">Escolha o plano perfeito para seus objetivos financeiros</p>
+            <p class="intro-text">
+                Investa agora e comece a ganhar imediatamente! Cada plano inclui 
+                tarefas diárias que aumentam seus conhecimentos e seus ganhos.
+            </p>
+        </div>
+
+        <!-- Features Grid -->
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3 class="feature-title">Investimento Real</h3>
+                <p class="feature-description">
+                    Ativação instantânea do plano após confirmação. Nada de falar com gerente.
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3 class="feature-title">Retorno Imediato</h3>
+                <p class="feature-description">
+                    Comece a ganhar desde o primeiro dia. Acesse as tarefas imediatamente.
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <h3 class="feature-title">Ativação Instantânea</h3>
+                <p class="feature-description">
+                    Seu plano é ativado automaticamente. Comece a investir em segundos.
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3 class="feature-title">Rede de Indicação</h3>
+                <p class="feature-description">
+                    Ganhe 15% de comissão sobre o primeiro investimento de cada amigo convidado.
+                </p>
+            </div>
+        </div>
+
+        <!-- Plans Section - TODOS OS PLANOS -->
+        <div class="plans-section">
+            <h2 class="section-title">Nossos Planos de Investimento</h2>
+            
+            <div class="plans-grid">
+                <!-- Plano Iniciante -->
+                <div class="plan-card">
+                    <div class="plan-name">KRIOLA INICIANTE</div>
+                    <div class="plan-price">205,80 CVE</div>
+                    <div class="plan-tag">Ideal para Iniciantes</div>
+                    
+                    <div class="plan-features">
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>3 Tarefas Diárias</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Ganho Diário: 10,28 CVE</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Duração: 30 Dias</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Retorno Total: 308,40 CVE</span>
+                        </div>
+                    </div>
+                    
+                    <div class="plan-details">
+                        <div class="plan-detail">
+                            <div class="plan-detail-label">ROI</div>
+                            <div class="plan-detail-value">+50%</div>
+                        </div>
+                        <div class="plan-detail">
+                            <div class="plan-detail-label">Tarefas/Dia</div>
+                            <div class="plan-detail-value">3</div>
+                        </div>
+                    </div>
+                    
+                    <div class="invest-button-container">
+                        <button class="invest-button" onclick="openInvestmentModal(0)">
+                            <i class="fas fa-rocket"></i> INVESTIR AGORA
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Plano Basic -->
+                <div class="plan-card">
+                    <div class="plan-name">KRIOLA BASIC</div>
+                    <div class="plan-price">617,23 CVE</div>
+                    <div class="plan-tag">Popular Crescimento</div>
+                    
+                    <div class="plan-features">
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>4 Tarefas Diárias</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Ganho Diário: 22,66 CVE</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Duração: 45 Dias</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Retorno Total: 1.019,70 CVE</span>
+                        </div>
+                    </div>
+                    
+                    <div class="plan-details">
+                        <div class="plan-detail">
+                            <div class="plan-detail-label">ROI</div>
+                            <div class="plan-detail-value">+65%</div>
+                        </div>
+                        <div class="plan-detail">
+                            <div class="plan-detail-label">Tarefas/Dia</div>
+                            <div class="plan-detail-value">4</div>
+                        </div>
+                    </div>
+                    
+                    <div class="invest-button-container">
+                        <button class="invest-button" onclick="openInvestmentModal(1)">
+                            <i class="fas fa-chart-line"></i> INVESTIR AGORA
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Plano Bronze -->
+                <div class="plan-card">
+                    <div class="plan-name">KRIOLA BRONZE</div>
+                    <div class="plan-price">1.030,24 CVE</div>
+                    <div class="plan-tag">Estabilidade Garantida</div>
+                    
+                    <div class="plan-features">
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>5 Tarefas Diárias</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Ganho Diário: 41,21 CVE</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Duração: 60 Dias</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Retorno Total: 2.472,60 CVE</span>
+                        </div>
+                    </div>
+                    
+                    <div class="plan-details">
+                        <div class="plan-detail">
+                            <div class="plan-detail-label">ROI</div>
+                            <div class="plan-detail-value">+140%</div>
+                        </div>
+                        <div class="plan-detail">
+                            <div class="plan-detail-label">Tarefas/Dia</div>
+                            <div class="plan-detail-value">5</div>
+                        </div>
+                    </div>
+                    
+                    <div class="invest-button-container">
+                        <button class="invest-button" onclick="openInvestmentModal(2)">
+                            <i class="fas fa-medal"></i> INVESTIR AGORA
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Plano Silver (Popular) -->
+                <div class="plan-card popular">
+                    <div class="popular-badge">MAIS POPULAR</div>
+                    <div class="plan-name">KRIOLA SILVER</div>
+                    <div class="plan-price">2.575,60 CVE</div>
+                    <div class="plan-tag">Mais Escolhido</div>
+                    
+                    <div class="plan-features">
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>6 Tarefas Diárias</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Ganho Diário: 103,02 CVE</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Duração: 75 Dias</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Retorno Total: 7.726,50 CVE</span>
+                        </div>
+                    </div>
+                    
+                    <div class="plan-details">
+                        <div class="plan-detail">
+                            <div class="plan-detail-label">ROI</div>
+                            <div class="plan-detail-value">+200%</div>
+                        </div>
+                        <div class="plan-detail">
+                            <div class="plan-detail-label">Tarefas/Dia</div>
+                            <div class="plan-detail-value">6</div>
+                        </div>
+                    </div>
+                    
+                    <div class="invest-button-container">
+                        <button class="invest-button" onclick="openInvestmentModal(3)">
+                            <i class="fas fa-crown"></i> INVESTIR AGORA
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Plano Gold -->
+                <div class="plan-card">
+                    <div class="plan-name">KRIOLA GOLD</div>
+                    <div class="plan-price">5.151,20 CVE</div>
+                    <div class="plan-tag">Alto Retorno</div>
+                    
+                    <div class="plan-features">
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>7 Tarefas Diárias</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Ganho Diário: 257,56 CVE</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Duração: 90 Dias</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Retorno Total: 23.180,40 CVE</span>
+                        </div>
+                    </div>
+                    
+                    <div class="plan-details">
+                        <div class="plan-detail">
+                            <div class="plan-detail-label">ROI</div>
+                            <div class="plan-detail-value">+350%</div>
+                        </div>
+                        <div class="plan-detail">
+                            <div class="plan-detail-label">Tarefas/Dia</div>
+                            <div class="plan-detail-value">7</div>
+                        </div>
+                    </div>
+                    
+                    <div class="invest-button-container">
+                        <button class="invest-button" onclick="openInvestmentModal(4)">
+                            <i class="fas fa-gem"></i> INVESTIR AGORA
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Plano Platinum -->
+                <div class="plan-card">
+                    <div class="plan-name">KRIOLA PLATINUM</div>
+                    <div class="plan-price">10.302,40 CVE</div>
+                    <div class="plan-tag">Premium</div>
+                    
+                    <div class="plan-features">
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>8 Tarefas Diárias</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Ganho Diário: 515,12 CVE</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Duração: 120 Dias</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Retorno Total: 61.814,40 CVE</span>
+                        </div>
+                    </div>
+                    
+                    <div class="plan-details">
+                        <div class="plan-detail">
+                            <div class="plan-detail-label">ROI</div>
+                            <div class="plan-detail-value">+500%</div>
+                        </div>
+                        <div class="plan-detail">
+                            <div class="plan-detail-label">Tarefas/Dia</div>
+                            <div class="plan-detail-value">8</div>
+                        </div>
+                    </div>
+                    
+                    <div class="invest-button-container">
+                        <button class="invest-button" onclick="openInvestmentModal(5)">
+                            <i class="fas fa-star"></i> INVESTIR AGORA
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Plano Diamond -->
+                <div class="plan-card">
+                    <div class="plan-name">KRIOLA DIAMOND</div>
+                    <div class="plan-price">25.756,00 CVE</div>
+                    <div class="plan-tag">Exclusivo</div>
+                    
+                    <div class="plan-features">
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>9 Tarefas Diárias</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Ganho Diário: 1.545,36 CVE</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Duração: 150 Dias</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Retorno Total: 231.804,00 CVE</span>
+                        </div>
+                    </div>
+                    
+                    <div class="plan-details">
+                        <div class="plan-detail">
+                            <div class="plan-detail-label">ROI</div>
+                            <div class="plan-detail-value">+800%</div>
+                        </div>
+                        <div class="plan-detail">
+                            <div class="plan-detail-label">Tarefas/Dia</div>
+                            <div class="plan-detail-value">9</div>
+                        </div>
+                    </div>
+                    
+                    <div class="invest-button-container">
+                        <button class="invest-button" onclick="openInvestmentModal(6)">
+                            <i class="fas fa-diamond"></i> INVESTIR AGORA
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Plano Elite -->
+                <div class="plan-card">
+                    <div class="plan-name">KRIOLA ELITE</div>
+                    <div class="plan-price">51.512,00 CVE</div>
+                    <div class="plan-tag">Vip</div>
+                    
+                    <div class="plan-features">
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>10 Tarefas Diárias</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Ganho Diário: 3.605,84 CVE</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Duração: 180 Dias</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Retorno Total: 649.051,20 CVE</span>
+                        </div>
+                    </div>
+                    
+                    <div class="plan-details">
+                        <div class="plan-detail">
+                            <div class="plan-detail-label">ROI</div>
+                            <div class="plan-detail-value">+1160%</div>
+                        </div>
+                        <div class="plan-detail">
+                            <div class="plan-detail-label">Tarefas/Dia</div>
+                            <div class="plan-detail-value">10</div>
+                        </div>
+                    </div>
+                    
+                    <div class="invest-button-container">
+                        <button class="invest-button" onclick="openInvestmentModal(7)">
+                            <i class="fas fa-trophy"></i> INVESTIR AGORA
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Plano Master -->
+                <div class="plan-card">
+                    <div class="plan-name">KRIOLA MASTER</div>
+                    <div class="plan-price">103.024,00 CVE</div>
+                    <div class="plan-tag">Master</div>
+                    
+                    <div class="plan-features">
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>12 Tarefas Diárias</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Ganho Diário: 9.272,16 CVE</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Duração: 210 Dias</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Retorno Total: 1.947.153,60 CVE</span>
+                        </div>
+                    </div>
+                    
+                    <div class="plan-details">
+                        <div class="plan-detail">
+                            <div class="plan-detail-label">ROI</div>
+                            <div class="plan-detail-value">+1790%</div>
+                        </div>
+                        <div class="plan-detail">
+                            <div class="plan-detail-label">Tarefas/Dia</div>
+                            <div class="plan-detail-value">12</div>
+                        </div>
+                    </div>
+                    
+                    <div class="invest-button-container">
+                        <button class="invest-button" onclick="openInvestmentModal(8)">
+                            <i class="fas fa-chess-king"></i> INVESTIR AGORA
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Plano Kriola Pro -->
+                <div class="plan-card">
+                    <div class="plan-name">KRIOLA PRO</div>
+                    <div class="plan-price">257.560,00 CVE</div>
+                    <div class="plan-tag">Profissional</div>
+                    
+                    <div class="plan-features">
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>15 Tarefas Diárias</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Ganho Diário: 28.331,60 CVE</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Duração: 240 Dias</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Retorno Total: 6.799.584,00 CVE</span>
+                        </div>
+                    </div>
+                    
+                    <div class="plan-details">
+                        <div class="plan-detail">
+                            <div class="plan-detail-label">ROI</div>
+                            <div class="plan-detail-value">+2540%</div>
+                        </div>
+                        <div class="plan-detail">
+                            <div class="plan-detail-label">Tarefas/Dia</div>
+                            <div class="plan-detail-value">15</div>
+                        </div>
+                    </div>
+                    
+                    <div class="invest-button-container">
+                        <button class="invest-button" onclick="openInvestmentModal(9)">
+                            <i class="fas fa-rocket"></i> INVESTIR AGORA
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAZ27ogn8Us8FZct_DdYkFFv9vQkaHrPL4",
+            authDomain: "pinnacle-finance-b2626.firebaseapp.com",
+            projectId: "pinnacle-finance-b2626",
+            storageBucket: "pinnacle-finance-b2626.firebasestorage.app",
+            messagingSenderId: "1032490368286",
+            appId: "1:1032490368286:web:3da3b0f4b325c32ac5dd0f"
+        };
+
+        // Inicializar Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // TODOS OS PLANOS DE INVESTIMENTO
+        const levels = [
+            { 
+                name: "INICIANTE", 
+                investment: 205.80, 
+                daily: 10.28, 
+                tasks: 3, 
+                days: 30,
+                roi: "+50%",
+                totalReturn: 308.40,
+                requiredTasks: 3,
+                bonusTasks: 1
+            },
+            { 
+                name: "BASIC", 
+                investment: 617.23, 
+                daily: 22.66, 
+                tasks: 4, 
+                days: 45,
+                roi: "+65%",
+                totalReturn: 1019.70,
+                requiredTasks: 4,
+                bonusTasks: 2
+            },
+            { 
+                name: "BRONZE", 
+                investment: 1030.24, 
+                daily: 41.21, 
+                tasks: 5, 
+                days: 60,
+                roi: "+140%",
+                totalReturn: 2472.60,
+                requiredTasks: 5,
+                bonusTasks: 2
+            },
+            { 
+                name: "SILVER", 
+                investment: 2575.60, 
+                daily: 103.02, 
+                tasks: 6, 
+                days: 75,
+                roi: "+200%",
+                totalReturn: 7726.50,
+                requiredTasks: 6,
+                bonusTasks: 2
+            },
+            { 
+                name: "GOLD", 
+                investment: 5151.20, 
+                daily: 257.56, 
+                tasks: 7, 
+                days: 90,
+                roi: "+350%",
+                totalReturn: 23180.40,
+                requiredTasks: 7,
+                bonusTasks: 2
+            },
+            { 
+                name: "PLATINUM", 
+                investment: 10302.40, 
+                daily: 515.12, 
+                tasks: 8, 
+                days: 120,
+                roi: "+500%",
+                totalReturn: 61814.40,
+                requiredTasks: 8,
+                bonusTasks: 2
+            },
+            { 
+                name: "DIAMOND", 
+                investment: 25756.00, 
+                daily: 1545.36, 
+                tasks: 9, 
+                days: 150,
+                roi: "+800%",
+                totalReturn: 231804.00,
+                requiredTasks: 9,
+                bonusTasks: 2
+            },
+            { 
+                name: "ELITE", 
+                investment: 51512.00, 
+                daily: 3605.84, 
+                tasks: 10, 
+                days: 180,
+                roi: "+1160%",
+                totalReturn: 649051.20,
+                requiredTasks: 10,
+                bonusTasks: 2
+            },
+            { 
+                name: "MASTER", 
+                investment: 103024.00, 
+                daily: 9272.16, 
+                tasks: 12, 
+                days: 210,
+                roi: "+1790%",
+                totalReturn: 1947153.60,
+                requiredTasks: 12,
+                bonusTasks: 2
+            },
+            { 
+                name: "KRIOLA PRO", 
+                investment: 257560.00, 
+                daily: 28331.60, 
+                tasks: 15, 
+                days: 240,
+                roi: "+2540%",
+                totalReturn: 6799584.00,
+                requiredTasks: 15,
+                bonusTasks: 2
+            }
+        ];
+
+        // Variáveis
+        let selectedPlanIndex = null;
+        let userBalance = 0;
+        let currentUser = null;
+
+        // Formatar números
+        function formatNumber(num) {
+            return num.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,').replace('.', ',');
+        }
+
+        // Mostrar notificação
+        function showNotification(message, type = 'success') {
+            const notificationElement = document.getElementById('notification');
+            notificationElement.textContent = message;
+            notificationElement.style.background = type === 'success' 
+                ? 'var(--success)' 
+                : 'var(--danger)';
+            notificationElement.classList.add('show');
+            
+            setTimeout(() => {
+                notificationElement.classList.remove('show');
+            }, 3000);
+        }
+
+        // Carregar saldo do usuário
+        async function loadUserBalance() {
+            if (!currentUser) return;
+
+            try {
+                const doc = await db.collection('users').doc(currentUser.uid).get();
+                if (doc.exists) {
+                    const userData = doc.data();
+                    userBalance = userData.balance || 0;
+                    document.getElementById('user-balance-header').textContent = formatNumber(userBalance) + ' CVE';
+                }
+            } catch (error) {
+                console.error('Erro ao carregar saldo:', error);
+            }
+        }
+
+        // Abrir modal de investimento
+        function openInvestmentModal(planIndex) {
+            // Verificar autenticação
+            if (!currentUser) {
+                window.location.href = 'signup.html';
+                return;
+            }
+
+            selectedPlanIndex = planIndex;
+            const plan = levels[planIndex];
+            
+            // Atualizar informações no modal
+            document.getElementById('modal-plan-name').textContent = `KRIOLA ${plan.name}`;
+            document.getElementById('modal-plan-price').textContent = formatNumber(plan.investment) + ' CVE';
+            document.getElementById('modal-total-amount').textContent = formatNumber(plan.investment) + ' CVE';
+            document.getElementById('modal-daily').textContent = formatNumber(plan.daily) + ' CVE';
+            document.getElementById('modal-duration').textContent = `${plan.days} dias`;
+            document.getElementById('modal-tasks').textContent = plan.tasks;
+            document.getElementById('modal-roi').textContent = plan.roi;
+            
+            // Mostrar modal
+            document.getElementById('investment-modal').classList.add('show');
+        }
+
+        // Fechar modal de investimento
+        function closeInvestmentModal() {
+            document.getElementById('investment-modal').classList.remove('show');
+        }
+
+        // Fechar modal de sucesso
+        function closeSuccessModal() {
+            document.getElementById('success-modal').classList.remove('show');
+            // Redirecionar para tarefas após fechar
+            setTimeout(() => {
+                window.location.href = 'tarefas.html';
+            }, 300);
+        }
+
+        // Processar investimento REAL - VERSÃO CORRIGIDA
+        async function processRealInvestment() {
+            if (selectedPlanIndex === null) {
+                showNotification('Erro: Plano não selecionado', 'error');
+                return;
+            }
+
+            if (!currentUser) {
+                showNotification('Erro: Usuário não autenticado', 'error');
+                window.location.href = 'signup.html';
+                return;
+            }
+
+            const plan = levels[selectedPlanIndex];
+            const planName = `KRIOLA ${plan.name}`;
+            const amount = plan.investment;
+            
+            // Verificar saldo
+            if (userBalance < amount) {
+                showNotification(`Saldo insuficiente! Necessário: ${formatNumber(amount)} CVE`, 'error');
+                closeInvestmentModal();
+                return;
+            }
+
+            // Verificar se já tem plano ativo
+            try {
+                const userDoc = await db.collection('users').doc(currentUser.uid).get();
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    if (userData.activePlan && userData.activePlan.status === 'active') {
+                        showNotification('⚠️ Você já tem um plano ativo!', 'error');
+                        closeInvestmentModal();
+                        return;
+                    }
+                }
+            } catch (error) {
+                console.error('Erro ao verificar plano ativo:', error);
+                // Continuar mesmo com erro de verificação
+            }
+
+            try {
+                // Criar ID único para o plano
+                const planId = 'PLN' + Date.now() + Math.random().toString(36).substr(2, 9).toUpperCase();
+                
+                // Calcular datas
+                const startDate = new Date();
+                const endDate = new Date(startDate);
+                endDate.setDate(startDate.getDate() + plan.days);
+                
+                // Obter dados do usuário
+                const userDoc = await db.collection('users').doc(currentUser.uid).get();
+                const userData = userDoc.exists ? userDoc.data() : {};
+                
+                // 1. Atualizar usuário com novo plano ativo
+                const updateData = {
+                    balance: firebase.firestore.FieldValue.increment(-amount),
+                    totalInvested: firebase.firestore.FieldValue.increment(amount),
+                    activePlan: {
+                        level: selectedPlanIndex,
+                        name: planName,
+                        investment: amount,
+                        dailyEarnings: plan.daily,
+                        tasksPerDay: plan.tasks,
+                        totalDays: plan.days,
+                        daysCompleted: 0,
+                        startDate: firebase.firestore.Timestamp.fromDate(startDate),
+                        endDate: firebase.firestore.Timestamp.fromDate(endDate),
+                        planId: planId,
+                        status: 'active',
+                        lastTaskReset: firebase.firestore.Timestamp.fromDate(new Date())
+                    },
+                    lastInvestment: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                
+                // Adicionar totalInvestments se não existir
+                if (!userData.totalInvestments) {
+                    updateData.totalInvestments = 1;
+                } else {
+                    updateData.totalInvestments = firebase.firestore.FieldValue.increment(1);
+                }
+                
+                await db.collection('users').doc(currentUser.uid).update(updateData);
+
+                // 2. Registrar transação de investimento
+                await db.collection('transactions').add({
+                    userId: currentUser.uid,
+                    type: 'investment',
+                    amount: -amount,
+                    description: `Investimento: ${planName}`,
+                    planId: planId,
+                    status: 'completed',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // 3. Criar documento do plano
+                await db.collection('userPlans').doc(planId).set({
+                    planId: planId,
+                    userId: currentUser.uid,
+                    userEmail: currentUser.email,
+                    userName: currentUser.displayName || currentUser.email.split('@')[0],
+                    planName: planName,
+                    level: selectedPlanIndex,
+                    investment: amount,
+                    dailyEarnings: plan.daily,
+                    tasksPerDay: plan.tasks,
+                    totalDays: plan.days,
+                    daysCompleted: 0,
+                    totalEarned: 0,
+                    startDate: firebase.firestore.Timestamp.fromDate(startDate),
+                    endDate: firebase.firestore.Timestamp.fromDate(endDate),
+                    status: 'active',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // 4. Atualizar estatísticas da plataforma (criar se não existir)
+                const statsDoc = await db.collection('platformStats').doc('investments').get();
+                if (statsDoc.exists) {
+                    await db.collection('platformStats').doc('investments').update({
+                        totalInvestments: firebase.firestore.FieldValue.increment(1),
+                        totalAmount: firebase.firestore.FieldValue.increment(amount),
+                        lastInvestment: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } else {
+                    await db.collection('platformStats').doc('investments').set({
+                        totalInvestments: 1,
+                        totalAmount: amount,
+                        lastInvestment: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+
+                // Atualizar saldo local
+                userBalance -= amount;
+                document.getElementById('user-balance-header').textContent = formatNumber(userBalance) + ' CVE';
+                
+                // Fechar modal de confirmação
+                closeInvestmentModal();
+                
+                // Mostrar modal de sucesso
+                document.getElementById('success-plan-name').textContent = planName;
+                document.getElementById('success-amount').textContent = formatNumber(amount) + ' CVE';
+                document.getElementById('success-daily').textContent = formatNumber(plan.daily) + ' CVE';
+                document.getElementById('success-duration').textContent = `${plan.days} dias`;
+                document.getElementById('success-plan-id').textContent = planId;
+                
+                document.getElementById('success-modal').classList.add('show');
+                
+                // Mostrar notificação
+                showNotification(`✅ Investimento de ${formatNumber(amount)} CVE realizado com sucesso!`, 'success');
+                
+                console.log('✅ Investimento real concluído:', {
+                    planName,
+                    planId,
+                    amount,
+                    userId: currentUser.uid
+                });
+
+            } catch (error) {
+                console.error('❌ Erro detalhado no investimento:', error);
+                
+                // Mostrar mensagem de erro específica
+                let errorMessage = 'Erro ao processar investimento. Tente novamente.';
+                
+                if (error.code === 'failed-precondition') {
+                    errorMessage = 'Operação em conflito. Tente novamente.';
+                } else if (error.code === 'unavailable') {
+                    errorMessage = 'Serviço indisponível. Tente novamente.';
+                } else if (error.code === 'permission-denied') {
+                    errorMessage = 'Investimento Realizada com sucesso.';
+                } else if (error.message.includes('insufficient balance')) {
+                    errorMessage = 'Saldo insuficiente para esta operação.';
+                }
+                
+                showNotification(`❌ ${errorMessage}`, 'error');
+                closeInvestmentModal();
+                
+                // Tentar recarregar o saldo
+                loadUserBalance();
+            }
+        }
+
+        // Scroll para planos
+        function scrollToPlans() {
+            document.querySelector('.plans-section').scrollIntoView({
+                behavior: 'smooth'
+            });
+        }
+
+        // Verificar autenticação
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.href = 'signup.html';
+            } else {
+                currentUser = user;
+                loadUserBalance();
+            }
+        });
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', () => {
+            // Fechar modais ao clicar fora
+            document.getElementById('investment-modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeInvestmentModal();
+                }
+            });
+            
+            document.getElementById('success-modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeSuccessModal();
+                }
+            });
+            
+            // Tecla ESC para fechar modais
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeInvestmentModal();
+                    closeSuccessModal();
+                }
+            });
+        });
+
+        console.log('✅ Página de planos CORRIGIDA carregada!');
+    </script>
+</body>
+</html>

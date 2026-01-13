@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kriola Yield Pro - Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #1a1a2e;
+            --secondary: #16213e;
+            --accent: #0f4c75;
+            --gold: #ffd700;
+            --success: #00b894;
+            --danger: #ff6b6b;
+            --warning: #fdcb6e;
+            --dark: #2c3e50;
+            --light: #f5f5f5;
+            --gray: #666;
+            --white: #ffffff;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--light) 0%, #e0e0e0 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            padding-bottom: 80px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Background Pattern */
+        .background-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(204, 9, 47, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 56, 147, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(255, 235, 0, 0.05) 0%, transparent 50%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Header */
+        .header {
+            background: var(--white);
+            padding: 15px 20px;
+            border-bottom: 3px solid var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            color: var(--gold);
+            font-size: 1.8rem;
+        }
+
+        .logo-text {
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .logo-text span {
+            color: var(--accent);
+        }
+
+        .user-info {
+            text-align: right;
+        }
+
+        .user-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 2px;
+        }
+
+        .user-id {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        /* Balance Display */
+        .balance-display {
+            background: linear-gradient(135deg, var(--accent), #0c2461);
+            color: white;
+            padding: 20px;
+            margin: 15px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(15, 76, 117, 0.3);
+            text-align: center;
+        }
+
+        .balance-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .balance-amount {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .balance-details {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Platform Name */
+        .platform-name {
+            text-align: center;
+            margin: 20px 0 30px 0;
+        }
+
+        .platform-name h1 {
+            font-size: 2.2rem;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .platform-name .highlight {
+            color: var(--accent);
+        }
+
+        .platform-name .tagline {
+            color: var(--gray);
+            font-size: 1rem;
+        }
+
+        /* Status Card */
+        .status-card {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .status-card:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(to right, var(--accent), var(--success));
+        }
+
+        .status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .day-counter {
+            font-size: 1.2rem;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .level-badge {
+            background: linear-gradient(45deg, var(--gold), #ff9f1a);
+            color: var(--primary);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            box-shadow: 0 3px 10px rgba(255, 215, 0, 0.3);
+        }
+
+        /* Progress Circle */
+        .progress-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 25px 0;
+        }
+
+        .circle-container {
+            position: relative;
+            width: 140px;
+            height: 140px;
+        }
+
+        .circle-bg {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(var(--accent) 0deg, var(--success) 0deg, #e0e0e0 0deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 1s ease;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .circle-inner {
+            width: 110px;
+            height: 110px;
+            background: var(--white);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .circle-amount {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .circle-label {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-top: 5px;
+        }
+
+        .progress-info {
+            flex: 1;
+            padding-left: 25px;
+        }
+
+        .progress-item {
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .quick-action {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            text-decoration: none;
+            color: var(--dark);
+            transition: all 0.3s;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .quick-action:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-color: var(--accent);
+        }
+
+        .action-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--accent);
+        }
+
+        .action-text {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* Action Grid */
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .action-card {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            text-decoration: none;
+            color: var(--dark);
+            transition: all 0.3s;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-color: var(--accent);
+        }
+
+        .action-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--accent);
+        }
+
+        .action-text {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .stat-card {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-value {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--accent);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        /* Comission Section */
+        .comission-card {
+            background: linear-gradient(135deg, #ffd700, #ff9f1a);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 25px;
+            color: var(--primary);
+            text-align: center;
+        }
+
+        .comission-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .comission-amount {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+
+        /* Referral Section */
+        .referral-card {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 25px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .referral-title {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .referral-id {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 2px dashed var(--accent);
+        }
+
+        .id-code {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+
+        .copy-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .copy-btn:hover {
+            background: #0d3d5c;
+            transform: translateY(-2px);
+        }
+
+        .comission-info {
+            color: var(--success);
+            font-size: 0.9rem;
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(0, 184, 148, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(0, 184, 148, 0.2);
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            z-index: 10000;
+            animation: slideInRight 0.5s;
+            display: none;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--white);
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            border-top: 3px solid var(--accent);
+            z-index: 1000;
+            box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--gray);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+
+        .nav-item.active {
+            color: var(--accent);
+        }
+
+        .nav-icon {
+            font-size: 1.4rem;
+            margin-bottom: 5px;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--gray);
+        }
+
+        /* Alert Box */
+        .alert-box {
+            background: rgba(255, 107, 107, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 4px solid var(--danger);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Recent Activity */
+        .activity-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            align-items: center;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-info {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .activity-time {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        .activity-amount {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .action-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .progress-container {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .progress-info {
+                padding-left: 0;
+                margin-top: 20px;
+            }
+            
+            .platform-name h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Pattern -->
+    <div class="background-pattern"></div>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="logo-container">
+            <i class="fas fa-gem logo-icon"></i>
+            <div class="logo-text">KRIOLA<span>YIELD</span></div>
+        </div>
+        
+        <div class="user-info">
+            <div class="user-name" id="user-name">Carregando...</div>
+            <div class="user-id" id="user-kriola-id">KRI-XXXXXX</div>
+        </div>
+    </div>
+
+    <!-- Balance Display -->
+    <div class="balance-display">
+        <div class="balance-label">Seu Saldo Disponível</div>
+        <div class="balance-amount" id="user-balance">0,00 CVE</div>
+        <div class="balance-details">
+            <span>Ganho Hoje: <span id="today-earnings">0,00 CVE</span></span>
+            <span>Total: <span id="total-earned">0,00 CVE</span></span>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Status Card -->
+        <div class="status-card">
+            <div class="status-header">
+                <div class="day-counter" id="day-counter">DIA 0/0</div>
+                <div class="level-badge" id="user-level">NÍVEL 0</div>
+            </div>
+
+            <!-- Progress Circle -->
+            <div class="progress-container">
+                <div class="circle-container">
+                    <div class="circle-bg" id="progress-circle">
+                        <div class="circle-inner">
+                            <div class="circle-amount" id="daily-earnings">0,00</div>
+                            <div class="circle-label">CVE/DIA</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="progress-info">
+                    <div class="progress-item">
+                        <span>Tarefas Hoje</span>
+                        <span id="tasks-today">0/0</span>
+                    </div>
+                    <div class="progress-item">
+                        <span>Ganho Parcial</span>
+                        <span class="pulse" id="partial-earnings">0,00 CVE</span>
+                    </div>
+                    <div class="progress-item">
+                        <span>Plano Atual</span>
+                        <span id="current-plan">Nenhum</span>
+                    </div>
+                    <div class="progress-item">
+                        <span>Tempo Restante</span>
+                        <span id="time-left">0h 00m</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alert Box -->
+            <div class="alert-box" id="alert-box" style="display: none;">
+                <i class="fas fa-exclamation-triangle" style="color: var(--danger);"></i>
+                <div>
+                    <strong id="alert-title">Complete tarefas</strong>
+                    <div id="alert-message"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <a href="tarefas.html" class="quick-action">
+                <div class="action-icon">
+                    <i class="fas fa-tasks"></i>
+                </div>
+                <div class="action-text">Tarefas</div>
+            </a>
+            
+            <a href="depositar.html" class="quick-action">
+                <div class="action-icon">
+                    <i class="fas fa-plus-circle"></i>
+                </div>
+                <div class="action-text">Depositar</div>
+            </a>
+            
+            <a href="sacar.html" class="quick-action">
+                <div class="action-icon">
+                    <i class="fas fa-wallet"></i>
+                </div>
+                <div class="action-text">Sacar</div>
+            </a>
+            
+            <a href="planos.html" class="quick-action">
+                <div class="action-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="action-text">Planos</div>
+            </a>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading" id="loading">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>
+            <div style="margin-top: 15px;">Carregando dados...</div>
+        </div>
+
+        <!-- Main Actions Grid -->
+        <div id="main-content" style="display: none;">
+            <div class="action-grid">
+                <a href="tarefas.html" class="action-card">
+                    <div class="action-icon">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <div class="action-text">Fazer Tarefas Diárias</div>
+                    <div style="color: var(--gray); font-size: 0.85rem; margin-top: 8px;">
+                        Ganhe completando tarefas
+                    </div>
+                </a>
+                
+                <a href="depositar.html" class="action-card">
+                    <div class="action-icon">
+                        <i class="fas fa-arrow-down"></i>
+                    </div>
+                    <div class="action-text">Fazer Depósito</div>
+                    <div style="color: var(--gray); font-size: 0.85rem; margin-top: 8px;">
+                        Ative seu plano de investimento
+                    </div>
+                </a>
+                
+                <a href="sacar.html" class="action-card">
+                    <div class="action-icon">
+                        <i class="fas fa-arrow-up"></i>
+                    </div>
+                    <div class="action-text">Sacar Ganhos</div>
+                    <div style="color: var(--gray); font-size: 0.85rem; margin-top: 8px;">
+                        Saque mínimo: 1.000 CVE
+                    </div>
+                </a>
+                
+                <a href="planos.html" class="action-card">
+                    <div class="action-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="action-text">Planos de Investimento</div>
+                    <div style="color: var(--gray); font-size: 0.85rem; margin-top: 8px;">
+                        Escolha o melhor plano
+                    </div>
+                </a>
+            </div>
+
+            <!-- Comission Section -->
+            <div class="comission-card">
+                <h3 class="comission-title">
+                    <i class="fas fa-gift"></i> COMISSÃO 15%
+                </h3>
+                <div class="comission-amount" id="comission-earned">0,00 CVE</div>
+                <div style="font-size: 1rem; margin-bottom: 15px;">
+                    Ganhe 15% do primeiro investimento<br>de cada amigo convidado!
+                </div>
+                <div style="font-size: 0.9rem; opacity: 0.9;">
+                    <i class="fas fa-user-friends"></i> Rede ativa: <span id="network-size">0</span> pessoas
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-earned-2">0,00</div>
+                    <div class="stat-label">Total Ganho</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-value" id="total-comissions">0,00</div>
+                    <div class="stat-label">Comissões (15%)</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-value" id="streak-days">0</div>
+                    <div class="stat-label">Dias Consecutivos</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-value" id="tasks-total">0</div>
+                    <div class="stat-label">Tarefas Completas</div>
+                </div>
+            </div>
+
+            <!-- Referral Section -->
+            <div class="referral-card">
+                <h3 class="referral-title">
+                    <i class="fas fa-user-friends"></i> Convide Amigos
+                </h3>
+                
+                <div class="referral-id">
+                    <div>
+                        <div style="font-size: 0.9rem; color: var(--gray);">Seu ID de Convite</div>
+                        <div class="id-code" id="user-id-code">KRI-XXXXXX</div>
+                    </div>
+                    <button class="copy-btn" onclick="copyReferralId()">
+                        <i class="fas fa-copy"></i> Copiar
+                    </button>
+                </div>
+                
+                <div style="margin-top: 15px;">
+                    <div style="color: var(--gray); font-size: 0.9rem; margin-bottom: 10px;">
+                        Compartilhe seu link de indicação:
+                    </div>
+                    <div style="background: linear-gradient(135deg, #f8f9fa, #e9ecef); padding: 12px; border-radius: 8px; font-size: 0.9rem; word-break: break-all; color: var(--accent); border: 1px solid #dee2e6;" id="referral-link">
+                        https://kriolayield.cv/?ref=KRI-XXXXXX
+                    </div>
+                </div>
+                
+                <div class="comission-info">
+                    <i class="fas fa-gift"></i> Você ganha <strong>15%</strong> do primeiro investimento de cada amigo convidado!
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="status-card" style="margin-top: 25px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+                    <h3 style="color: var(--primary);">
+                        <i class="fas fa-history"></i> Atividade Recente
+                    </h3>
+                </div>
+                
+                <div id="recent-activity">
+                    <div style="color: var(--gray); text-align: center; padding: 30px;">
+                        <i class="fas fa-history fa-2x" style="margin-bottom: 10px;"></i><br>
+                        Nenhuma atividade recente
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <a href="index.html" class="nav-item active">
+            <i class="fas fa-home nav-icon"></i>
+            Início
+        </a>
+        <a href="tarefas.html" class="nav-item">
+            <i class="fas fa-tasks nav-icon"></i>
+            Tarefas
+        </a>
+        <a href="depositar.html" class="nav-item">
+            <i class="fas fa-arrow-down nav-icon"></i>
+            Depósitos
+        </a>
+        <a href="sacar.html" class="nav-item">
+            <i class="fas fa-arrow-up nav-icon"></i>
+            Saques
+        </a>
+    </div>
+
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAZ27ogn8Us8FZct_DdYkFFv9vQkaHrPL4",
+            authDomain: "pinnacle-finance-b2626.firebaseapp.com",
+            projectId: "pinnacle-finance-b2626",
+            storageBucket: "pinnacle-finance-b2626.firebasestorage.app",
+            messagingSenderId: "1032490368286",
+            appId: "1:1032490368286:web:3da3b0f4b325c32ac5dd0f"
+        };
+
+        // Inicializar Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Elementos DOM
+        const userBalanceElement = document.getElementById('user-balance');
+        const userNameElement = document.getElementById('user-name');
+        const mainContent = document.getElementById('main-content');
+        const loadingElement = document.getElementById('loading');
+        const notificationElement = document.getElementById('notification');
+
+        // Níveis da plataforma (RETORNO DIÁRIO FIXO CONFORME PLANO)
+        const levels = [
+            { name: "INICIANTE", investment: 205.80, daily: 10.28, tasks: 3 },
+            { name: "BASIC", investment: 617.23, daily: 22.66, tasks: 4 },
+            { name: "BRONZE", investment: 1030.24, daily: 41.21, tasks: 5 },
+            { name: "SILVER", investment: 2575.60, daily: 103.02, tasks: 6 },
+            { name: "GOLD", investment: 5151.20, daily: 257.56, tasks: 7 },
+            { name: "PLATINUM", investment: 10302.40, daily: 515.12, tasks: 8 },
+            { name: "DIAMOND", investment: 25756.00, daily: 1545.36, tasks: 9 },
+            { name: "ELITE", investment: 51512.00, daily: 3605.84, tasks: 10 },
+            { name: "MASTER", investment: 103024.00, daily: 9272.16, tasks: 12 },
+            { name: "KRIOLA PRO", investment: 257560.00, daily: 28331.60, tasks: 15 }
+        ];
+
+        // Formatar números
+        function formatNumber(num) {
+            return Number(num).toFixed(2).replace('.', ',');
+        }
+
+        // Mostrar notificação
+        function showNotification(message, type = 'success') {
+            notificationElement.textContent = message;
+            notificationElement.style.background = type === 'success' 
+                ? 'var(--success)' 
+                : 'var(--danger)';
+            notificationElement.classList.add('show');
+            
+            setTimeout(() => {
+                notificationElement.classList.remove('show');
+            }, 3000);
+        }
+
+        // Copiar ID de referência
+        function copyReferralId() {
+            const link = document.getElementById('referral-link').textContent;
+            
+            navigator.clipboard.writeText(link).then(() => {
+                showNotification('Link de indicação copiado! 📋', 'success');
+            }).catch(err => {
+                console.error('Erro ao copiar:', err);
+                showNotification('Erro ao copiar link', 'error');
+            });
+        }
+
+        // Atualizar tempo restante
+        function updateTimeLeft() {
+            const now = new Date();
+            const midnight = new Date();
+            midnight.setHours(24, 0, 0, 0);
+            
+            const diff = midnight - now;
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            
+            document.getElementById('time-left').textContent = `${hours}h ${minutes}m`;
+        }
+
+        // Atualizar círculo de progresso
+        function updateProgressCircle(completed, total) {
+            const percent = Math.min((completed / total) * 270, 270);
+            const circle = document.getElementById('progress-circle');
+            circle.style.background = `conic-gradient(var(--accent) 0deg, var(--success) ${percent}deg, #e0e0e0 ${percent}deg)`;
+        }
+
+        // Carregar tamanho da rede
+        async function loadNetworkSize(userId) {
+            try {
+                const snapshot = await db.collection('users')
+                    .where('referrerId', '==', userId)
+                    .get();
+                
+                document.getElementById('network-size').textContent = snapshot.size;
+            } catch (error) {
+                console.error('Erro ao carregar rede:', error);
+                document.getElementById('network-size').textContent = '0';
+            }
+        }
+
+        // Carregar tarefas completadas HOJE
+        async function loadCompletedTasksToday(userId) {
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                
+                const snapshot = await db.collection('taskCompletions')
+                    .where('userId', '==', userId)
+                    .where('date', '==', today)
+                    .get();
+                
+                return snapshot.size;
+            } catch (error) {
+                console.error('Erro ao carregar tarefas:', error);
+                return 0;
+            }
+        }
+
+        // Verificar se é novo dia e resetar tarefas se necessário
+        async function checkAndResetDailyTasks(userId) {
+            try {
+                const userDoc = await db.collection('users').doc(userId).get();
+                const userData = userDoc.data();
+                
+                const today = new Date().toISOString().split('T')[0];
+                const lastReset = userData.lastTaskReset || today;
+                
+                // Se o último reset foi ontem ou anterior, resetar tarefas
+                if (lastReset !== today) {
+                    await db.collection('users').doc(userId).update({
+                        'lastTaskReset': today,
+                        'tasksCompletedToday': 0,
+                        'todayEarnings': 0
+                    });
+                    
+                    console.log('✅ Tarefas resetadas para o novo dia');
+                    return true;
+                }
+                return false;
+            } catch (error) {
+                console.error('Erro ao verificar reset:', error);
+                return false;
+            }
+        }
+
+        // Carregar atividade recente
+        async function loadRecentActivity(userId) {
+            try {
+                const activityElement = document.getElementById('recent-activity');
+
+                const transactionsSnapshot = await db.collection('transactions')
+                    .where('userId', '==', userId)
+                    .orderBy('createdAt', 'desc')
+                    .limit(5)
+                    .get();
+
+                if (!transactionsSnapshot.empty) {
+                    let activityHTML = '';
+                    transactionsSnapshot.forEach(doc => {
+                        const transaction = doc.data();
+                        const date = transaction.createdAt?.toDate() || new Date();
+                        const formattedDate = date.toLocaleDateString('pt-PT');
+                        const formattedTime = date.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+                        
+                        let icon = 'fas fa-exchange-alt';
+                        let color = 'var(--accent)';
+                        let typeText = transaction.description || 'Transação';
+                        
+                        if (transaction.type === 'task') {
+                            icon = 'fas fa-tasks';
+                            color = 'var(--success)';
+                            typeText = 'Tarefa completa';
+                        } else if (transaction.type === 'deposit') {
+                            icon = 'fas fa-arrow-down';
+                            color = 'var(--accent)';
+                            typeText = 'Depósito';
+                        } else if (transaction.type === 'withdrawal') {
+                            icon = 'fas fa-arrow-up';
+                            color = 'var(--warning)';
+                            typeText = 'Saque';
+                        } else if (transaction.type === 'comission') {
+                            icon = 'fas fa-user-friends';
+                            color = 'var(--success)';
+                            typeText = 'Comissão (15%)';
+                        }
+                        
+                        activityHTML += `
+                            <div class="activity-item">
+                                <div class="activity-info">
+                                    <div class="activity-title">${typeText}</div>
+                                    <div class="activity-time">${formattedDate} ${formattedTime}</div>
+                                </div>
+                                <div class="activity-amount" style="color: ${color};">
+                                    ${transaction.amount > 0 ? '+' : ''}${formatNumber(transaction.amount || 0)} CVE
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    activityElement.innerHTML = activityHTML;
+                }
+
+            } catch (error) {
+                console.error('Erro ao carregar atividade:', error);
+            }
+        }
+
+        // Carregar dados do usuário em tempo real
+        async function loadUserData() {
+            const user = auth.currentUser;
+            if (!user) {
+                window.location.href = 'signup.html';
+                return;
+            }
+
+            loadingElement.style.display = 'block';
+            mainContent.style.display = 'none';
+
+            try {
+                // Verificar e resetar tarefas diárias se necessário
+                await checkAndResetDailyTasks(user.uid);
+
+                const unsubscribe = db.collection('users').doc(user.uid).onSnapshot(async (doc) => {
+                    if (doc.exists) {
+                        const userData = doc.data();
+                        
+                        // Atualizar informações básicas
+                        userNameElement.textContent = userData.name || user.email.split('@')[0];
+                        document.getElementById('user-kriola-id').textContent = userData.kriolaId || 'KRI-XXXXXX';
+                        document.getElementById('user-id-code').textContent = userData.kriolaId || 'KRI-XXXXXX';
+                        document.getElementById('referral-link').textContent = `https://kriolayield.cv/?ref=${userData.kriolaId || 'KRI-XXXXXX'}`;
+                        
+                        // Atualizar saldo
+                        const balance = userData.balance || 0;
+                        userBalanceElement.textContent = formatNumber(balance) + ' CVE';
+                        
+                        // Atualizar estatísticas
+                        document.getElementById('total-earned').textContent = formatNumber(userData.totalEarned || 0);
+                        document.getElementById('total-earned-2').textContent = formatNumber(userData.totalEarned || 0);
+                        document.getElementById('comission-earned').textContent = formatNumber(userData.comissions || 0);
+                        document.getElementById('total-comissions').textContent = formatNumber(userData.comissions || 0);
+                        document.getElementById('streak-days').textContent = userData.streak || 0;
+                        document.getElementById('tasks-total').textContent = userData.totalTasksCompleted || 0;
+                        
+                        // Verificar plano ativo
+                        const activePlan = userData.activePlan || null;
+                        if (activePlan && activePlan.level >= 0 && activePlan.level < levels.length) {
+                            const levelData = levels[activePlan.level];
+                            const today = new Date();
+                            const planStartDate = activePlan.startDate?.toDate() || today;
+                            const planEndDate = new Date(planStartDate);
+                            planEndDate.setDate(planStartDate.getDate() + (activePlan.totalDays || 30));
+                            
+                            // Calcular dias
+                            const daysPassed = Math.floor((today - planStartDate) / (1000 * 60 * 60 * 24));
+                            const totalDays = activePlan.totalDays || 30;
+                            const daysRemaining = Math.max(0, totalDays - daysPassed);
+                            
+                            // Carregar tarefas completadas HOJE
+                            const tasksCompletedToday = await loadCompletedTasksToday(user.uid);
+                            const totalTasks = levelData.tasks;
+                            
+                            // CALCULAR GANHO DIÁRIO CORRETAMENTE
+                            // O ganho diário é FIXO conforme o plano, mas só é liberado proporcionalmente às tarefas
+                            const dailyEarningsFixed = levelData.daily; // Retorno diário FIXO do plano
+                            const partialEarnings = (tasksCompletedToday / totalTasks) * dailyEarningsFixed;
+                            
+                            // Atualizar interface
+                            document.getElementById('user-level').textContent = `KRIOLA ${levelData.name}`;
+                            document.getElementById('day-counter').textContent = `DIA ${Math.min(daysPassed + 1, totalDays)}/${totalDays}`;
+                            document.getElementById('daily-earnings').textContent = formatNumber(dailyEarningsFixed); // Retorno diário FIXO
+                            document.getElementById('current-plan').textContent = `KRIOLA ${levelData.name}`;
+                            
+                            document.getElementById('partial-earnings').textContent = formatNumber(partialEarnings) + ' CVE';
+                            document.getElementById('today-earnings').textContent = formatNumber(partialEarnings) + ' CVE';
+                            document.getElementById('tasks-today').textContent = `${tasksCompletedToday}/${totalTasks}`;
+                            
+                            // Atualizar círculo de progresso
+                            updateProgressCircle(tasksCompletedToday, totalTasks);
+                            
+                            // Mostrar alerta se necessário
+                            const alertBox = document.getElementById('alert-box');
+                            if (tasksCompletedToday < totalTasks) {
+                                const tasksRemaining = totalTasks - tasksCompletedToday;
+                                document.getElementById('alert-title').textContent = `Complete ${tasksRemaining} tarefa(s)`;
+                                document.getElementById('alert-message').textContent = `Para liberar 100% dos ganhos diários (${formatNumber(dailyEarningsFixed)} CVE)`;
+                                alertBox.style.display = 'flex';
+                            } else {
+                                alertBox.style.display = 'none';
+                            }
+                            
+                        } else {
+                            // Sem plano ativo
+                            document.getElementById('user-level').textContent = 'SEM PLANO';
+                            document.getElementById('day-counter').textContent = 'ESCOLHA UM PLANO';
+                            document.getElementById('daily-earnings').textContent = '0,00';
+                            document.getElementById('partial-earnings').textContent = '0,00 CVE';
+                            document.getElementById('today-earnings').textContent = '0,00 CVE';
+                            document.getElementById('tasks-today').textContent = '0/0';
+                            document.getElementById('current-plan').textContent = 'Nenhum plano ativo';
+                            document.getElementById('alert-box').style.display = 'flex';
+                            document.getElementById('alert-title').textContent = 'Escolha um plano de investimento';
+                            document.getElementById('alert-message').textContent = 'Para começar a ganhar diariamente';
+                            updateProgressCircle(0, 1);
+                        }
+                        
+                        // Carregar tamanho da rede
+                        loadNetworkSize(user.uid);
+                        
+                        // Carregar atividade recente
+                        loadRecentActivity(user.uid);
+                        
+                        // Esconder loading e mostrar conteúdo
+                        setTimeout(() => {
+                            loadingElement.style.display = 'none';
+                            mainContent.style.display = 'block';
+                        }, 500);
+                        
+                    } else {
+                        console.error('Documento do usuário não encontrado');
+                        showNotification('Erro ao carregar dados do usuário', 'error');
+                    }
+                }, (error) => {
+                    console.error('Erro ao escutar dados:', error);
+                    showNotification('Erro de conexão com o servidor', 'error');
+                    loadingElement.style.display = 'none';
+                });
+
+                // Salvar unsubscribe para limpar quando necessário
+                window.unsubscribeUserData = unsubscribe;
+
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+                showNotification('Erro ao carregar dados', 'error');
+                loadingElement.style.display = 'none';
+            }
+        }
+
+        // Verificar autenticação
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                loadUserData();
+                updateTimeLeft();
+                setInterval(updateTimeLeft, 60000);
+                
+                // Verificar a cada hora se é novo dia
+                setInterval(() => {
+                    const user = auth.currentUser;
+                    if (user) checkAndResetDailyTasks(user.uid);
+                }, 3600000); // 1 hora
+                
+            } else {
+                window.location.href = 'signup.html';
+            }
+        });
+
+        // Limpar listener quando a página for fechada
+        window.addEventListener('beforeunload', () => {
+            if (window.unsubscribeUserData) {
+                window.unsubscribeUserData();
+            }
+        });
+
+        console.log('✅ Dashboard corrigido - Tarefas resetam às 00h00!');
+    </script>
+</body>
+</html>

@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kriola Yield Pro - Saques</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #1a1a2e;
+            --secondary: #16213e;
+            --accent: #0f4c75;
+            --gold: #ffd700;
+            --success: #00b894;
+            --danger: #ff6b6b;
+            --warning: #fdcb6e;
+            --dark: #2c3e50;
+            --light: #f5f5f5;
+            --gray: #666;
+            --white: #ffffff;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--light) 0%, #e0e0e0 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Background Pattern */
+        .background-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(204, 9, 47, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 56, 147, 0.1) 0%, transparent 50%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Success Modal */
+        .success-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s;
+        }
+
+        .success-modal.show {
+            display: flex;
+        }
+
+        .success-content {
+            background: linear-gradient(135deg, var(--success), #00a085);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 450px;
+            width: 90%;
+            animation: popIn 0.5s;
+            box-shadow: 0 20px 60px rgba(0, 184, 148, 0.4);
+        }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .success-title {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .success-message {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 25px;
+        }
+
+        .success-details {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .success-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .success-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .success-label {
+            opacity: 0.8;
+        }
+
+        .success-value {
+            font-weight: bold;
+        }
+
+        /* Header */
+        .header {
+            background: var(--white);
+            padding: 20px;
+            border-bottom: 3px solid var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+
+        .back-button {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--primary);
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .back-button:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            color: var(--primary);
+            font-weight: bold;
+            flex: 1;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Balance Card */
+        .balance-card {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .balance-card:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(to right, var(--accent), var(--success));
+        }
+
+        .balance-label {
+            font-size: 1rem;
+            color: var(--gray);
+            margin-bottom: 10px;
+        }
+
+        .balance-amount {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .min-withdraw {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.05));
+            padding: 10px 15px;
+            border-radius: 10px;
+            display: inline-block;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .min-withdraw strong {
+            color: var(--dark);
+        }
+
+        /* Withdraw Form */
+        .withdraw-form {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+        }
+
+        .form-title {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Amount Input */
+        .amount-input-container {
+            margin-bottom: 20px;
+        }
+
+        .amount-label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--gray);
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .amount-input-wrapper {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .amount-input {
+            width: 100%;
+            padding: 18px;
+            padding-right: 70px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 2px solid #dee2e6;
+            border-radius: 12px;
+            color: var(--dark);
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .amount-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: var(--white);
+            box-shadow: 0 0 0 3px rgba(15, 76, 117, 0.1);
+        }
+
+        .currency {
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-weight: bold;
+            color: var(--accent);
+            font-size: 1.1rem;
+        }
+
+        /* Quick Amount Buttons */
+        .quick-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .quick-btn {
+            padding: 12px 5px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            color: var(--dark);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .quick-btn:hover {
+            background: linear-gradient(135deg, #e9ecef, #dee2e6);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .quick-btn.active {
+            background: linear-gradient(135deg, rgba(15, 76, 117, 0.1), rgba(15, 76, 117, 0.05));
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* Payment Methods */
+        .methods-title {
+            color: var(--gray);
+            margin-bottom: 15px;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .method-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 2px solid #dee2e6;
+            border-radius: 12px;
+            padding: 18px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .method-card:hover {
+            background: linear-gradient(135deg, #e9ecef, #dee2e6);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .method-card.selected {
+            background: linear-gradient(135deg, rgba(15, 76, 117, 0.1), rgba(15, 76, 117, 0.05));
+            border-color: var(--accent);
+        }
+
+        .method-icon {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+
+        .method-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .method-time {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        /* Bank Details Form */
+        .bank-details-form {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #dee2e6;
+            display: none;
+        }
+
+        .bank-details-form.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--gray);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            background: var(--white);
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            color: var(--dark);
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(15, 76, 117, 0.1);
+        }
+
+        /* Fee Info */
+        .fee-info {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #dee2e6;
+        }
+
+        .fee-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .fee-row:last-child {
+            border-bottom: none;
+        }
+
+        .fee-label {
+            color: var(--gray);
+        }
+
+        .fee-value {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .total-value {
+            color: var(--accent);
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        /* Withdraw Button */
+        .withdraw-button {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(45deg, var(--success), #00a085);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 5px 15px rgba(0, 184, 148, 0.3);
+        }
+
+        .withdraw-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 184, 148, 0.4);
+        }
+
+        .withdraw-button:disabled {
+            background: linear-gradient(135deg, #e9ecef, #dee2e6);
+            cursor: not-allowed;
+            color: var(--gray);
+            box-shadow: none;
+        }
+
+        /* Info Box */
+        .info-box {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.05));
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 25px;
+            text-align: center;
+        }
+
+        .info-box i {
+            color: var(--dark);
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+        }
+
+        .info-text {
+            color: var(--gray);
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            z-index: 10000;
+            animation: slideInRight 0.5s;
+            display: none;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 15px;
+            }
+            
+            .page-title {
+                font-size: 1.6rem;
+            }
+            
+            .balance-amount {
+                font-size: 2rem;
+            }
+            
+            .quick-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .payment-methods {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .quick-buttons {
+                grid-template-columns: 1fr;
+            }
+            
+            .amount-input {
+                font-size: 1.1rem;
+                padding: 15px;
+                padding-right: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Success Modal -->
+    <div class="success-modal" id="success-modal">
+        <div class="success-content">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="success-title">Saque Solicitado com Sucesso! 🎉</div>
+            <div class="success-message">Seu pedido de saque foi enviado para processamento</div>
+            
+            <div class="success-details">
+                <div class="success-row">
+                    <span class="success-label">ID do Saque:</span>
+                    <span class="success-value" id="modal-withdrawal-id">-</span>
+                </div>
+                <div class="success-row">
+                    <span class="success-label">Valor Solicitado:</span>
+                    <span class="success-value" id="modal-withdrawal-amount">0,00 CVE</span>
+                </div>
+                <div class="success-row">
+                    <span class="success-label">Taxa (3%):</span>
+                    <span class="success-value" id="modal-withdrawal-fee">0,00 CVE</span>
+                </div>
+                <div class="success-row">
+                    <span class="success-label">Valor a Receber:</span>
+                    <span class="success-value" id="modal-net-amount">0,00 CVE</span>
+                </div>
+                <div class="success-row">
+                    <span class="success-label">Método:</span>
+                    <span class="success-value" id="modal-method">-</span>
+                </div>
+                <div class="success-row">
+                    <span class="success-label">Status:</span>
+                    <span class="success-value" style="color: #FFD700;">EM PROCESSAMENTO</span>
+                </div>
+            </div>
+            
+            <div style="font-size: 0.9rem; opacity: 0.8; margin-top: 20px; line-height: 1.5;">
+                ⏳ Processamento: 2-24 horas úteis<br>
+                📞 Dúvidas: Telegram @Miaa_anne12
+            </div>
+        </div>
+    </div>
+
+    <!-- Background Pattern -->
+    <div class="background-pattern"></div>
+
+    <!-- Header -->
+    <div class="header">
+        <button class="back-button" onclick="window.location.href='index.html'">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <h1 class="page-title">Saque de Ganhos</h1>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Balance Card -->
+        <div class="balance-card">
+            <div class="balance-label">Seu Saldo Disponível para Saque</div>
+            <div class="balance-amount" id="available-balance">0,00 CVE</div>
+            <div class="min-withdraw">
+                <strong>Saque mínimo: 1.000,00 CVE</strong>
+            </div>
+            <div style="margin-top: 15px; color: var(--gray); font-size: 0.9rem;">
+                <i class="fas fa-info-circle"></i> Taxa de saque: 3% | Processamento: 2-24h
+            </div>
+        </div>
+
+        <!-- Withdraw Form -->
+        <div class="withdraw-form">
+            <h2 class="form-title">Solicitar Saque</h2>
+
+            <!-- Amount Input -->
+            <div class="amount-input-container">
+                <div class="amount-label">Valor do Saque</div>
+                <div class="amount-input-wrapper">
+                    <input type="number" class="amount-input" id="withdraw-amount" 
+                           placeholder="1000" min="1000" step="100" value="1000">
+                    <div class="currency">CVE</div>
+                </div>
+                
+                <!-- Quick Buttons -->
+                <div class="quick-buttons">
+                    <div class="quick-btn active" data-amount="1000" onclick="setAmount(1000)">1.000 CVE</div>
+                    <div class="quick-btn" data-amount="5000" onclick="setAmount(5000)">5.000 CVE</div>
+                    <div class="quick-btn" data-amount="10000" onclick="setAmount(10000)">10.000 CVE</div>
+                    <div class="quick-btn" id="btn-max" onclick="setMaxAmount()">MÁXIMO</div>
+                </div>
+            </div>
+
+            <!-- Payment Methods -->
+            <div class="methods-title">Método de Recebimento</div>
+            <div class="payment-methods" id="payment-methods">
+                <div class="method-card selected" data-method="transfer" onclick="selectMethod('transfer')">
+                    <div class="method-icon" style="color: var(--accent);">
+                        <i class="fas fa-university"></i>
+                    </div>
+                    <div class="method-name">Transferência Bancária</div>
+                    <div class="method-time">24-48 horas</div>
+                </div>
+                
+                <div class="method-card" data-method="mobile" onclick="selectMethod('mobile')">
+                    <div class="method-icon" style="color: #00A859;">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <div class="method-name">Pagamento Móvel</div>
+                    <div class="method-time">2-6 horas</div>
+                </div>
+            </div>
+
+            <!-- Bank Details Form -->
+            <div class="bank-details-form show" id="bank-details-form">
+                <div class="form-group">
+                    <label class="form-label">Nome do Banco</label>
+                    <input type="text" class="form-input" id="bank-name" 
+                           placeholder="Ex: Banco Angolano de Investimentos" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Nome do Titular da Conta</label>
+                    <input type="text" class="form-input" id="account-holder" 
+                           placeholder="Seu nome completo como está no banco" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Número da Conta</label>
+                    <input type="text" class="form-input" id="account-number" 
+                           placeholder="Número da conta bancária" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">IBAN (Opcional)</label>
+                    <input type="text" class="form-input" id="iban" 
+                           placeholder="Código IBAN da conta">
+                </div>
+            </div>
+
+            <!-- Mobile Details Form -->
+            <div class="bank-details-form" id="mobile-details-form">
+                <div class="form-group">
+                    <label class="form-label">Operadora</label>
+                    <select class="form-input" id="mobile-operator" required>
+                        <option value="">Selecione a operadora</option>
+                        <option value="mpesa">M-Pesa</option>
+                        <option value="unitel">Unitel Money</option>
+                        <option value="movicel">Movicel Money</option>
+                        <option value="other">Outra</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Número do Telefone</label>
+                    <input type="tel" class="form-input" id="mobile-number" 
+                           placeholder="+238 XXX XXX XXX" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Nome do Titular</label>
+                    <input type="text" class="form-input" id="mobile-holder" 
+                           placeholder="Nome registrado na conta móvel" required>
+                </div>
+            </div>
+
+            <!-- Fee Info -->
+            <div class="fee-info" id="fee-info">
+                <div class="fee-row">
+                    <div class="fee-label">Valor do Saque:</div>
+                    <div class="fee-value" id="summary-amount">1.000,00 CVE</div>
+                </div>
+                <div class="fee-row">
+                    <div class="fee-label">Taxa de Saque (3%):</div>
+                    <div class="fee-value" id="summary-fee">30,00 CVE</div>
+                </div>
+                <div class="fee-row">
+                    <div class="fee-label">Valor a Receber:</div>
+                    <div class="fee-value total-value" id="summary-total">970,00 CVE</div>
+                </div>
+            </div>
+
+            <!-- Withdraw Button -->
+            <button class="withdraw-button" id="btn-withdraw" onclick="processWithdrawal()" disabled>
+                <i class="fas fa-check-circle"></i> SOLICITAR SAQUE
+            </button>
+        </div>
+
+        <!-- Info Box -->
+        <div class="info-box">
+            <i class="fas fa-shield-alt"></i>
+            <div class="info-text">
+                <strong>Processamento Seguro:</strong> Todos os saques são processados 
+                manualmente pela nossa equipe de suporte verificado. Entre em contato via 
+                Telegram para dúvidas: @Miaa_anne12
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAZ27ogn8Us8FZct_DdYkFFv9vQkaHrPL4",
+            authDomain: "pinnacle-finance-b2626.firebaseapp.com",
+            projectId: "pinnacle-finance-b2626",
+            storageBucket: "pinnacle-finance-b2626.firebasestorage.app",
+            messagingSenderId: "1032490368286",
+            appId: "1:1032490368286:web:3da3b0f4b325c32ac5dd0f"
+        };
+
+        // Inicializar Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Variáveis
+        let userBalance = 0;
+        let selectedMethod = 'transfer';
+        const MIN_WITHDRAW = 1000;
+        const WITHDRAW_FEE = 0.03;
+
+        // Elementos DOM
+        const withdrawAmountInput = document.getElementById('withdraw-amount');
+        const availableBalanceElement = document.getElementById('available-balance');
+        const btnWithdraw = document.getElementById('btn-withdraw');
+        const notificationElement = document.getElementById('notification');
+
+        // Formatar números
+        function formatNumber(num) {
+            return num.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,').replace('.', ',');
+        }
+
+        // Mostrar notificação
+        function showNotification(message, type = 'success') {
+            notificationElement.textContent = message;
+            notificationElement.style.background = type === 'success' 
+                ? 'var(--success)' 
+                : 'var(--danger)';
+            notificationElement.classList.add('show');
+            
+            setTimeout(() => {
+                notificationElement.classList.remove('show');
+            }, 3000);
+        }
+
+        // Mostrar modal de sucesso
+        function showSuccessModal(withdrawalId, amount, fee, netAmount, method) {
+            document.getElementById('modal-withdrawal-id').textContent = withdrawalId;
+            document.getElementById('modal-withdrawal-amount').textContent = formatNumber(amount) + ' CVE';
+            document.getElementById('modal-withdrawal-fee').textContent = formatNumber(fee) + ' CVE';
+            document.getElementById('modal-net-amount').textContent = formatNumber(netAmount) + ' CVE';
+            
+            let methodText = '';
+            if (method === 'transfer') {
+                methodText = 'Transferência Bancária';
+            } else if (method === 'mobile') {
+                methodText = 'Pagamento Móvel';
+            }
+            document.getElementById('modal-method').textContent = methodText;
+            
+            const modal = document.getElementById('success-modal');
+            modal.classList.add('show');
+            
+            // Fechar modal após 5 segundos
+            setTimeout(() => {
+                modal.classList.remove('show');
+            }, 5000);
+        }
+
+        // Carregar dados do usuário
+        async function loadUserData() {
+            const user = auth.currentUser;
+            if (!user) {
+                window.location.href = 'signup.html';
+                return;
+            }
+
+            try {
+                const doc = await db.collection('users').doc(user.uid).get();
+                
+                if (doc.exists) {
+                    const userData = doc.data();
+                    userBalance = userData.balance || 0;
+                    
+                    // Atualizar saldo
+                    availableBalanceElement.textContent = formatNumber(userBalance) + ' CVE';
+                    
+                    // Configurar valor máximo
+                    withdrawAmountInput.max = userBalance;
+                    
+                    // Calcular valores iniciais
+                    calculateWithdraw();
+                    
+                    // Validar formulário inicial
+                    validateForm();
+                    
+                } else {
+                    showNotification('Erro ao carregar dados do usuário', 'error');
+                }
+                
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+                showNotification('Erro de conexão com o servidor', 'error');
+            }
+        }
+
+        // Definir valor do saque
+        function setAmount(amount) {
+            withdrawAmountInput.value = amount;
+            calculateWithdraw();
+        }
+
+        // Definir valor máximo
+        function setMaxAmount() {
+            const max = parseFloat(userBalance);
+            withdrawAmountInput.value = max;
+            calculateWithdraw();
+        }
+
+        // Selecionar método de pagamento
+        function selectMethod(method) {
+            selectedMethod = method;
+            
+            // Remover seleção anterior
+            document.querySelectorAll('.method-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Adicionar seleção atual
+            document.querySelector(`.method-card[data-method="${method}"]`).classList.add('selected');
+            
+            // Mostrar/ocultar formulários
+            document.getElementById('bank-details-form').classList.remove('show');
+            document.getElementById('mobile-details-form').classList.remove('show');
+            
+            if (method === 'transfer') {
+                document.getElementById('bank-details-form').classList.add('show');
+            } else if (method === 'mobile') {
+                document.getElementById('mobile-details-form').classList.add('show');
+            }
+            
+            // Validar formulário
+            validateForm();
+        }
+
+        // Calcular valores do saque
+        function calculateWithdraw() {
+            const amount = parseFloat(withdrawAmountInput.value) || 0;
+            
+            if (amount < MIN_WITHDRAW) {
+                withdrawAmountInput.value = MIN_WITHDRAW;
+                return calculateWithdraw();
+            }
+            
+            if (amount > userBalance) {
+                withdrawAmountInput.value = userBalance;
+                return calculateWithdraw();
+            }
+            
+            const fee = amount * WITHDRAW_FEE;
+            const total = amount - fee;
+            
+            // Atualizar resumo
+            document.getElementById('summary-amount').textContent = formatNumber(amount) + ' CVE';
+            document.getElementById('summary-fee').textContent = formatNumber(fee) + ' CVE';
+            document.getElementById('summary-total').textContent = formatNumber(total) + ' CVE';
+            
+            // Atualizar botões rápidos
+            document.querySelectorAll('.quick-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (parseFloat(btn.dataset.amount) === amount) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Validar formulário
+            validateForm();
+        }
+
+        // Validar formulário
+        function validateForm() {
+            const amount = parseFloat(withdrawAmountInput.value) || 0;
+            let isValid = true;
+            
+            // Validar valor mínimo
+            if (amount < MIN_WITHDRAW) {
+                isValid = false;
+            }
+            
+            // Validar saldo suficiente
+            if (amount > userBalance) {
+                isValid = false;
+            }
+            
+            // Validar método selecionado
+            if (!selectedMethod) {
+                isValid = false;
+            }
+            
+            // Validar campos do método
+            if (selectedMethod === 'transfer') {
+                const bankName = document.getElementById('bank-name').value;
+                const accountHolder = document.getElementById('account-holder').value;
+                const accountNumber = document.getElementById('account-number').value;
+                
+                if (!bankName || bankName.length < 3) {
+                    isValid = false;
+                } else if (!accountHolder || accountHolder.length < 3) {
+                    isValid = false;
+                } else if (!accountNumber || accountNumber.length < 5) {
+                    isValid = false;
+                }
+                
+            } else if (selectedMethod === 'mobile') {
+                const mobileOperator = document.getElementById('mobile-operator').value;
+                const mobileNumber = document.getElementById('mobile-number').value;
+                const mobileHolder = document.getElementById('mobile-holder').value;
+                
+                if (!mobileOperator) {
+                    isValid = false;
+                } else if (!mobileNumber || mobileNumber.length < 9) {
+                    isValid = false;
+                } else if (!mobileHolder || mobileHolder.length < 3) {
+                    isValid = false;
+                }
+            }
+            
+            // Habilitar/desabilitar botão
+            btnWithdraw.disabled = !isValid;
+            
+            return isValid;
+        }
+
+        // Processar saque - CORRIGIDO
+        async function processWithdrawal() {
+            if (!validateForm()) {
+                showNotification('Preencha todos os campos corretamente', 'error');
+                return;
+            }
+
+            const user = auth.currentUser;
+            const amount = parseFloat(withdrawAmountInput.value);
+            const fee = amount * WITHDRAW_FEE;
+            const netAmount = amount - fee;
+
+            // Dados do método
+            let methodDetails = {};
+            let methodName = '';
+            
+            if (selectedMethod === 'transfer') {
+                methodDetails = {
+                    bankName: document.getElementById('bank-name').value,
+                    accountHolder: document.getElementById('account-holder').value,
+                    accountNumber: document.getElementById('account-number').value,
+                    iban: document.getElementById('iban').value || ''
+                };
+                methodName = 'Transferência Bancária';
+            } else if (selectedMethod === 'mobile') {
+                methodDetails = {
+                    operator: document.getElementById('mobile-operator').value,
+                    phoneNumber: document.getElementById('mobile-number').value,
+                    accountHolder: document.getElementById('mobile-holder').value
+                };
+                methodName = 'Pagamento Móvel';
+            }
+
+            // Criar mensagem de confirmação
+            const confirmMessage = `💰 Confirmar saque de ${formatNumber(amount)} CVE?\n\n` +
+                                 `💸 Valor a receber: ${formatNumber(netAmount)} CVE\n` +
+                                 `📉 Taxa (3%): ${formatNumber(fee)} CVE\n` +
+                                 `🏦 Método: ${methodName}\n\n` +
+                                 `⏳ Processamento: 2-24 horas úteis`;
+
+            if (confirm(confirmMessage)) {
+                try {
+                    // Verificar saldo novamente
+                    const userDoc = await db.collection('users').doc(user.uid).get();
+                    const currentBalance = userDoc.data().balance || 0;
+                    
+                    if (amount > currentBalance) {
+                        showNotification('Saldo insuficiente!', 'error');
+                        return;
+                    }
+
+                    // Criar ID único para o saque
+                    const withdrawalId = 'WTH' + Date.now() + Math.random().toString(36).substr(2, 5).toUpperCase();
+
+                    // 1. Criar documento de saque COM DADOS SIMPLIFICADOS
+                    await db.collection('withdrawals').doc(withdrawalId).set({
+                        id: withdrawalId,
+                        userId: user.uid,
+                        userEmail: user.email,
+                        userName: userDoc.data().name || user.email.split('@')[0],
+                        amount: amount,
+                        fee: fee,
+                        netAmount: netAmount,
+                        method: selectedMethod,
+                        methodName: methodName,
+                        methodDetails: methodDetails,
+                        status: 'pending',
+                        statusMessage: 'Saque solicitado. Aguardando processamento.',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+
+                    // 2. Atualizar saldo do usuário
+                    await db.collection('users').doc(user.uid).update({
+                        balance: firebase.firestore.FieldValue.increment(-amount),
+                        totalWithdrawn: firebase.firestore.FieldValue.increment(netAmount),
+                        lastWithdrawal: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+
+                    // 3. Registrar transação SIMPLIFICADA
+                    await db.collection('transactions').add({
+                        userId: user.uid,
+                        type: 'withdrawal',
+                        amount: -amount,
+                        description: `Saque via ${methodName}`,
+                        withdrawalId: withdrawalId,
+                        status: 'pending',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+
+                    // Mostrar modal de sucesso
+                    showSuccessModal(withdrawalId, amount, fee, netAmount, selectedMethod);
+                    
+                    // Mostrar mensagem personalizada
+                    showNotification('🎉 Saque solicitado! Verifique seu e-mail para detalhes.', 'success');
+                    
+                    // Atualizar dados após 2 segundos
+                    setTimeout(() => {
+                        loadUserData();
+                        
+                        // Limpar campos mantendo método
+                        if (selectedMethod === 'transfer') {
+                            document.getElementById('bank-name').value = '';
+                            document.getElementById('account-holder').value = '';
+                            document.getElementById('account-number').value = '';
+                            document.getElementById('iban').value = '';
+                        } else {
+                            document.getElementById('mobile-operator').value = '';
+                            document.getElementById('mobile-number').value = '';
+                            document.getElementById('mobile-holder').value = '';
+                        }
+                        
+                        // Resetar valor
+                        withdrawAmountInput.value = MIN_WITHDRAW;
+                        calculateWithdraw();
+                        
+                    }, 2000);
+                    
+                } catch (error) {
+                    console.error('Erro detalhado ao processar saque:', error);
+                    
+                    // Mensagem de erro mais específica
+                    let errorMsg = '❌ Erro ao processar saque. ';
+                    
+                    if (error.code === 'permission-denied') {
+                        errorMsg += 'Permissão negada. Verifique as regras do Firebase.';
+                    } else if (error.code === 'unavailable') {
+                        errorMsg += 'Serviço indisponível. Tente novamente.';
+                    } else {
+                        errorMsg += 'Tente novamente ou contate @Miaa_anne12';
+                    }
+                    
+                    showNotification(errorMsg, 'error');
+                }
+            }
+        }
+
+        // Event Listeners
+        withdrawAmountInput.addEventListener('input', calculateWithdraw);
+        
+        withdrawAmountInput.addEventListener('blur', () => {
+            let amount = parseFloat(withdrawAmountInput.value) || 0;
+            if (amount < MIN_WITHDRAW) {
+                withdrawAmountInput.value = MIN_WITHDRAW;
+            }
+            if (amount > userBalance) {
+                withdrawAmountInput.value = userBalance;
+            }
+            calculateWithdraw();
+        });
+
+        // Adicionar validação em tempo real aos campos
+        document.querySelectorAll('.form-input').forEach(input => {
+            input.addEventListener('input', validateForm);
+        });
+
+        // Verificar autenticação
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                loadUserData();
+            } else {
+                window.location.href = 'signup.html';
+            }
+        });
+
+        // Inicializar
+        calculateWithdraw();
+
+        console.log('✅ Sistema de saques carregado!');
+    </script>
+</body>
+</html>

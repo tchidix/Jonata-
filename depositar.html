@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kriola Yield Pro - Depósitos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #1a1a2e;
+            --secondary: #16213e;
+            --accent: #0f4c75;
+            --gold: #ffd700;
+            --success: #00b894;
+            --danger: #ff6b6b;
+            --warning: #fdcb6e;
+            --dark: #2c3e50;
+            --light: #f5f5f5;
+            --gray: #666;
+            --white: #ffffff;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--light) 0%, #e0e0e0 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Background Pattern */
+        .background-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(204, 9, 47, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 56, 147, 0.1) 0%, transparent 50%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Header */
+        .header {
+            background: var(--white);
+            padding: 20px;
+            border-bottom: 3px solid var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+
+        .back-button {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--primary);
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .back-button:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            color: var(--primary);
+            font-weight: bold;
+            flex: 1;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Page Description */
+        .page-description {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+
+        .description-text {
+            color: var(--gray);
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(255, 107, 107, 0.05));
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        /* Levels Grid */
+        .levels-grid {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .level-card {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid #dee2e6;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .level-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .level-card.selected {
+            border-color: var(--accent);
+            background: linear-gradient(135deg, rgba(15, 76, 117, 0.05), rgba(15, 76, 117, 0.02));
+        }
+
+        .level-card.selected:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(to right, var(--accent), var(--success));
+        }
+
+        .level-number {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--accent);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .level-name {
+            font-size: 1.2rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .level-investment {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--dark);
+            margin-bottom: 15px;
+        }
+
+        .level-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .level-detail {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            font-size: 0.8rem;
+            color: var(--gray);
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        /* Selected Level Info */
+        .selected-info {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            display: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .selected-info:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(to right, var(--accent), var(--success));
+        }
+
+        .selected-info.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .info-title {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #dee2e6;
+        }
+
+        .info-label {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        /* Contact Section */
+        .contact-section {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .contact-title {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .contact-methods {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .contact-method {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: var(--dark);
+        }
+
+        .contact-method:hover {
+            background: linear-gradient(135deg, #e9ecef, #dee2e6);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .contact-icon {
+            font-size: 1.8rem;
+            color: var(--accent);
+            width: 40px;
+        }
+
+        .contact-details {
+            flex: 1;
+        }
+
+        .contact-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .contact-info {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        .contact-time {
+            font-size: 0.8rem;
+            color: var(--success);
+            margin-top: 5px;
+        }
+
+        /* Process Steps */
+        .process-steps {
+            margin-top: 30px;
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .step:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .step-number {
+            background: var(--accent);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--primary);
+        }
+
+        .step-description {
+            font-size: 0.9rem;
+            color: var(--gray);
+            line-height: 1.5;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            z-index: 10000;
+            animation: slideInRight 0.5s;
+            display: none;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 15px;
+            }
+            
+            .page-title {
+                font-size: 1.6rem;
+            }
+            
+            .level-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Pattern -->
+    <div class="background-pattern"></div>
+
+    <!-- Header -->
+    <div class="header">
+        <button class="back-button" onclick="window.location.href='index.html'">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <h1 class="page-title">Depósito Seguro</h1>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Page Description -->
+        <div class="page-description">
+            <div class="description-text">
+                Escolha seu plano de investimento e entre em contato com nosso suporte 
+                para processar seu depósito de forma segura e verificada.
+            </div>
+            <div class="warning-box">
+                <i class="fas fa-exclamation-triangle" style="color: var(--danger); margin-right: 8px;"></i>
+                <strong>ATENÇÃO:</strong> Nunca envie dinheiro para contas não oficiais. 
+                Todo depósito deve ser feito exclusivamente através do suporte verificado.
+            </div>
+        </div>
+
+        <!-- Levels Grid -->
+        <div class="levels-grid" id="levels-grid">
+            <!-- Levels will be generated by JavaScript -->
+        </div>
+
+        <!-- Selected Level Info -->
+        <div class="selected-info" id="selected-info">
+            <h3 class="info-title">Plano Selecionado</h3>
+            
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Nível</div>
+                    <div class="info-value" id="selected-level-name">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Investimento</div>
+                    <div class="info-value" id="selected-investment">- CVE</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Ganho Diário</div>
+                    <div class="info-value" id="selected-daily">- CVE</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Duração</div>
+                    <div class="info-value" id="selected-duration">- dias</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Tarefas Diárias</div>
+                    <div class="info-value" id="selected-tasks">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Retorno Total</div>
+                    <div class="info-value" id="selected-total">- CVE</div>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px; font-size: 0.9rem; color: var(--gray); padding: 15px; background: linear-gradient(135deg, #f8f9fa, #e9ecef); border-radius: 10px; border: 1px solid #dee2e6;">
+                <i class="fas fa-info-circle"></i> Taxa de depósito: 2.5% | Processamento: 2-15 minutos
+            </div>
+        </div>
+
+        <!-- Contact Section -->
+        <div class="contact-section">
+            <h3 class="contact-title">Contatar Suporte para Depósito</h3>
+            
+            <div class="contact-methods">
+                <a href="https://t.me/Miaa_anne12" target="_blank" class="contact-method">
+                    <div class="contact-icon">
+                        <i class="fab fa-telegram"></i>
+                    </div>
+                    <div class="contact-details">
+                        <div class="contact-name">Telegram Oficial</div>
+                        <div class="contact-info">@KriolaSupport</div>
+                        <div class="contact-time">Recomendado • 5 min resposta</div>
+                    </div>
+                </a>
+                
+                <a href="https://wa.me/+238XXXXXXXXX" target="_blank" class="contact-method">
+                    <div class="contact-icon">
+                        <i class="fab fa-whatsapp"></i>
+                    </div>
+                    <div class="contact-details">
+                        <div class="contact-name">WhatsApp Business</div>
+                        <div class="contact-info">+238 XXX XXX XXX</div>
+                        <div class="contact-time">5 min resposta</div>
+                    </div>
+                </a>
+                
+                <a href="mailto:suporte@kriolayield.cv" target="_blank" class="contact-method">
+                    <div class="contact-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="contact-details">
+                        <div class="contact-name">Email Oficial</div>
+                        <div class="contact-info">suporte@kriolayield.cv</div>
+                        <div class="contact-time">24 horas</div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Process Steps -->
+            <div class="process-steps">
+                <h4 style="color: var(--primary); margin-bottom: 20px; text-align: center;">
+                    <i class="fas fa-list-ol"></i> Processo de Depósito
+                </h4>
+                
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <div class="step-title">Selecione o Nível</div>
+                        <div class="step-description">Escolha o nível de investimento desejado acima</div>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <div class="step-title">Contate o Suporte</div>
+                        <div class="step-description">Clique em um dos métodos acima para entrar em contato</div>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <div class="step-title">Receba Instruções</div>
+                        <div class="step-description">Nossa equipe enviará informações específicas para depósito</div>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <div class="step-title">Envie Comprovante</div>
+                        <div class="step-description">Envie o comprovante pelo mesmo canal de contato</div>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <div class="step-title">Ativação Rápida</div>
+                        <div class="step-description">Seu plano será ativado em 2-15 minutos</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAZ27ogn8Us8FZct_DdYkFFv9vQkaHrPL4",
+            authDomain: "pinnacle-finance-b2626.firebaseapp.com",
+            projectId: "pinnacle-finance-b2626",
+            storageBucket: "pinnacle-finance-b2626.firebasestorage.app",
+            messagingSenderId: "1032490368286",
+            appId: "1:1032490368286:web:3da3b0f4b325c32ac5dd0f"
+        };
+
+        // Inicializar Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+
+        // Níveis da plataforma
+        const levels = [
+            { name: "INICIANTE", investment: 205.80, daily: 10.28, tasks: 3, days: 30 },
+            { name: "BASIC", investment: 617.23, daily: 22.66, tasks: 4, days: 45 },
+            { name: "BRONZE", investment: 1030.24, daily: 41.21, tasks: 5, days: 60 },
+            { name: "SILVER", investment: 2575.60, daily: 103.02, tasks: 6, days: 75 },
+            { name: "GOLD", investment: 5151.20, daily: 257.56, tasks: 7, days: 90 },
+            { name: "PLATINUM", investment: 10302.40, daily: 515.12, tasks: 8, days: 120 },
+            { name: "DIAMOND", investment: 25756.00, daily: 1545.36, tasks: 9, days: 150 },
+            { name: "ELITE", investment: 51512.00, daily: 3605.84, tasks: 10, days: 180 },
+            { name: "MASTER", investment: 103024.00, daily: 9272.16, tasks: 12, days: 210 },
+            { name: "KRIOLA PRO", investment: 257560.00, daily: 28331.60, tasks: 15, days: 240 }
+        ];
+
+        // Elementos DOM
+        const notificationElement = document.getElementById('notification');
+
+        // Formatar números
+        function formatNumber(num) {
+            return num.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,').replace('.', ',');
+        }
+
+        // Mostrar notificação
+        function showNotification(message, type = 'success') {
+            notificationElement.textContent = message;
+            notificationElement.style.background = type === 'success' 
+                ? 'var(--success)' 
+                : 'var(--danger)';
+            notificationElement.classList.add('show');
+            
+            setTimeout(() => {
+                notificationElement.classList.remove('show');
+            }, 3000);
+        }
+
+        // Gerar cards de níveis
+        function generateLevelCards() {
+            const container = document.getElementById('levels-grid');
+            container.innerHTML = '';
+            
+            levels.forEach((level, index) => {
+                const totalReturn = level.daily * level.days;
+                const roi = ((totalReturn - level.investment) / level.investment * 100).toFixed(1);
+                
+                const card = document.createElement('div');
+                card.className = 'level-card';
+                card.dataset.index = index;
+                card.onclick = () => selectLevel(index);
+                
+                card.innerHTML = `
+                    <div class="level-number">${index + 1}</div>
+                    <div class="level-name">KRIOLA ${level.name}</div>
+                    <div class="level-investment">${formatNumber(level.investment)} CVE</div>
+                    
+                    <div class="level-details">
+                        <div class="level-detail">
+                            <div class="detail-label">Ganho Diário</div>
+                            <div class="detail-value" style="color: var(--success);">${formatNumber(level.daily)} CVE</div>
+                        </div>
+                        <div class="level-detail">
+                            <div class="detail-label">Duração</div>
+                            <div class="detail-value">${level.days} dias</div>
+                        </div>
+                        <div class="level-detail">
+                            <div class="detail-label">Tarefas/Dia</div>
+                            <div class="detail-value">${level.tasks}</div>
+                        </div>
+                        <div class="level-detail">
+                            <div class="detail-label">Retorno Total</div>
+                            <div class="detail-value" style="color: var(--accent);">${formatNumber(totalReturn)} CVE</div>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        // Selecionar nível
+        function selectLevel(index) {
+            // Remover seleção anterior
+            document.querySelectorAll('.level-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Adicionar seleção atual
+            document.querySelector(`.level-card[data-index="${index}"]`).classList.add('selected');
+            
+            // Atualizar informações
+            const level = levels[index];
+            const totalReturn = level.daily * level.days;
+            
+            document.getElementById('selected-level-name').textContent = `KRIOLA ${level.name} (${index + 1})`;
+            document.getElementById('selected-investment').textContent = formatNumber(level.investment) + ' CVE';
+            document.getElementById('selected-daily').textContent = formatNumber(level.daily) + ' CVE';
+            document.getElementById('selected-duration').textContent = level.days;
+            document.getElementById('selected-tasks').textContent = level.tasks;
+            document.getElementById('selected-total').textContent = formatNumber(totalReturn) + ' CVE';
+            
+            // Mostrar painel de informações
+            document.getElementById('selected-info').classList.add('show');
+            
+            // Rolar suavemente para as informações
+            document.getElementById('selected-info').scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+            });
+            
+            // Mostrar notificação
+            showNotification(`Plano ${level.name} selecionado! Contate o suporte para prosseguir.`);
+        }
+
+        // Verificar autenticação
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.href = 'signup.html';
+            }
+        });
+
+        // Inicializar
+        generateLevelCards();
+        
+        // Selecionar nível 5 (PLATINUM) por padrão
+        setTimeout(() => selectLevel(5), 500);
+
+        console.log('Página de depósitos carregada!');
+    </script>
+</body>
+</html>

@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kriola Yield Pro - Tarefas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #1a1a2e;
+            --secondary: #16213e;
+            --accent: #0f4c75;
+            --gold: #ffd700;
+            --success: #00b894;
+            --danger: #ff6b6b;
+            --warning: #fdcb6e;
+            --dark: #2c3e50;
+            --light: #f5f5f5;
+            --gray: #666;
+            --white: #ffffff;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--light) 0%, #e0e0e0 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Background Pattern */
+        .background-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(204, 9, 47, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 56, 147, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(255, 235, 0, 0.05) 0%, transparent 50%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Header */
+        .header {
+            background: var(--white);
+            padding: 20px;
+            border-bottom: 3px solid var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+
+        .back-button {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--primary);
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .back-button:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            color: var(--primary);
+            font-weight: bold;
+            flex: 1;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Plan Info */
+        .plan-info {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .plan-info:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(to right, var(--accent), var(--success));
+        }
+
+        .plan-name {
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 1.3rem;
+            margin-bottom: 5px;
+        }
+
+        .plan-details {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        /* Daily Stats */
+        .daily-stats {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-box {
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 10px;
+            border: 1px solid #dee2e6;
+        }
+
+        .stat-value {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--accent);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--accent), var(--success));
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        /* Tasks Container */
+        .tasks-container {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .section-title h3 {
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .tasks-count {
+            background: var(--accent);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        /* Task List */
+        .task-list {
+            margin-bottom: 20px;
+        }
+
+        .task-item {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+            border: 1px solid #dee2e6;
+        }
+
+        .task-item:hover {
+            background: linear-gradient(135deg, #e9ecef, #dee2e6);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .task-item.completed {
+            background: linear-gradient(135deg, rgba(0, 184, 148, 0.1), rgba(0, 184, 148, 0.05));
+            border-color: rgba(0, 184, 148, 0.3);
+        }
+
+        .task-checkbox {
+            margin-right: 15px;
+        }
+
+        .task-checkbox input {
+            display: none;
+        }
+
+        .task-checkbox label {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #adb5bd;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: var(--white);
+        }
+
+        .task-checkbox label:hover {
+            border-color: var(--accent);
+        }
+
+        .task-checkbox input:checked + label {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        .task-checkbox input:checked + label:after {
+            content: '✓';
+            color: white;
+            font-weight: bold;
+        }
+
+        .task-content {
+            flex: 1;
+        }
+
+        .task-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 1rem;
+            color: var(--primary);
+        }
+
+        .task-description {
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .task-reward {
+            display: inline-block;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.05));
+            color: var(--dark);
+            padding: 3px 10px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .task-actions {
+            margin-left: 10px;
+        }
+
+        .task-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+            font-weight: 600;
+        }
+
+        .task-btn:hover {
+            background: #0d3d5c;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(15, 76, 117, 0.3);
+        }
+
+        .task-btn.completed {
+            background: var(--success);
+            cursor: default;
+        }
+
+        .task-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Earnings Calculator */
+        .earnings-calculator {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 25px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+
+        .calculator-title {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .calculator-result {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--success);
+            margin: 15px 0;
+        }
+
+        /* Streak Info */
+        .streak-info {
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(255, 107, 107, 0.05));
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            border-radius: 12px;
+            padding: 18px;
+            margin-top: 25px;
+            text-align: center;
+        }
+
+        .streak-title {
+            color: var(--dark);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .streak-days {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--danger);
+            margin: 10px 0;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            z-index: 10000;
+            animation: slideInRight 0.5s;
+            display: none;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+        /* Success Modal */
+        .success-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s;
+        }
+
+        .success-modal.show {
+            display: flex;
+        }
+
+        .success-content {
+            background: linear-gradient(135deg, var(--success), #00a085);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            animation: popIn 0.5s;
+            box-shadow: 0 20px 60px rgba(0, 184, 148, 0.4);
+        }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .success-title {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .success-message {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 25px;
+        }
+
+        .success-amount {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 20px 0;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Task Modal */
+        .task-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s;
+        }
+
+        .task-modal.show {
+            display: flex;
+        }
+
+        .task-modal-content {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            animation: popIn 0.5s;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .task-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .task-modal-title {
+            font-size: 1.3rem;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .task-modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--gray);
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .task-modal-body {
+            margin-bottom: 25px;
+        }
+
+        .task-modal-description {
+            color: var(--gray);
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .task-modal-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            transition: border-color 0.3s;
+        }
+
+        .task-modal-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .task-modal-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .task-modal-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .task-modal-btn.cancel {
+            background: #f0f0f0;
+            color: var(--gray);
+        }
+
+        .task-modal-btn.cancel:hover {
+            background: #e0e0e0;
+        }
+
+        .task-modal-btn.confirm {
+            background: var(--accent);
+            color: white;
+        }
+
+        .task-modal-btn.confirm:hover {
+            background: #0d3d5c;
+            transform: translateY(-2px);
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--gray);
+        }
+
+        /* No Plan Message */
+        .no-plan-message {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            margin-top: 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 15px;
+            }
+            
+            .page-title {
+                font-size: 1.6rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .task-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .task-actions {
+                margin-left: 0;
+                margin-top: 12px;
+                width: 100%;
+            }
+            
+            .task-btn {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .calculator-result {
+                font-size: 1.6rem;
+            }
+            
+            .task-modal-content {
+                padding: 20px;
+            }
+            
+            .task-modal-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Pattern -->
+    <div class="background-pattern"></div>
+
+    <!-- Success Modal -->
+    <div class="success-modal" id="success-modal">
+        <div class="success-content">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="success-title" id="success-title">Tarefa Concluída! 🎉</div>
+            <div class="success-message" id="success-message">Você ganhou</div>
+            <div class="success-amount" id="success-amount">+0,00 CVE</div>
+            <div style="font-size: 0.9rem; opacity: 0.8;">
+                ✅ Saldo atualizado automaticamente
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Modal -->
+    <div class="task-modal" id="task-modal">
+        <div class="task-modal-content">
+            <div class="task-modal-header">
+                <h3 class="task-modal-title" id="task-modal-title">Tarefa</h3>
+                <button class="task-modal-close" id="task-modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="task-modal-body">
+                <p class="task-modal-description" id="task-modal-description"></p>
+                <input type="text" 
+                       class="task-modal-input" 
+                       id="task-modal-input" 
+                       placeholder="Digite sua resposta..."
+                       style="display: none;">
+                <div class="task-modal-actions">
+                    <button class="task-modal-btn cancel" id="task-modal-cancel">Cancelar</button>
+                    <button class="task-modal-btn confirm" id="task-modal-confirm">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+        <button class="back-button" onclick="window.location.href='index.html'">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <h1 class="page-title">Tarefas Diárias</h1>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Plan Info -->
+        <div class="plan-info" id="plan-info">
+            <div class="plan-name" id="plan-name">Carregando...</div>
+            <div class="plan-details" id="plan-details"></div>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading" id="loading">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>
+            <div style="margin-top: 15px;">Carregando suas tarefas...</div>
+        </div>
+
+        <!-- No Plan Message -->
+        <div class="no-plan-message" id="no-plan-message" style="display: none;">
+            <i class="fas fa-exclamation-triangle fa-3x" style="color: var(--danger); margin-bottom: 20px;"></i>
+            <h2 style="color: var(--primary); margin-bottom: 15px;">Nenhum Plano Ativo</h2>
+            <p style="color: var(--gray); margin-bottom: 25px; line-height: 1.6;">
+                Para acessar as tarefas diárias e começar a ganhar, você precisa de um plano de investimento ativo.
+            </p>
+            <a href="planos.html" style="display: inline-block; background: var(--accent); color: white; 
+               padding: 15px 30px; border-radius: 10px; text-decoration: none; font-weight: 600; 
+               font-size: 1.1rem; transition: all 0.3s;" 
+               onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(15, 76, 117, 0.3)';"
+               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                <i class="fas fa-rocket"></i> ESCOLHER PLANO
+            </a>
+        </div>
+
+        <!-- Daily Stats -->
+        <div class="daily-stats" id="daily-stats" style="display: none;">
+            <div style="text-align: center; margin-bottom: 15px;">
+                <div style="color: var(--gray); font-size: 0.9rem;">Progresso do Dia</div>
+                <div style="font-size: 1.4rem; font-weight: bold; color: var(--primary);" id="day-progress">0/0 tarefas</div>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-value" id="tasks-completed">0</div>
+                    <div class="stat-label">Completadas</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="daily-potential">0,00</div>
+                    <div class="stat-label">Ganho Diário</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="current-earnings">0,00</div>
+                    <div class="stat-label">Ganho Atual</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tasks Container -->
+        <div id="tasks-container" style="display: none;">
+            <!-- Required Tasks -->
+            <div class="tasks-container" id="required-tasks-container">
+                <div class="section-title">
+                    <h3><i class="fas fa-tasks"></i> Tarefas Diárias</h3>
+                    <div class="tasks-count" id="required-count">0/0</div>
+                </div>
+                <div class="task-list" id="required-task-list">
+                    <!-- Required tasks will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Earnings Calculator -->
+            <div class="earnings-calculator">
+                <h3 class="calculator-title">
+                    <i class="fas fa-calculator"></i> Simulador de Ganhos
+                </h3>
+                <div class="calculator-result" id="simulated-earnings">0,00 CVE</div>
+                <div style="color: var(--gray); font-size: 0.9rem;">
+                    Estimativa baseada nas tarefas completadas
+                </div>
+            </div>
+
+            <!-- Streak Info -->
+            <div class="streak-info" id="streak-info">
+                <h4 class="streak-title">
+                    <i class="fas fa-fire"></i> Seu Streak
+                </h4>
+                <div class="streak-days" id="streak-days">0 DIAS</div>
+                <div style="color: var(--gray); font-size: 0.9rem;">
+                    Complete tarefas diariamente para manter seu streak!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAZ27ogn8Us8FZct_DdYkFFv9vQkaHrPL4",
+            authDomain: "pinnacle-finance-b2626.firebaseapp.com",
+            projectId: "pinnacle-finance-b2626",
+            storageBucket: "pinnacle-finance-b2626.firebasestorage.app",
+            messagingSenderId: "1032490368286",
+            appId: "1:1032490368286:web:3da3b0f4b325c32ac5dd0f"
+        };
+
+        // Inicializar Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Níveis da plataforma com retorno diário FIXO
+        const ALL_LEVELS = [
+            { 
+                id: 0,
+                name: "INICIANTE", 
+                investment: 205.80, 
+                daily: 10.28,  // Retorno diário FIXO
+                tasks: 3
+            },
+            { 
+                id: 1,
+                name: "BASIC", 
+                investment: 617.23, 
+                daily: 22.66,  // Retorno diário FIXO
+                tasks: 4
+            },
+            { 
+                id: 2,
+                name: "BRONZE", 
+                investment: 1030.24, 
+                daily: 41.21,  // Retorno diário FIXO
+                tasks: 5
+            },
+            { 
+                id: 3,
+                name: "SILVER", 
+                investment: 2575.60, 
+                daily: 103.02,  // Retorno diário FIXO
+                tasks: 6
+            },
+            { 
+                id: 4,
+                name: "GOLD", 
+                investment: 5151.20, 
+                daily: 257.56,  // Retorno diário FIXO
+                tasks: 7
+            },
+            { 
+                id: 5,
+                name: "PLATINUM", 
+                investment: 10302.40, 
+                daily: 515.12,  // Retorno diário FIXO
+                tasks: 8
+            },
+            { 
+                id: 6,
+                name: "DIAMOND", 
+                investment: 25756.00, 
+                daily: 1545.36,  // Retorno diário FIXO
+                tasks: 9
+            },
+            { 
+                id: 7,
+                name: "ELITE", 
+                investment: 51512.00, 
+                daily: 3605.84,  // Retorno diário FIXO
+                tasks: 10
+            },
+            { 
+                id: 8,
+                name: "MASTER", 
+                investment: 103024.00, 
+                daily: 9272.16,  // Retorno diário FIXO
+                tasks: 12
+            },
+            { 
+                id: 9,
+                name: "KRIOLA PRO", 
+                investment: 257560.00, 
+                daily: 28331.60,  // Retorno diário FIXO
+                tasks: 15
+            }
+        ];
+
+        // Tarefas padrão para todos os níveis (sem tarefas extras)
+        const DEFAULT_TASKS = [
+            { 
+                id: 1, 
+                title: "Verificar Email", 
+                description: "Confirme seu email diariamente", 
+                reward: 2.00, 
+                type: "required",
+                action: "email"
+            },
+            { 
+                id: 2, 
+                title: "Vídeo Educativo", 
+                description: "Assista um vídeo sobre investimentos", 
+                reward: 3.00, 
+                type: "required",
+                action: "watch"
+            },
+            { 
+                id: 3, 
+                title: "Compartilhar", 
+                description: "Compartilhe nas redes sociais", 
+                reward: 2.50, 
+                type: "required",
+                action: "share"
+            },
+            { 
+                id: 4, 
+                title: "Quiz Básico", 
+                description: "Responda um quiz simples", 
+                reward: 2.50, 
+                type: "required",
+                action: "quiz"
+            },
+            { 
+                id: 5, 
+                title: "Feedback", 
+                description: "Deixe seu feedback", 
+                reward: 2.00, 
+                type: "required",
+                action: "feedback"
+            }
+        ];
+
+        // Variáveis
+        let userLevel = null;
+        let completedTasks = [];
+        let userData = null;
+        let currentTask = null;
+        let taskModalCallback = null;
+
+        // Elementos DOM
+        const notificationElement = document.getElementById('notification');
+        const loadingElement = document.getElementById('loading');
+        const dailyStatsElement = document.getElementById('daily-stats');
+        const tasksContainerElement = document.getElementById('tasks-container');
+        const noPlanElement = document.getElementById('no-plan-message');
+
+        // Elementos do Task Modal
+        const taskModal = document.getElementById('task-modal');
+        const taskModalTitle = document.getElementById('task-modal-title');
+        const taskModalDescription = document.getElementById('task-modal-description');
+        const taskModalInput = document.getElementById('task-modal-input');
+        const taskModalClose = document.getElementById('task-modal-close');
+        const taskModalCancel = document.getElementById('task-modal-cancel');
+        const taskModalConfirm = document.getElementById('task-modal-confirm');
+
+        // Inicializar Task Modal
+        taskModalClose.addEventListener('click', () => {
+            taskModal.classList.remove('show');
+            if (taskModalCallback) taskModalCallback(false);
+        });
+
+        taskModalCancel.addEventListener('click', () => {
+            taskModal.classList.remove('show');
+            if (taskModalCallback) taskModalCallback(false);
+        });
+
+        taskModalConfirm.addEventListener('click', () => {
+            taskModal.classList.remove('show');
+            if (taskModalCallback) {
+                const value = taskModalInput.style.display !== 'none' ? taskModalInput.value : true;
+                taskModalCallback(value);
+            }
+        });
+
+        // Formatar números
+        function formatNumber(num) {
+            return Number(num).toFixed(2).replace('.', ',');
+        }
+
+        // Mostrar notificação
+        function showNotification(message, type = 'success') {
+            notificationElement.textContent = message;
+            notificationElement.style.background = type === 'success' 
+                ? 'var(--success)' 
+                : 'var(--danger)';
+            notificationElement.classList.add('show');
+            
+            setTimeout(() => {
+                notificationElement.classList.remove('show');
+            }, 3000);
+        }
+
+        // Mostrar sucesso com modal
+        function showSuccessModal(amount, taskTitle) {
+            document.getElementById('success-amount').textContent = `+${formatNumber(amount)} CVE`;
+            document.getElementById('success-message').textContent = `Tarefa "${taskTitle}" concluída com sucesso! 🎉`;
+            
+            const modal = document.getElementById('success-modal');
+            modal.classList.add('show');
+            
+            setTimeout(() => {
+                modal.classList.remove('show');
+            }, 3000);
+        }
+
+        // Mostrar Task Modal personalizado
+        function showTaskModal(title, description, needsInput = false, inputPlaceholder = '') {
+            return new Promise((resolve) => {
+                taskModalTitle.textContent = title;
+                taskModalDescription.textContent = description;
+                
+                if (needsInput) {
+                    taskModalInput.style.display = 'block';
+                    taskModalInput.placeholder = inputPlaceholder;
+                    taskModalInput.value = '';
+                    taskModalConfirm.textContent = 'Enviar';
+                } else {
+                    taskModalInput.style.display = 'none';
+                    taskModalConfirm.textContent = 'Confirmar';
+                }
+                
+                taskModalCallback = (result) => {
+                    resolve(result);
+                    taskModalCallback = null;
+                };
+                
+                taskModal.classList.add('show');
+                if (needsInput) {
+                    setTimeout(() => taskModalInput.focus(), 300);
+                }
+            });
+        }
+
+        // Verificar e resetar tarefas diárias
+        async function checkAndResetDailyTasks(userId) {
+            try {
+                const userDoc = await db.collection('users').doc(userId).get();
+                const userData = userDoc.data();
+                
+                const today = new Date().toISOString().split('T')[0];
+                const lastReset = userData.lastTaskReset || today;
+                
+                // Se o último reset foi ontem ou anterior, resetar tarefas
+                if (lastReset !== today) {
+                    await db.collection('users').doc(userId).update({
+                        'lastTaskReset': today,
+                        'tasksCompletedToday': 0,
+                        'todayEarnings': 0
+                    });
+                    
+                    // Deletar tarefas completadas do dia anterior
+                    const yesterday = new Date();
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    const yesterdayStr = yesterday.toISOString().split('T')[0];
+                    
+                    const oldTasks = await db.collection('taskCompletions')
+                        .where('userId', '==', userId)
+                        .where('date', '==', yesterdayStr)
+                        .get();
+                    
+                    const batch = db.batch();
+                    oldTasks.forEach(doc => {
+                        batch.delete(doc.ref);
+                    });
+                    
+                    if (!oldTasks.empty) {
+                        await batch.commit();
+                        console.log('✅ Tarefas antigas removidas');
+                    }
+                    
+                    console.log('✅ Tarefas resetadas para o novo dia');
+                    return true;
+                }
+                return false;
+            } catch (error) {
+                console.error('Erro ao verificar reset:', error);
+                return false;
+            }
+        }
+
+        // Carregar dados do usuário
+        async function loadUserData() {
+            const user = auth.currentUser;
+            if (!user) {
+                window.location.href = 'signup.html';
+                return;
+            }
+
+            try {
+                // Verificar e resetar tarefas se necessário
+                await checkAndResetDailyTasks(user.uid);
+
+                const doc = await db.collection('users').doc(user.uid).get();
+                
+                if (doc.exists) {
+                    userData = doc.data();
+                    
+                    // VERIFICAÇÃO DO PLANO ATIVO
+                    const activePlan = userData.activePlan;
+                    
+                    if (activePlan && (activePlan.status === 'active' || activePlan.active === true)) {
+                        // Encontrar o nível correto
+                        const levelId = activePlan.level || activePlan.planId || 0;
+                        userLevel = ALL_LEVELS[levelId] || ALL_LEVELS[0];
+                        
+                        // Se não encontrar pelo ID, tentar pelo nome
+                        if (!userLevel && activePlan.name) {
+                            userLevel = ALL_LEVELS.find(level => 
+                                level.name === activePlan.name || 
+                                activePlan.name.includes(level.name)
+                            ) || ALL_LEVELS[0];
+                        }
+                        
+                        // Carregar tarefas completadas HOJE
+                        await loadCompletedTasks(user.uid);
+                        
+                        // Atualizar interface
+                        updateInterface();
+                        
+                        // Mostrar conteúdo
+                        loadingElement.style.display = 'none';
+                        noPlanElement.style.display = 'none';
+                        dailyStatsElement.style.display = 'block';
+                        tasksContainerElement.style.display = 'block';
+                    } else {
+                        showNoPlan();
+                    }
+                } else {
+                    showNoPlan();
+                }
+                
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+                showNotification('Erro ao carregar dados do usuário', 'error');
+                showNoPlan();
+            }
+        }
+
+        // Mostrar mensagem sem plano
+        function showNoPlan() {
+            loadingElement.style.display = 'none';
+            dailyStatsElement.style.display = 'none';
+            tasksContainerElement.style.display = 'none';
+            noPlanElement.style.display = 'block';
+            
+            document.getElementById('plan-name').textContent = 'Nenhum Plano Ativo';
+            document.getElementById('plan-details').innerHTML = 'Escolha um plano para começar';
+        }
+
+        // Carregar tarefas completadas HOJE
+        async function loadCompletedTasks(userId) {
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                
+                const snapshot = await db.collection('taskCompletions')
+                    .where('userId', '==', userId)
+                    .where('date', '==', today)
+                    .get();
+                
+                completedTasks = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    completedTasks.push(data.taskId);
+                });
+                
+            } catch (error) {
+                console.error('Erro ao carregar tarefas completadas:', error);
+                completedTasks = [];
+            }
+        }
+
+        // Atualizar interface
+        function updateInterface() {
+            if (!userLevel || !userData) return;
+
+            // Atualizar informações do plano
+            document.getElementById('plan-name').textContent = `KRIOLA ${userLevel.name}`;
+            
+            // Verificar se temos dados do plano ativo
+            const activePlan = userData.activePlan;
+            if (activePlan) {
+                document.getElementById('plan-details').innerHTML = `
+                    Investimento: ${formatNumber(activePlan.investment || userLevel.investment)} CVE • 
+                    Ganho Diário: ${formatNumber(activePlan.dailyEarnings || userLevel.daily)} CVE
+                `;
+            } else {
+                document.getElementById('plan-details').innerHTML = `
+                    Investimento: ${formatNumber(userLevel.investment)} CVE • 
+                    Ganho Diário: ${formatNumber(userLevel.daily)} CVE
+                `;
+            }
+
+            // Calcular tarefas completadas
+            const completedCount = completedTasks.length;
+            const totalRequired = userLevel.tasks || 5;
+            const progress = Math.min(completedCount / totalRequired, 1);
+            
+            // Atualizar estatísticas
+            document.getElementById('tasks-completed').textContent = completedCount;
+            
+            const dailyEarnings = activePlan ? activePlan.dailyEarnings : userLevel.daily;
+            document.getElementById('daily-potential').textContent = formatNumber(dailyEarnings);
+            
+            const currentEarnings = (progress * dailyEarnings);
+            document.getElementById('current-earnings').textContent = formatNumber(currentEarnings);
+            
+            document.getElementById('day-progress').textContent = `${completedCount}/${totalRequired} tarefas`;
+            document.getElementById('required-count').textContent = `${completedCount}/${totalRequired}`;
+            
+            // Atualizar barra de progresso
+            const progressFill = document.getElementById('progress-fill');
+            progressFill.style.width = `${progress * 100}%`;
+            
+            // Carregar tarefas
+            loadTasks();
+            
+            // Atualizar streak
+            document.getElementById('streak-days').textContent = `${userData.streak || 0} DIAS`;
+            
+            // Calcular ganhos simulados
+            calculateSimulatedEarnings();
+        }
+
+        // Carregar tarefas
+        function loadTasks() {
+            if (!userLevel) return;
+
+            const requiredList = document.getElementById('required-task-list');
+            
+            requiredList.innerHTML = '';
+            
+            // Usar tarefas padrão (não tem tarefas extras)
+            const tasks = DEFAULT_TASKS.slice(0, userLevel.tasks || 5);
+            
+            tasks.forEach(task => {
+                const isCompleted = completedTasks.includes(task.id);
+                const taskElement = createTaskElement(task, isCompleted);
+                requiredList.appendChild(taskElement);
+            });
+        }
+
+        // Criar elemento de tarefa
+        function createTaskElement(task, isCompleted) {
+            const div = document.createElement('div');
+            div.className = `task-item ${isCompleted ? 'completed' : ''}`;
+            div.dataset.taskId = task.id;
+            
+            div.innerHTML = `
+                <div class="task-checkbox">
+                    <input type="checkbox" id="task-${task.id}" ${isCompleted ? 'checked disabled' : ''}>
+                    <label for="task-${task.id}"></label>
+                </div>
+                <div class="task-content">
+                    <div class="task-title">${task.title}</div>
+                    <div class="task-description">${task.description}</div>
+                    <div class="task-reward">+${formatNumber(task.reward)} CVE</div>
+                </div>
+                <div class="task-actions">
+                    <button class="task-btn ${isCompleted ? 'completed' : ''}" 
+                            onclick="completeTask(${task.id})" 
+                            ${isCompleted ? 'disabled' : ''}>
+                        ${isCompleted ? '<i class="fas fa-check"></i> Concluído' : '<i class="fas fa-play"></i> Iniciar'}
+                    </button>
+                </div>
+            `;
+            
+            return div;
+        }
+
+        // Completar tarefa
+        async function completeTask(taskId) {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            // Encontrar tarefa
+            const tasks = DEFAULT_TASKS;
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) {
+                showNotification('Tarefa não encontrada', 'error');
+                return;
+            }
+
+            // Verificar se já está completa
+            if (completedTasks.includes(taskId)) {
+                showNotification('Esta tarefa já foi completada hoje! ✅', 'error');
+                return;
+            }
+
+            try {
+                // Executar ação específica da tarefa
+                const taskCompleted = await executeTaskAction(task);
+                
+                if (!taskCompleted) {
+                    showNotification('Tarefa não completada', 'error');
+                    return;
+                }
+
+                // Atualizar contador local imediatamente para feedback visual
+                completedTasks.push(taskId);
+                updateInterface();
+                
+                // Registrar no banco de dados
+                await db.collection('taskCompletions').add({
+                    userId: user.uid,
+                    taskId: taskId,
+                    taskTitle: task.title,
+                    taskType: task.type,
+                    reward: task.reward,
+                    level: userLevel.name,
+                    completedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    date: new Date().toISOString().split('T')[0]
+                });
+
+                // Atualizar contador de tarefas completadas hoje
+                await db.collection('users').doc(user.uid).update({
+                    'tasksCompletedToday': firebase.firestore.FieldValue.increment(1),
+                    'totalTasksCompleted': firebase.firestore.FieldValue.increment(1),
+                    'todayEarnings': firebase.firestore.FieldValue.increment(task.reward),
+                    'lastTaskCompletion': firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // Atualizar streak se necessário
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                const userData = userDoc.data();
+                const lastCompletion = userData.lastTaskCompletion?.toDate() || new Date();
+                const today = new Date();
+                
+                // Se a última tarefa foi completada ontem, incrementar streak
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                if (lastCompletion.toDateString() === yesterday.toDateString()) {
+                    await db.collection('users').doc(user.uid).update({
+                        'streak': firebase.firestore.FieldValue.increment(1)
+                    });
+                }
+                // Se foi completada hoje, manter streak
+                else if (lastCompletion.toDateString() !== today.toDateString()) {
+                    // Se passou mais de um dia, resetar streak
+                    await db.collection('users').doc(user.uid).update({
+                        'streak': 1
+                    });
+                }
+
+                // Adicionar ganho ao saldo
+                await db.collection('users').doc(user.uid).update({
+                    balance: firebase.firestore.FieldValue.increment(task.reward),
+                    totalEarned: firebase.firestore.FieldValue.increment(task.reward)
+                });
+
+                // Registrar transação
+                await db.collection('transactions').add({
+                    userId: user.uid,
+                    type: 'task',
+                    amount: task.reward,
+                    description: `Tarefa concluída: ${task.title}`,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    status: 'completed'
+                });
+
+                // Mostrar confirmação com modal bonito
+                showSuccessModal(task.reward, task.title);
+                
+            } catch (error) {
+                console.error('Erro ao completar tarefa:', error);
+                
+                // Remover da lista local se houve erro
+                const index = completedTasks.indexOf(taskId);
+                if (index > -1) {
+                    completedTasks.splice(index, 1);
+                    updateInterface();
+                }
+                
+                // Verificar se é erro de permissões
+                if (error.code === 'permission-denied') {
+                    showNotification('❌ Erro de permissões. Entre em contato com o suporte.', 'error');
+                } else {
+                    showNotification('❌ Erro ao completar tarefa: ' + error.message, 'error');
+                }
+            }
+        }
+
+        // Executar ação da tarefa
+        async function executeTaskAction(task) {
+            switch(task.action) {
+                case 'email':
+                    return await showTaskModal(
+                        task.title,
+                        'Por favor, verifique seu email e confirme o código enviado.\n\nClique em "Confirmar" quando tiver verificado.',
+                        false
+                    );
+                    
+                case 'watch':
+                    return await showTaskModal(
+                        task.title,
+                        'Assista o vídeo educativo sobre investimentos (30 segundos).\n\nClique em "Confirmar" quando terminar.',
+                        false
+                    );
+                    
+                case 'quiz':
+                    const answer = await showTaskModal(
+                        task.title,
+                        'Pergunta do Quiz: Qual é a capital de Cabo Verde?',
+                        true,
+                        'Digite sua resposta...'
+                    );
+                    return answer && answer.toLowerCase().trim() === 'praia';
+                    
+                case 'share':
+                    return await showTaskModal(
+                        task.title,
+                        'Compartilhe nosso link nas redes sociais.\n\nClique em "Confirmar" quando compartilhar.',
+                        false
+                    );
+                    
+                case 'feedback':
+                    const feedback = await showTaskModal(
+                        task.title,
+                        'Deixe seu feedback sobre a plataforma:',
+                        true,
+                        'Digite seu feedback (mínimo 10 caracteres)...'
+                    );
+                    return feedback && feedback.length >= 10;
+                    
+                default:
+                    return await showTaskModal(
+                        task.title,
+                        task.description + '\n\nClique em "Confirmar" para completar.',
+                        false
+                    );
+            }
+        }
+
+        // Calcular ganhos simulados
+        function calculateSimulatedEarnings() {
+            if (!userLevel || !userData) return;
+
+            const activePlan = userData.activePlan;
+            const completedCount = completedTasks.length;
+            const totalRequired = userLevel.tasks || 5;
+            
+            // Ganho diário FIXO do plano
+            const dailyEarnings = activePlan ? activePlan.dailyEarnings : userLevel.daily;
+            
+            // Ganho proporcional às tarefas completadas
+            const earnings = (completedCount / totalRequired) * dailyEarnings;
+            
+            document.getElementById('simulated-earnings').textContent = formatNumber(earnings) + ' CVE';
+        }
+
+        // Verificar autenticação
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                loadUserData();
+            } else {
+                window.location.href = 'signup.html';
+            }
+        });
+
+        console.log('✅ Sistema de tarefas corrigido - Sem tarefas extras!');
+    </script>
+</body>
+</html>
