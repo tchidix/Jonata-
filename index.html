@@ -997,17 +997,65 @@
             }
         }
 
-        // Carregar tamanho da rede
-        async function loadNetworkSize(userId) {
+        // FUNÇÃO NOVA: Carregar comissões de 15% do primeiro investimento
+        async function loadComissions(userId) {
             try {
-                const snapshot = await db.collection('users')
+                // Buscar todos os usuários que indicou
+                const referralsSnapshot = await db.collection('users')
                     .where('referrerId', '==', userId)
                     .get();
                 
-                document.getElementById('network-size').textContent = snapshot.size;
+                let totalComissions = 0;
+                let networkSize = 0;
+                let comissionDetails = [];
+                
+                for (const doc of referralsSnapshot.docs) {
+                    const referredUser = doc.data();
+                    networkSize++;
+                    
+                    // Verificar se o usuário indicado já fez um investimento
+                    const depositsSnapshot = await db.collection('deposits')
+                        .where('userId', '==', doc.id)
+                        .orderBy('createdAt', 'asc')
+                        .limit(1)
+                        .get();
+                    
+                    if (!depositsSnapshot.empty) {
+                        const firstDeposit = depositsSnapshot.docs[0].data();
+                        const depositAmount = firstDeposit.amount || 0;
+                        
+                        // Calcular 15% do primeiro investimento
+                        const comissionAmount = depositAmount * 0.15;
+                        totalComissions += comissionAmount;
+                        
+                        comissionDetails.push({
+                            userId: doc.id,
+                            userName: referredUser.name || 'Usuário',
+                            depositAmount: depositAmount,
+                            comissionAmount: comissionAmount,
+                            date: firstDeposit.createdAt || new Date()
+                        });
+                    }
+                }
+                
+                // Atualizar estatísticas na interface
+                document.getElementById('network-size').textContent = networkSize;
+                document.getElementById('comission-earned').textContent = formatNumber(totalComissions) + ' CVE';
+                document.getElementById('total-comissions').textContent = formatNumber(totalComissions) + ' CVE';
+                
+                return {
+                    totalComissions,
+                    networkSize,
+                    comissionDetails
+                };
+                
             } catch (error) {
-                console.error('Erro ao carregar rede:', error);
-                document.getElementById('network-size').textContent = '0';
+                console.error('Erro ao carregar comissões:', error);
+                return {
+                    totalComissions: 0,
+                    networkSize: 0,
+                    comissionDetails: []
+                };
             }
         }
 
@@ -1055,45 +1103,84 @@
             }
         }
 
-        // Carregar atividade recente
+        // Carregar atividade recente (INCLUINDO COMISSÕES)
         async function loadRecentActivity(userId) {
             try {
                 const activityElement = document.getElementById('recent-activity');
 
+                // Buscar transações
                 const transactionsSnapshot = await db.collection('transactions')
                     .where('userId', '==', userId)
                     .orderBy('createdAt', 'desc')
                     .limit(5)
                     .get();
 
-                if (!transactionsSnapshot.empty) {
+                // Buscar comissões também
+                const comissionsSnapshot = await db.collection('comissions')
+                    .where('referrerId', '==', userId)
+                    .orderBy('createdAt', 'desc')
+                    .limit(5)
+                    .get();
+
+                let allActivities = [];
+
+                transactionsSnapshot.forEach(doc => {
+                    const transaction = doc.data();
+                    allActivities.push({
+                        ...transaction,
+                        type: transaction.type,
+                        source: 'transaction'
+                    });
+                });
+
+                comissionsSnapshot.forEach(doc => {
+                    const comission = doc.data();
+                    allActivities.push({
+                        ...comission,
+                        type: 'comission',
+                        amount: comission.amount,
+                        description: `Comissão de ${comission.referredUserName}`,
+                        source: 'comission'
+                    });
+                });
+
+                // Ordenar por data
+                allActivities.sort((a, b) => {
+                    const dateA = a.createdAt?.toDate() || new Date(0);
+                    const dateB = b.createdAt?.toDate() || new Date(0);
+                    return dateB - dateA;
+                });
+
+                // Limitar a 5 itens
+                allActivities = allActivities.slice(0, 5);
+
+                if (allActivities.length > 0) {
                     let activityHTML = '';
-                    transactionsSnapshot.forEach(doc => {
-                        const transaction = doc.data();
-                        const date = transaction.createdAt?.toDate() || new Date();
+                    allActivities.forEach(activity => {
+                        const date = activity.createdAt?.toDate() || new Date();
                         const formattedDate = date.toLocaleDateString('pt-PT');
                         const formattedTime = date.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
                         
                         let icon = 'fas fa-exchange-alt';
                         let color = 'var(--accent)';
-                        let typeText = transaction.description || 'Transação';
+                        let typeText = activity.description || 'Transação';
                         
-                        if (transaction.type === 'task') {
+                        if (activity.type === 'task') {
                             icon = 'fas fa-tasks';
                             color = 'var(--success)';
                             typeText = 'Tarefa completa';
-                        } else if (transaction.type === 'deposit') {
+                        } else if (activity.type === 'deposit') {
                             icon = 'fas fa-arrow-down';
                             color = 'var(--accent)';
                             typeText = 'Depósito';
-                        } else if (transaction.type === 'withdrawal') {
+                        } else if (activity.type === 'withdrawal') {
                             icon = 'fas fa-arrow-up';
                             color = 'var(--warning)';
                             typeText = 'Saque';
-                        } else if (transaction.type === 'comission') {
+                        } else if (activity.type === 'comission') {
                             icon = 'fas fa-user-friends';
                             color = 'var(--success)';
-                            typeText = 'Comissão (15%)';
+                            typeText = `Comissão 15% - ${activity.description || 'Indicação'}`;
                         }
                         
                         activityHTML += `
@@ -1103,7 +1190,7 @@
                                     <div class="activity-time">${formattedDate} ${formattedTime}</div>
                                 </div>
                                 <div class="activity-amount" style="color: ${color};">
-                                    ${transaction.amount > 0 ? '+' : ''}${formatNumber(transaction.amount || 0)} CVE
+                                    ${activity.amount > 0 ? '+' : ''}${formatNumber(activity.amount || 0)} CVE
                                 </div>
                             </div>
                         `;
@@ -1149,13 +1236,24 @@
                         const balance = userData.balance || 0;
                         userBalanceElement.textContent = formatNumber(balance) + ' CVE';
                         
-                        // Atualizar estatísticas
+                        // Atualizar estatísticas básicas
                         document.getElementById('total-earned').textContent = formatNumber(userData.totalEarned || 0) + ' CVE';
                         document.getElementById('total-earned-2').textContent = formatNumber(userData.totalEarned || 0) + ' CVE';
-                        document.getElementById('comission-earned').textContent = formatNumber(userData.comissions || 0) + ' CVE';
-                        document.getElementById('total-comissions').textContent = formatNumber(userData.comissions || 0) + ' CVE';
                         document.getElementById('streak-days').textContent = userData.streak || 0;
                         document.getElementById('tasks-total').textContent = userData.totalTasksCompleted || 0;
+                        
+                        // CARREGAR COMISSÕES DE 15% - CHAMADA CORRIGIDA
+                        const comissionsData = await loadComissions(user.uid);
+                        
+                        // Atualizar campo de comissões
+                        document.getElementById('total-comissions').textContent = formatNumber(comissionsData.totalComissions) + ' CVE';
+                        document.getElementById('comission-earned').textContent = formatNumber(comissionsData.totalComissions) + ' CVE';
+                        
+                        // Se o usuário não tiver comissões no documento principal, usar o valor calculado
+                        let userComissions = userData.comissions || 0;
+                        if (comissionsData.totalComissions > 0) {
+                            userComissions = comissionsData.totalComissions;
+                        }
                         
                         // Verificar plano ativo
                         const activePlan = userData.activePlan || null;
@@ -1175,15 +1273,14 @@
                             const tasksCompletedToday = await loadCompletedTasksToday(user.uid);
                             const totalTasks = levelData.tasks;
                             
-                            // CALCULAR GANHO DIÁRIO CORRETAMENTE
-                            // O ganho diário é FIXO conforme o plano, mas só é liberado proporcionalmente às tarefas
-                            const dailyEarningsFixed = levelData.daily; // Retorno diário FIXO do plano
+                            // CALCULAR GANHO DIÁRIO
+                            const dailyEarningsFixed = levelData.daily;
                             const partialEarnings = (tasksCompletedToday / totalTasks) * dailyEarningsFixed;
                             
                             // Atualizar interface
                             document.getElementById('user-level').textContent = `KRIOLA ${levelData.name}`;
                             document.getElementById('day-counter').textContent = `DIA ${Math.min(daysPassed + 1, totalDays)}/${totalDays}`;
-                            document.getElementById('daily-earnings').textContent = formatNumber(dailyEarningsFixed); // Retorno diário FIXO
+                            document.getElementById('daily-earnings').textContent = formatNumber(dailyEarningsFixed);
                             document.getElementById('current-plan').textContent = `KRIOLA ${levelData.name}`;
                             
                             document.getElementById('partial-earnings').textContent = formatNumber(partialEarnings) + ' CVE';
@@ -1219,10 +1316,7 @@
                             updateProgressCircle(0, 1);
                         }
                         
-                        // Carregar tamanho da rede
-                        loadNetworkSize(user.uid);
-                        
-                        // Carregar atividade recente
+                        // Carregar atividade recente (incluindo comissões)
                         loadRecentActivity(user.uid);
                         
                         // Esconder loading e mostrar conteúdo
@@ -1276,7 +1370,7 @@
             }
         });
 
-        console.log('✅ Dashboard corrigido - Tarefas resetam às 00h00!');
+        console.log('✅ Dashboard corrigido - Comissões de 15% funcionando!');
     </script>
 </body>
-    </html>
+</html>
