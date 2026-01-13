@@ -181,16 +181,49 @@
             cursor: pointer;
             transition: all 0.3s;
             margin-top: 20px;
+            position: relative;
+            overflow: hidden;
         }
 
-        .btn-submit:hover {
+        .btn-submit:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(15, 76, 117, 0.3);
         }
 
         .btn-submit:disabled {
-            opacity: 0.5;
+            opacity: 0.7;
             cursor: not-allowed;
+        }
+
+        .btn-submit .btn-text {
+            display: inline-block;
+            transition: opacity 0.3s;
+        }
+
+        .btn-submit .spinner {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .btn-submit.loading .btn-text {
+            opacity: 0;
+        }
+
+        .btn-submit.loading .spinner {
+            display: block;
         }
 
         .notification {
@@ -278,6 +311,44 @@
             background: rgba(255, 255, 255, 0.2);
         }
 
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loading-overlay.show {
+            display: flex;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--gold);
+            animation: spin-overlay 1s linear infinite;
+        }
+
+        @keyframes spin-overlay {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            position: absolute;
+            color: white;
+            font-size: 1.2rem;
+            margin-top: 80px;
+        }
+
         @media (max-width: 480px) {
             .container {
                 padding: 30px 20px;
@@ -290,6 +361,12 @@
     </style>
 </head>
 <body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Criando sua conta...</div>
+    </div>
+
     <div class="container">
         <!-- Logo -->
         <div class="logo">
@@ -327,7 +404,10 @@
                 </div>
                 
                 <button type="submit" class="btn-submit" id="btn-login-submit">
-                    <i class="fas fa-sign-in-alt"></i> Entrar na Plataforma
+                    <span class="btn-text">
+                        <i class="fas fa-sign-in-alt"></i> Entrar na Plataforma
+                    </span>
+                    <div class="spinner"></div>
                 </button>
             </form>
             
@@ -370,7 +450,10 @@
                 </div>
                 
                 <button type="submit" class="btn-submit" id="btn-signup-submit">
-                    <i class="fas fa-user-plus"></i> Criar Conta
+                    <span class="btn-text">
+                        <i class="fas fa-user-plus"></i> Criar Conta
+                    </span>
+                    <div class="spinner"></div>
                 </button>
             </form>
             
@@ -419,6 +502,29 @@
         const notificationElement = document.getElementById('notification');
         const kriolaIdElement = document.getElementById('kriola-id');
         const generatedIdElement = document.getElementById('generated-id');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const btnLoginSubmit = document.getElementById('btn-login-submit');
+        const btnSignupSubmit = document.getElementById('btn-signup-submit');
+        const referralCodeInput = document.getElementById('referral-code');
+
+        // Verificar se há código de indicação na URL
+        function checkUrlForReferralCode() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const referralCode = urlParams.get('ref');
+            
+            if (referralCode) {
+                // Preencher automaticamente o campo de código
+                referralCodeInput.value = referralCode.toUpperCase();
+                
+                // Mudar para o formulário de cadastro
+                btnSignup.click();
+                
+                showNotification('Código de indicação aplicado automaticamente!', 'success');
+            }
+        }
+
+        // Chamar ao carregar a página
+        document.addEventListener('DOMContentLoaded', checkUrlForReferralCode);
 
         // Alternar entre Login e Cadastro
         btnLogin.addEventListener('click', () => {
@@ -479,6 +585,28 @@
             notificationElement.classList.remove('show');
         }
 
+        // Mostrar/ocultar loading
+        function showLoading() {
+            loadingOverlay.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function hideLoading() {
+            loadingOverlay.classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Ativar/desativar botão com spinner
+        function setButtonLoading(button, isLoading) {
+            if (isLoading) {
+                button.classList.add('loading');
+                button.disabled = true;
+            } else {
+                button.classList.remove('loading');
+                button.disabled = false;
+            }
+        }
+
         // Gerar ID Kriola único
         function generateKriolaId() {
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -500,7 +628,75 @@
             });
         }
 
-        // Cadastro de usuário - CORRIGIDO
+        // Função para salvar usuário no Firestore (agora mais robusta)
+        async function saveUserToFirestore(user, userData) {
+            console.log('Salvando usuário no Firestore:', userData);
+            
+            try {
+                // Verificar se já existe
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                
+                if (userDoc.exists) {
+                    console.log('Usuário já existe no Firestore, atualizando...');
+                    await db.collection('users').doc(user.uid).update({
+                        ...userData,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } else {
+                    console.log('Criando novo usuário no Firestore...');
+                    await db.collection('users').doc(user.uid).set(userData);
+                }
+                
+                console.log('Usuário salvo com sucesso no Firestore!');
+                return true;
+                
+            } catch (error) {
+                console.error('Erro ao salvar no Firestore:', error);
+                throw error;
+            }
+        }
+
+        // Processar referência se houver código
+        async function processReferral(newUserId, referralCode) {
+            if (!referralCode) return;
+            
+            try {
+                console.log('Processando referência:', referralCode);
+                
+                // Buscar referenciador
+                const referrerQuery = await db.collection('users')
+                    .where('kriolaId', '==', referralCode)
+                    .limit(1)
+                    .get();
+                
+                if (!referrerQuery.empty) {
+                    const referrerDoc = referrerQuery.docs[0];
+                    const referrerId = referrerDoc.id;
+                    const referrerData = referrerDoc.data();
+                    
+                    console.log('Referenciador encontrado:', referrerData.name);
+                    
+                    // Atualizar novo usuário com referrerId
+                    await db.collection('users').doc(newUserId).update({
+                        referrerId: referrerId,
+                        referredBy: referrerData.email || referrerData.name
+                    });
+                    
+                    // Atualizar referenciador com novo indicado
+                    await db.collection('users').doc(referrerId).update({
+                        referrals: firebase.firestore.FieldValue.arrayUnion(newUserId),
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    
+                    console.log('Referência processada com sucesso!');
+                }
+            } catch (error) {
+                console.error('Erro ao processar referência:', error);
+                // Não falhar o cadastro por erro na referência
+            }
+        }
+
+        // Cadastro de usuário - CORRIGIDO E MELHORADO
         signupForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -509,6 +705,7 @@
             const password = document.getElementById('signup-password').value;
             const referralCode = document.getElementById('referral-code').value.trim().toUpperCase();
             
+            // Validações
             if (password.length < 6) {
                 showNotification('A senha deve ter no mínimo 6 caracteres!', 'error');
                 return;
@@ -519,26 +716,39 @@
                 return;
             }
             
+            if (!email.includes('@') || !email.includes('.')) {
+                showNotification('Por favor, insira um email válido!', 'error');
+                return;
+            }
+            
             const kriolaId = generateKriolaId();
             generatedIdElement.textContent = kriolaId;
+            
+            // Mostrar loading e desativar botão
+            showLoading();
+            setButtonLoading(btnSignupSubmit, true);
             
             try {
                 console.log('Iniciando criação de conta...');
                 
-                // Criar usuário no Firebase Auth
+                // 1. Criar usuário no Firebase Auth
                 const userCredential = await auth.createUserWithEmailAndPassword(email, password);
                 const user = userCredential.user;
                 
                 console.log('Usuário criado no Auth:', user.uid);
                 
-                // Preparar dados do usuário
+                // 2. Atualizar perfil no Auth
+                await user.updateProfile({
+                    displayName: name
+                });
+                
+                // 3. Preparar dados completos para Firestore
                 const userData = {
                     uid: user.uid,
                     name: name,
                     email: email,
                     kriolaId: kriolaId,
                     referralCode: referralCode || null,
-                    referrerId: referralCode || null,
                     level: 0,
                     balance: 0.00,
                     totalEarned: 0.00,
@@ -556,66 +766,36 @@
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 };
                 
-                console.log('Dados a serem salvos:', userData);
+                // 4. Salvar dados no Firestore
+                await saveUserToFirestore(user, userData);
                 
-                // Salvar dados no Firestore COM TIMEOUT
-                try {
-                    await db.collection('users').doc(user.uid).set(userData);
-                    console.log('Usuário salvo no Firestore com sucesso!');
-                    
-                    // Se houver código de indicação, processar
-                    if (referralCode) {
-                        try {
-                            const referrerQuery = await db.collection('users')
-                                .where('kriolaId', '==', referralCode)
-                                .limit(1)
-                                .get();
-                            
-                            if (!referrerQuery.empty) {
-                                const referrerDoc = referrerQuery.docs[0];
-                                const referrerData = referrerDoc.data();
-                                
-                                // Atualizar usuário com referrerId correto
-                                await db.collection('users').doc(user.uid).update({
-                                    referrerId: referrerData.uid || referrerDoc.id,
-                                    referredBy: referrerData.email
-                                });
-                                
-                                console.log('Referência processada com sucesso');
-                            }
-                        } catch (referralError) {
-                            console.error('Erro ao processar referência:', referralError);
-                        }
-                    }
-                    
-                    // Mostrar ID Kriola
-                    kriolaIdElement.classList.add('show');
-                    
-                    showNotification(`✅ Conta criada com sucesso! Seu ID: ${kriolaId}`, 'success');
-                    
-                    // Atualizar perfil do usuário no Auth
-                    await user.updateProfile({
-                        displayName: name
-                    });
-                    
-                    // Enviar email de verificação (opcional)
-                    await user.sendEmailVerification();
-                    
-                    // Redirecionar após 3 segundos
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 3000);
-                    
-                } catch (firestoreError) {
-                    console.error('Erro ao salvar no Firestore:', firestoreError);
-                    showNotification('Erro ao salvar dados do usuário. Tente novamente.', 'error');
-                    
-                    // Se falhar no Firestore, deletar usuário do Auth
-                    await user.delete();
+                // 5. Processar referência (se houver)
+                if (referralCode) {
+                    await processReferral(user.uid, referralCode);
                 }
+                
+                // 6. Enviar email de verificação
+                await user.sendEmailVerification();
+                
+                // 7. Mostrar ID Kriola
+                kriolaIdElement.classList.add('show');
+                
+                // 8. Mostrar mensagem de sucesso
+                showNotification(`✅ Conta criada com sucesso! Seu ID: ${kriolaId}. Verifique seu email.`, 'success');
+                
+                // 9. Aguardar 3 segundos antes de redirecionar
+                setTimeout(() => {
+                    hideLoading();
+                    window.location.href = 'index.html';
+                }, 3000);
                 
             } catch (error) {
                 console.error('Erro completo no cadastro:', error);
+                
+                // Esconder loading
+                hideLoading();
+                setButtonLoading(btnSignupSubmit, false);
+                
                 let errorMessage = 'Erro ao criar conta. Tente novamente.';
                 
                 if (error.code === 'auth/email-already-in-use') {
@@ -626,9 +806,22 @@
                     errorMessage = 'Senha muito fraca! Use pelo menos 6 caracteres.';
                 } else if (error.code === 'auth/network-request-failed') {
                     errorMessage = 'Erro de conexão. Verifique sua internet.';
+                } else if (error.code === 'auth/operation-not-allowed') {
+                    errorMessage = 'Operação não permitida. Contate o suporte.';
+                } else if (error.code === 'auth/too-many-requests') {
+                    errorMessage = 'Muitas tentativas. Tente novamente mais tarde.';
                 }
                 
                 showNotification(errorMessage, 'error');
+                
+                // Tentar deletar usuário do Auth se criado mas falhou no Firestore
+                if (auth.currentUser) {
+                    try {
+                        await auth.currentUser.delete();
+                    } catch (deleteError) {
+                        console.error('Erro ao deletar usuário:', deleteError);
+                    }
+                }
             }
         });
 
@@ -638,6 +831,9 @@
             
             const email = document.getElementById('login-email').value.trim().toLowerCase();
             const password = document.getElementById('login-password').value;
+            
+            // Ativar loading
+            setButtonLoading(btnLoginSubmit, true);
             
             try {
                 console.log('Tentando login com:', email);
@@ -652,9 +848,10 @@
                 const userDoc = await db.collection('users').doc(user.uid).get();
                 
                 if (!userDoc.exists) {
-                    console.log('Usuário não encontrado no Firestore, criando dados...');
+                    console.log('Usuário não encontrado no Firestore, criando dados básicos...');
+                    
                     // Criar dados básicos se não existirem
-                    await db.collection('users').doc(user.uid).set({
+                    const basicData = {
                         uid: user.uid,
                         email: user.email,
                         name: user.displayName || user.email.split('@')[0],
@@ -663,8 +860,11 @@
                         totalEarned: 0.00,
                         isActive: true,
                         lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+                    
+                    await db.collection('users').doc(user.uid).set(basicData);
                 } else {
                     // Atualizar último login
                     await db.collection('users').doc(user.uid).update({
@@ -674,13 +874,17 @@
                 
                 showNotification('✅ Login realizado com sucesso!', 'success');
                 
-                // Redirecionar após 1 segundo
+                // Redirecionar após 1.5 segundos
                 setTimeout(() => {
                     window.location.href = 'index.html';
-                }, 1000);
+                }, 1500);
                 
             } catch (error) {
                 console.error('Erro no login:', error);
+                
+                // Desativar loading
+                setButtonLoading(btnLoginSubmit, false);
+                
                 let errorMessage = 'Erro ao fazer login. Verifique suas credenciais.';
                 
                 if (error.code === 'auth/user-not-found') {
@@ -693,6 +897,8 @@
                     errorMessage = 'Muitas tentativas. Tente novamente mais tarde.';
                 } else if (error.code === 'auth/network-request-failed') {
                     errorMessage = 'Erro de conexão. Verifique sua internet.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'Email inválido!';
                 }
                 
                 showNotification(errorMessage, 'error');
@@ -704,6 +910,11 @@
             if (user && window.location.pathname.includes('signup.html')) {
                 window.location.href = 'index.html';
             }
+        });
+
+        // Limpar loading se a página for recarregada
+        window.addEventListener('beforeunload', () => {
+            hideLoading();
         });
 
         console.log('Sistema de autenticação carregado!');
