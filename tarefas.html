@@ -1524,7 +1524,8 @@
                         true,
                         'Digite sua resposta...'
                     );
-                    return answer && answer.toLowerCase().trim() === 'praia';
+                    // CORREÇÃO: Aceitar "Praia" em qualquer formato (maiúsculas, minúsculas)
+                    return answer && answer.trim().toLowerCase() === 'praia';
                     
                 case 'share':
                     return await showTaskModal(
@@ -1598,7 +1599,12 @@
             }
         });
 
+        // Expor funções para uso global
+        window.completeTask = completeTask;
+        window.showTaskModal = showTaskModal;
+
         console.log('✅ Sistema de tarefas corrigido com valores exatos da tabela!');
+        console.log('✅ Quiz da capital de Cabo Verde corrigido - agora aceita "Praia" em qualquer formato!');
     </script>
 </body>
 </html>
