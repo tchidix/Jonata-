@@ -1163,70 +1163,95 @@
             }
         }
 
-        // FUNÇÃO CORRIGIDA: Carregar estatísticas de amigos
+        // FUNÇÃO COMPLETAMENTE REFEITA: Carregar estatísticas de amigos
         async function loadFriendsStats(userId) {
             try {
                 console.log('📊 Carregando estatísticas de amigos para usuário:', userId);
                 
-                // Buscar todos os usuários que indicou
+                // Primeiro, vamos verificar se há um campo de referrerId nos usuários
+                // Buscar todos os usuários que têm este usuário como referrerId
                 const referralsSnapshot = await db.collection('users')
                     .where('referrerId', '==', userId)
                     .get();
                 
-                let totalFriends = referralsSnapshot.size;
+                let totalFriends = referralsSnapshot.size || 0;
                 let friendsInvested = 0;
                 let totalFriendsInvestment = 0;
                 let comissionDetails = [];
                 
-                console.log(`📈 Total de amigos convidados: ${totalFriends}`);
+                console.log(`📈 Total de amigos encontrados (referrerId): ${totalFriends}`);
                 
-                // Para cada amigo convidado, verificar se investiu
-                for (const doc of referralsSnapshot.docs) {
-                    const referredUser = doc.data();
-                    const referredUserId = doc.id;
+                // Se não encontrou pelo campo referrerId, tenta buscar de outra forma
+                if (totalFriends === 0) {
+                    // Tentar buscar pelo campo referrer que pode ser o ID ou kriolaId
+                    const userDoc = await db.collection('users').doc(userId).get();
+                    const userData = userDoc.data();
+                    const userKriolaId = userData?.kriolaId || '';
                     
-                    console.log(`Verificando amigo: ${referredUser.name || referredUserId}`);
-                    
-                    // Buscar depósitos do usuário indicado
-                    const depositsSnapshot = await db.collection('deposits')
-                        .where('userId', '==', referredUserId)
-                        .where('status', '==', 'completed')
-                        .orderBy('createdAt', 'asc')
-                        .get();
-                    
-                    if (!depositsSnapshot.empty) {
-                        // Pegar o primeiro depósito (mais antigo)
-                        let firstDeposit = null;
-                        depositsSnapshot.forEach(depositDoc => {
-                            const deposit = depositDoc.data();
-                            if (!firstDeposit || deposit.createdAt < firstDeposit.createdAt) {
-                                firstDeposit = deposit;
-                            }
-                        });
+                    if (userKriolaId) {
+                        const referralsByKriolaId = await db.collection('users')
+                            .where('referrer', '==', userKriolaId)
+                            .get();
                         
-                        if (firstDeposit) {
-                            friendsInvested++;
-                            const depositAmount = firstDeposit.amount || 0;
-                            totalFriendsInvestment += depositAmount;
-                            
-                            // Calcular 15% do primeiro investimento
-                            const comissionAmount = depositAmount * 0.15;
-                            
-                            comissionDetails.push({
-                                friendId: referredUserId,
-                                friendName: referredUser.name || 'Usuário',
-                                depositAmount: depositAmount,
-                                comissionAmount: comissionAmount,
-                                date: firstDeposit.createdAt || new Date()
+                        totalFriends = referralsByKriolaId.size || 0;
+                        console.log(`📈 Total de amigos encontrados (referrer kriolaId): ${totalFriends}`);
+                        
+                        // Atualizar referrerId para futuras consultas
+                        if (totalFriends > 0) {
+                            const batch = db.batch();
+                            referralsByKriolaId.forEach(doc => {
+                                const userRef = db.collection('users').doc(doc.id);
+                                batch.update(userRef, { referrerId: userId });
                             });
-                            
-                            console.log(`✅ Amigo investiu: ${depositAmount} CVE, comissão: ${comissionAmount} CVE`);
+                            await batch.commit();
                         }
                     }
                 }
                 
-                console.log(`🎯 Amigos que investiram: ${friendsInvested}`);
-                console.log(`💰 Total investido por amigos: ${totalFriendsInvestment} CVE`);
+                // Para cada amigo, verificar se fez investimento
+                for (const doc of referralsSnapshot.docs) {
+                    const referredUser = doc.data();
+                    const referredUserId = doc.id;
+                    
+                    console.log(`Verificando investimentos do amigo: ${referredUser.name || referredUserId}`);
+                    
+                    // Buscar depósitos deste usuário
+                    const depositsSnapshot = await db.collection('deposits')
+                        .where('userId', '==', referredUserId)
+                        .where('status', '==', 'completed')
+                        .get();
+                    
+                    if (!depositsSnapshot.empty) {
+                        friendsInvested++;
+                        
+                        // Somar todos os depósitos deste usuário
+                        let userTotalInvestment = 0;
+                        depositsSnapshot.forEach(depositDoc => {
+                            const deposit = depositDoc.data();
+                            userTotalInvestment += (deposit.amount || 0);
+                        });
+                        
+                        totalFriendsInvestment += userTotalInvestment;
+                        
+                        // Para comissão, pegar apenas o primeiro depósito
+                        const firstDeposit = depositsSnapshot.docs[0].data();
+                        const firstDepositAmount = firstDeposit.amount || 0;
+                        const comissionAmount = firstDepositAmount * 0.15;
+                        
+                        comissionDetails.push({
+                            friendId: referredUserId,
+                            friendName: referredUser.name || 'Usuário',
+                            firstDepositAmount: firstDepositAmount,
+                            totalInvestment: userTotalInvestment,
+                            comissionAmount: comissionAmount,
+                            date: firstDeposit.createdAt || new Date()
+                        });
+                        
+                        console.log(`✅ Amigo ${referredUser.name} investiu: ${userTotalInvestment} CVE (primeiro: ${firstDepositAmount} CVE)`);
+                    }
+                }
+                
+                console.log(`🎯 Resumo: Total amigos: ${totalFriends}, Investiram: ${friendsInvested}, Total investido: ${totalFriendsInvestment} CVE`);
                 
                 // Atualizar estatísticas na interface
                 document.getElementById('total-friends').textContent = totalFriends;
@@ -1243,12 +1268,42 @@
                 
             } catch (error) {
                 console.error('❌ Erro ao carregar estatísticas de amigos:', error);
-                return {
-                    totalFriends: 0,
-                    friendsInvested: 0,
-                    totalFriendsInvestment: 0,
-                    comissionDetails: []
-                };
+                
+                // Tentar método alternativo
+                try {
+                    const userDoc = await db.collection('users').doc(userId).get();
+                    const userData = userDoc.data();
+                    
+                    // Se não conseguir carregar estatísticas, mostrar dados do usuário se existirem
+                    const totalFriends = userData?.totalReferrals || 0;
+                    const friendsInvested = userData?.activeReferrals || 0;
+                    const totalFriendsInvestment = userData?.referralInvestment || 0;
+                    
+                    document.getElementById('total-friends').textContent = totalFriends;
+                    document.getElementById('friends-invested').textContent = friendsInvested;
+                    document.getElementById('total-friends-investment').textContent = formatNumber(totalFriendsInvestment);
+                    document.getElementById('network-size').textContent = totalFriends;
+                    
+                    return {
+                        totalFriends,
+                        friendsInvested,
+                        totalFriendsInvestment,
+                        comissionDetails: []
+                    };
+                } catch (fallbackError) {
+                    console.error('❌ Erro no método alternativo:', fallbackError);
+                    document.getElementById('total-friends').textContent = '0';
+                    document.getElementById('friends-invested').textContent = '0';
+                    document.getElementById('total-friends-investment').textContent = '0,00';
+                    document.getElementById('network-size').textContent = '0';
+                    
+                    return {
+                        totalFriends: 0,
+                        friendsInvested: 0,
+                        totalFriendsInvestment: 0,
+                        comissionDetails: []
+                    };
+                }
             }
         }
 
@@ -1259,30 +1314,51 @@
                 
                 let totalComissions = 0;
                 
-                // Buscar comissões registradas no Firestore
+                // Primeiro, buscar comissões já registradas no Firestore
                 const comissionsSnapshot = await db.collection('comissions')
                     .where('referrerId', '==', userId)
                     .get();
                 
-                console.log(`📊 Comissões encontradas: ${comissionsSnapshot.size}`);
+                console.log(`📊 Comissões encontradas no Firestore: ${comissionsSnapshot.size}`);
                 
-                // Se não houver comissões no Firestore, calcular com base nos amigos
-                if (comissionsSnapshot.empty) {
-                    const friendsData = await loadFriendsStats(userId);
-                    
-                    friendsData.comissionDetails.forEach(detail => {
-                        totalComissions += detail.comissionAmount;
-                    });
-                    
-                    console.log(`💵 Comissões calculadas: ${totalComissions} CVE`);
-                } else {
-                    // Usar comissões já registradas no Firestore
+                if (!comissionsSnapshot.empty) {
                     comissionsSnapshot.forEach(doc => {
                         const comission = doc.data();
                         totalComissions += (comission.amount || 0);
                     });
+                    console.log(`💵 Total comissões do Firestore: ${formatNumber(totalComissions)} CVE`);
+                } else {
+                    // Se não houver comissões no Firestore, calcular com base nos amigos
+                    console.log('🔍 Nenhuma comissão no Firestore, calculando com base nos amigos...');
+                    const friendsData = await loadFriendsStats(userId);
                     
-                    console.log(`💵 Comissões do Firestore: ${totalComissions} CVE`);
+                    // Calcular 15% do primeiro investimento de cada amigo
+                    friendsData.comissionDetails.forEach(detail => {
+                        totalComissions += detail.comissionAmount;
+                    });
+                    
+                    console.log(`💵 Comissões calculadas dos amigos: ${formatNumber(totalComissions)} CVE`);
+                    
+                    // Se houver comissões, salvar no Firestore para referência futura
+                    if (totalComissions > 0 && friendsData.comissionDetails.length > 0) {
+                        const batch = db.batch();
+                        friendsData.comissionDetails.forEach((detail, index) => {
+                            const comissionId = `comission_${userId}_${index}`;
+                            const comissionRef = db.collection('comissions').doc(comissionId);
+                            batch.set(comissionRef, {
+                                referrerId: userId,
+                                friendId: detail.friendId,
+                                friendName: detail.friendName,
+                                amount: detail.comissionAmount,
+                                firstDepositAmount: detail.firstDepositAmount,
+                                percentage: 15,
+                                createdAt: detail.date || new Date(),
+                                updatedAt: new Date()
+                            }, { merge: true });
+                        });
+                        await batch.commit();
+                        console.log('💾 Comissões salvas no Firestore');
+                    }
                 }
                 
                 // Atualizar interface
@@ -1292,9 +1368,23 @@
                 return totalComissions;
             } catch (error) {
                 console.error('❌ Erro ao calcular comissões:', error);
-                document.getElementById('comission-earned').textContent = '0,00 CVE';
-                document.getElementById('total-comissions').textContent = '0,00';
-                return 0;
+                
+                // Tentar método alternativo
+                try {
+                    const userDoc = await db.collection('users').doc(userId).get();
+                    const userData = userDoc.data();
+                    const totalComissions = userData?.totalComissions || 0;
+                    
+                    document.getElementById('comission-earned').textContent = formatCurrency(totalComissions);
+                    document.getElementById('total-comissions').textContent = formatNumber(totalComissions);
+                    
+                    return totalComissions;
+                } catch (fallbackError) {
+                    console.error('❌ Erro no método alternativo para comissões:', fallbackError);
+                    document.getElementById('comission-earned').textContent = '0,00 CVE';
+                    document.getElementById('total-comissions').textContent = '0,00';
+                    return 0;
+                }
             }
         }
 
@@ -1391,7 +1481,7 @@
                         id: doc.id,
                         type: 'comission',
                         activityType: 'comission',
-                        description: `Comissão de indicação`,
+                        description: `Comissão de indicação de ${comission.friendName || 'amigo'}`,
                         source: 'comission',
                         timestamp: comission.createdAt
                     });
@@ -1557,8 +1647,8 @@
                         document.getElementById('streak-days').textContent = userData.streak || 0;
                         document.getElementById('tasks-total').textContent = userData.totalTasksCompleted || 0;
                         
-                        // CARREGAR ESTATÍSTICAS DE AMIGOS (CORRIGIDO)
-                        const friendsData = await loadFriendsStats(user.uid);
+                        // CARREGAR ESTATÍSTICAS DE AMIGOS (COMPLETAMENTE REFEITO)
+                        await loadFriendsStats(user.uid);
                         
                         // CALCULAR COMISSÕES DE 15% (CORRIGIDO)
                         await calculateComissions(user.uid);
@@ -1678,7 +1768,9 @@
             }
         });
 
-        console.log('✅ Dashboard completo - Comissões de 15% corrigidas e layout melhorado!');
+        console.log('✅ Dashboard completo - Sistema de estatísticas de amigos completamente refeito!');
+        console.log('📊 Agora mostra: Amigos Convidados, Amigos Investiram, Total Investido');
+        console.log('💰 Comissões de 15% funcionando corretamente');
     </script>
 </body>
-                    </html>
+</html>
