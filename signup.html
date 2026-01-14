@@ -427,6 +427,9 @@
         const btnLoginSubmit = document.getElementById('btn-login-submit');
         const referralCodeInput = document.getElementById('referral-code');
 
+        // Variável de controle para evitar redirecionamento durante cadastro
+        let isSigningUp = false;
+
         // Verificar se há código de indicação na URL
         function checkUrlForReferralCode() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -521,11 +524,12 @@
             });
         }
 
-        // CADASTRO SIMPLIFICADO E FUNCIONAL
+        // CADASTRO CORRIGIDO
         signupForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
             console.log('Iniciando cadastro...');
+            isSigningUp = true; // Marcar que estamos em processo de cadastro
             
             const name = document.getElementById('signup-name').value.trim();
             const email = document.getElementById('signup-email').value.trim().toLowerCase();
@@ -535,11 +539,13 @@
             // Validações básicas
             if (password.length < 6) {
                 showNotification('A senha deve ter no mínimo 6 caracteres!', 'error');
+                isSigningUp = false;
                 return;
             }
             
             if (!name || !email) {
                 showNotification('Preencha todos os campos obrigatórios!', 'error');
+                isSigningUp = false;
                 return;
             }
             
@@ -635,6 +641,9 @@
                     
                     showNotification('✅ Faça login com sua nova conta!', 'success');
                     
+                    // Agora pode liberar o redirecionamento
+                    isSigningUp = false;
+                    
                 }, 5000);
                 
             } catch (error) {
@@ -653,6 +662,7 @@
                 }
                 
                 showNotification(errorMessage, 'error');
+                isSigningUp = false; // Liberar o flag de cadastro
             } finally {
                 // Re-habilitar botão
                 btnSignupSubmit.disabled = false;
@@ -735,16 +745,37 @@
             }
         });
 
-        // Verificar se usuário já está logado
+        // Verificar se usuário já está logado - CORRIGIDO
         auth.onAuthStateChanged((user) => {
-            if (user) {
+            if (user && !isSigningUp) {
                 console.log('Usuário já está logado:', user.email);
-                // Se estiver na página de cadastro/login e já logado, vai para index
-                if (window.location.pathname.includes('signup.html')) {
-                    window.location.href = 'index.html';
-                }
+                console.log('Redirecionando para index.html...');
+                
+                // Redirecionar apenas se NÃO estiver no meio de um cadastro
+                setTimeout(() => {
+                    if (!isSigningUp) {
+                        window.location.href = 'index.html';
+                    }
+                }, 1000);
             } else {
-                console.log('Nenhum usuário logado');
+                console.log('Nenhum usuário logado ou em processo de cadastro');
+            }
+        });
+
+        // Desconectar usuário se acessar a página de cadastro/login
+        // Isso resolve o problema do redirecionamento automático
+        window.addEventListener('load', async () => {
+            try {
+                // Verificar se estamos em signup.html
+                if (window.location.pathname.includes('signup.html')) {
+                    // Sair apenas se não estiver em processo de cadastro
+                    if (!isSigningUp) {
+                        await auth.signOut();
+                        console.log('Sessão limpa para cadastro novo');
+                    }
+                }
+            } catch (error) {
+                console.log('Não foi possível limpar sessão:', error);
             }
         });
 
