@@ -236,12 +236,15 @@
             align-items: center;
             justify-content: space-between;
             margin: 25px 0;
+            flex-wrap: wrap;
+            gap: 20px;
         }
 
         .circle-container {
             position: relative;
             width: 140px;
             height: 140px;
+            margin: 0 auto;
         }
 
         .circle-bg {
@@ -282,16 +285,46 @@
 
         .progress-info {
             flex: 1;
-            padding-left: 25px;
+            min-width: 250px;
+        }
+
+        .progress-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
         }
 
         .progress-item {
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
+            background: rgba(0, 0, 0, 0.02);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+        }
+
+        .progress-item:hover {
+            background: rgba(0, 0, 0, 0.03);
+            transform: translateY(-2px);
+        }
+
+        .progress-item-label {
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin-bottom: 5px;
+        }
+
+        .progress-item-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .progress-item .highlight {
+            color: var(--accent);
+        }
+
+        .progress-item .success {
+            color: var(--success);
         }
 
         /* Quick Actions */
@@ -372,6 +405,12 @@
             text-align: center;
             border: 1px solid #e0e0e0;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
         }
 
         .stat-value {
@@ -388,8 +427,9 @@
 
         /* Friends Stats */
         .friends-stats {
-            display: flex;
-            justify-content: space-around;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
             background: var(--white);
             border-radius: 15px;
             padding: 20px;
@@ -400,6 +440,7 @@
 
         .friend-stat {
             text-align: center;
+            padding: 10px;
         }
 
         .friend-stat-value {
@@ -422,6 +463,7 @@
             margin-top: 25px;
             color: var(--primary);
             text-align: center;
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3);
         }
 
         .comission-title {
@@ -655,8 +697,7 @@
             }
             
             .friends-stats {
-                flex-direction: column;
-                gap: 20px;
+                grid-template-columns: repeat(2, 1fr);
             }
             
             .progress-container {
@@ -667,10 +708,35 @@
             .progress-info {
                 padding-left: 0;
                 margin-top: 20px;
+                width: 100%;
+            }
+            
+            .progress-grid {
+                grid-template-columns: 1fr;
             }
             
             .platform-name h1 {
                 font-size: 1.8rem;
+            }
+            
+            .circle-container {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .circle-inner {
+                width: 90px;
+                height: 90px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .friends-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .progress-item {
+                padding: 12px;
             }
         }
 
@@ -758,21 +824,23 @@
                     </div>
                 </div>
                 <div class="progress-info">
-                    <div class="progress-item">
-                        <span>Tarefas Hoje</span>
-                        <span id="tasks-today">0/0</span>
-                    </div>
-                    <div class="progress-item">
-                        <span>Ganho Parcial</span>
-                        <span class="pulse" id="partial-earnings">0,00 CVE</span>
-                    </div>
-                    <div class="progress-item">
-                        <span>Plano Atual</span>
-                        <span id="current-plan">Nenhum</span>
-                    </div>
-                    <div class="progress-item">
-                        <span>Tempo Restante</span>
-                        <span id="time-left">0h 00m</span>
+                    <div class="progress-grid">
+                        <div class="progress-item">
+                            <div class="progress-item-label">Tarefas Hoje</div>
+                            <div class="progress-item-value" id="tasks-today">0/0</div>
+                        </div>
+                        <div class="progress-item">
+                            <div class="progress-item-label">Ganho Parcial</div>
+                            <div class="progress-item-value success pulse" id="partial-earnings">0,00 CVE</div>
+                        </div>
+                        <div class="progress-item">
+                            <div class="progress-item-label">Plano Atual</div>
+                            <div class="progress-item-value highlight" id="current-plan">Nenhum</div>
+                        </div>
+                        <div class="progress-item">
+                            <div class="progress-item-label">Tempo Restante</div>
+                            <div class="progress-item-value" id="time-left">0h 00m</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1095,9 +1163,11 @@
             }
         }
 
-        // FUNÇÃO NOVA: Carregar estatísticas de amigos
+        // FUNÇÃO CORRIGIDA: Carregar estatísticas de amigos
         async function loadFriendsStats(userId) {
             try {
+                console.log('📊 Carregando estatísticas de amigos para usuário:', userId);
+                
                 // Buscar todos os usuários que indicou
                 const referralsSnapshot = await db.collection('users')
                     .where('referrerId', '==', userId)
@@ -1108,34 +1178,55 @@
                 let totalFriendsInvestment = 0;
                 let comissionDetails = [];
                 
+                console.log(`📈 Total de amigos convidados: ${totalFriends}`);
+                
+                // Para cada amigo convidado, verificar se investiu
                 for (const doc of referralsSnapshot.docs) {
                     const referredUser = doc.data();
+                    const referredUserId = doc.id;
                     
-                    // Verificar se o usuário indicado já fez um investimento
+                    console.log(`Verificando amigo: ${referredUser.name || referredUserId}`);
+                    
+                    // Buscar depósitos do usuário indicado
                     const depositsSnapshot = await db.collection('deposits')
-                        .where('userId', '==', doc.id)
+                        .where('userId', '==', referredUserId)
+                        .where('status', '==', 'completed')
                         .orderBy('createdAt', 'asc')
-                        .limit(1)
                         .get();
                     
                     if (!depositsSnapshot.empty) {
-                        friendsInvested++;
-                        const firstDeposit = depositsSnapshot.docs[0].data();
-                        const depositAmount = firstDeposit.amount || 0;
-                        totalFriendsInvestment += depositAmount;
-                        
-                        // Calcular 15% do primeiro investimento
-                        const comissionAmount = depositAmount * 0.15;
-                        
-                        comissionDetails.push({
-                            userId: doc.id,
-                            userName: referredUser.name || 'Usuário',
-                            depositAmount: depositAmount,
-                            comissionAmount: comissionAmount,
-                            date: firstDeposit.createdAt || new Date()
+                        // Pegar o primeiro depósito (mais antigo)
+                        let firstDeposit = null;
+                        depositsSnapshot.forEach(depositDoc => {
+                            const deposit = depositDoc.data();
+                            if (!firstDeposit || deposit.createdAt < firstDeposit.createdAt) {
+                                firstDeposit = deposit;
+                            }
                         });
+                        
+                        if (firstDeposit) {
+                            friendsInvested++;
+                            const depositAmount = firstDeposit.amount || 0;
+                            totalFriendsInvestment += depositAmount;
+                            
+                            // Calcular 15% do primeiro investimento
+                            const comissionAmount = depositAmount * 0.15;
+                            
+                            comissionDetails.push({
+                                friendId: referredUserId,
+                                friendName: referredUser.name || 'Usuário',
+                                depositAmount: depositAmount,
+                                comissionAmount: comissionAmount,
+                                date: firstDeposit.createdAt || new Date()
+                            });
+                            
+                            console.log(`✅ Amigo investiu: ${depositAmount} CVE, comissão: ${comissionAmount} CVE`);
+                        }
                     }
                 }
+                
+                console.log(`🎯 Amigos que investiram: ${friendsInvested}`);
+                console.log(`💰 Total investido por amigos: ${totalFriendsInvestment} CVE`);
                 
                 // Atualizar estatísticas na interface
                 document.getElementById('total-friends').textContent = totalFriends;
@@ -1151,7 +1242,7 @@
                 };
                 
             } catch (error) {
-                console.error('Erro ao carregar estatísticas de amigos:', error);
+                console.error('❌ Erro ao carregar estatísticas de amigos:', error);
                 return {
                     totalFriends: 0,
                     friendsInvested: 0,
@@ -1161,15 +1252,38 @@
             }
         }
 
-        // FUNÇÃO NOVA: Calcular comissões de 15%
-        async function calculateComissions(friendsData) {
+        // FUNÇÃO CORRIGIDA: Calcular comissões de 15%
+        async function calculateComissions(userId) {
             try {
+                console.log('💰 Calculando comissões para usuário:', userId);
+                
                 let totalComissions = 0;
                 
-                // Calcular comissões com base nos investimentos dos amigos
-                friendsData.comissionDetails.forEach(detail => {
-                    totalComissions += detail.comissionAmount;
-                });
+                // Buscar comissões registradas no Firestore
+                const comissionsSnapshot = await db.collection('comissions')
+                    .where('referrerId', '==', userId)
+                    .get();
+                
+                console.log(`📊 Comissões encontradas: ${comissionsSnapshot.size}`);
+                
+                // Se não houver comissões no Firestore, calcular com base nos amigos
+                if (comissionsSnapshot.empty) {
+                    const friendsData = await loadFriendsStats(userId);
+                    
+                    friendsData.comissionDetails.forEach(detail => {
+                        totalComissions += detail.comissionAmount;
+                    });
+                    
+                    console.log(`💵 Comissões calculadas: ${totalComissions} CVE`);
+                } else {
+                    // Usar comissões já registradas no Firestore
+                    comissionsSnapshot.forEach(doc => {
+                        const comission = doc.data();
+                        totalComissions += (comission.amount || 0);
+                    });
+                    
+                    console.log(`💵 Comissões do Firestore: ${totalComissions} CVE`);
+                }
                 
                 // Atualizar interface
                 document.getElementById('comission-earned').textContent = formatCurrency(totalComissions);
@@ -1177,7 +1291,9 @@
                 
                 return totalComissions;
             } catch (error) {
-                console.error('Erro ao calcular comissões:', error);
+                console.error('❌ Erro ao calcular comissões:', error);
+                document.getElementById('comission-earned').textContent = '0,00 CVE';
+                document.getElementById('total-comissions').textContent = '0,00';
                 return 0;
             }
         }
@@ -1226,7 +1342,7 @@
             }
         }
 
-        // FUNÇÃO NOVA: Carregar atividade recente
+        // Carregar atividade recente
         async function loadRecentActivity(userId) {
             try {
                 const activityElement = document.getElementById('recent-activity');
@@ -1358,12 +1474,15 @@
                         
                         activityHTML += `
                             <div class="activity-item">
-                                <div class="activity-info">
-                                    <div class="activity-title">${typeText}</div>
-                                    <div class="activity-description">${activity.description || ''}</div>
-                                    <div class="activity-time">${formattedDate} • ${formattedTime}</div>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <i class="${icon}" style="color: ${color}; font-size: 1.2rem;"></i>
+                                    <div class="activity-info">
+                                        <div class="activity-title">${typeText}</div>
+                                        <div class="activity-description">${activity.description || ''}</div>
+                                        <div class="activity-time">${formattedDate} • ${formattedTime}</div>
+                                    </div>
                                 </div>
-                                <div class="activity-amount" style="color: ${color};">
+                                <div class="activity-amount" style="color: ${color}; font-weight: bold;">
                                     ${amountText}
                                 </div>
                             </div>
@@ -1391,7 +1510,7 @@
             }
         }
 
-        // FUNÇÃO NOVA: Atualizar atividades
+        // Atualizar atividades
         function refreshActivities() {
             const user = auth.currentUser;
             if (user) {
@@ -1438,11 +1557,11 @@
                         document.getElementById('streak-days').textContent = userData.streak || 0;
                         document.getElementById('tasks-total').textContent = userData.totalTasksCompleted || 0;
                         
-                        // CARREGAR ESTATÍSTICAS DE AMIGOS
+                        // CARREGAR ESTATÍSTICAS DE AMIGOS (CORRIGIDO)
                         const friendsData = await loadFriendsStats(user.uid);
                         
-                        // CALCULAR COMISSÕES DE 15%
-                        const totalComissions = await calculateComissions(friendsData);
+                        // CALCULAR COMISSÕES DE 15% (CORRIGIDO)
+                        await calculateComissions(user.uid);
                         
                         // Verificar plano ativo
                         const activePlan = userData.activePlan || null;
@@ -1559,7 +1678,7 @@
             }
         });
 
-        console.log('✅ Dashboard completo - Comissões de 15% e histórico funcionando!');
+        console.log('✅ Dashboard completo - Comissões de 15% corrigidas e layout melhorado!');
     </script>
 </body>
-</html>
+                    </html>
