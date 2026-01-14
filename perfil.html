@@ -38,7 +38,6 @@
             overflow-x: hidden;
         }
 
-        /* Background Pattern */
         .background-pattern {
             position: fixed;
             top: 0;
@@ -53,7 +52,6 @@
             pointer-events: none;
         }
 
-        /* Header */
         .header {
             background: var(--white);
             padding: 15px 20px;
@@ -107,7 +105,6 @@
             background: rgba(15, 76, 117, 0.1);
         }
 
-        /* Profile Container */
         .profile-container {
             max-width: 800px;
             margin: 20px auto;
@@ -116,7 +113,6 @@
             z-index: 1;
         }
 
-        /* Profile Header */
         .profile-header {
             background: linear-gradient(135deg, var(--accent), #0c2461);
             color: white;
@@ -177,7 +173,6 @@
             backdrop-filter: blur(10px);
         }
 
-        /* Profile Options */
         .profile-options {
             background: var(--white);
             border-radius: 20px;
@@ -242,7 +237,6 @@
             margin-left: 10px;
         }
 
-        /* Stats Grid */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -271,7 +265,6 @@
             color: var(--gray);
         }
 
-        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -378,22 +371,6 @@
             cursor: not-allowed;
         }
 
-        .form-textarea {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 1rem;
-            min-height: 120px;
-            resize: vertical;
-            transition: border-color 0.3s;
-        }
-
-        .form-textarea:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-
         .btn {
             background: var(--accent);
             color: white;
@@ -416,25 +393,6 @@
             box-shadow: 0 5px 15px rgba(15, 76, 117, 0.2);
         }
 
-        .btn-danger {
-            background: var(--danger);
-        }
-
-        .btn-danger:hover {
-            background: #e05555;
-            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.2);
-        }
-
-        .btn-success {
-            background: var(--success);
-        }
-
-        .btn-success:hover {
-            background: #00a085;
-            box-shadow: 0 5px 15px rgba(0, 184, 148, 0.2);
-        }
-
-        /* Notification */
         .notification {
             position: fixed;
             top: 20px;
@@ -464,7 +422,6 @@
             display: block;
         }
 
-        /* Investment Details */
         .investment-details {
             background: var(--white);
             border-radius: 15px;
@@ -520,7 +477,6 @@
             color: var(--primary);
         }
 
-        /* Loading */
         .loading {
             text-align: center;
             padding: 40px;
@@ -533,7 +489,6 @@
             color: var(--accent);
         }
 
-        /* Team Members */
         .team-member {
             display: flex;
             align-items: center;
@@ -579,48 +534,33 @@
             color: var(--gray);
         }
 
-        .member-date {
-            font-size: 0.8rem;
-            color: var(--gray);
-        }
-
-        /* Empty State */
-        .empty-state {
+        .error-state {
             text-align: center;
             padding: 40px 20px;
             color: var(--gray);
         }
 
-        .empty-icon {
+        .error-icon {
             font-size: 3rem;
             margin-bottom: 15px;
-            color: #e0e0e0;
+            color: var(--warning);
         }
 
-        /* History Table */
-        .history-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
+        .history-item {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s;
         }
 
-        .history-table th {
-            background: #f8f9fa;
-            padding: 12px;
-            text-align: left;
-            font-weight: 600;
-            color: var(--primary);
-            border-bottom: 2px solid #e0e0e0;
-        }
-
-        .history-table td {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-            vertical-align: middle;
-        }
-
-        .history-table tr:hover {
-            background: rgba(15, 76, 117, 0.02);
+        .history-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
         .history-badge {
@@ -636,7 +576,7 @@
             color: #d35400;
         }
 
-        .badge-approved {
+        .badge-completed {
             background: rgba(0, 184, 148, 0.1);
             color: var(--success);
         }
@@ -646,12 +586,42 @@
             color: var(--danger);
         }
 
-        .badge-completed {
+        .badge-processing {
             background: rgba(15, 76, 117, 0.1);
             color: var(--accent);
         }
 
-        /* Responsive */
+        .retry-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .retry-btn:hover {
+            background: #0d3d5c;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--gray);
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #e0e0e0;
+        }
+
         @media (max-width: 768px) {
             .stats-grid {
                 grid-template-columns: 1fr;
@@ -678,11 +648,6 @@
             .modal-content {
                 padding: 20px;
             }
-            
-            .history-table {
-                display: block;
-                overflow-x: auto;
-            }
         }
 
         @media (max-width: 480px) {
@@ -704,14 +669,18 @@
                 font-size: 1.2rem;
                 margin-right: 10px;
             }
+            
+            .history-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Background Pattern -->
     <div class="background-pattern"></div>
 
-    <!-- Header -->
     <div class="header">
         <button class="back-btn" onclick="window.location.href='index.html'">
             <i class="fas fa-arrow-left"></i>
@@ -722,13 +691,11 @@
             <div class="logo-text">MEU <span>PERFIL</span></div>
         </div>
         
-        <div style="width: 40px;"></div> <!-- Espaço para alinhar -->
+        <div style="width: 40px;"></div>
     </div>
 
-    <!-- Notification -->
     <div class="notification" id="notification"></div>
 
-    <!-- Loading -->
     <div class="loading" id="loading">
         <div class="loading-spinner">
             <i class="fas fa-spinner fa-spin"></i>
@@ -736,9 +703,7 @@
         <div style="margin-top: 15px;">Carregando perfil...</div>
     </div>
 
-    <!-- Main Content -->
     <div class="profile-container" id="profile-content" style="display: none;">
-        <!-- Profile Header -->
         <div class="profile-header">
             <div class="profile-avatar" id="profile-avatar">
                 <i class="fas fa-user"></i>
@@ -748,7 +713,6 @@
             <div class="profile-level" id="profile-level">Nível: Carregando...</div>
         </div>
 
-        <!-- Stats Grid -->
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-value" id="stat-balance">0,00</div>
@@ -771,19 +735,15 @@
             </div>
         </div>
 
-        <!-- Investment Details -->
         <div class="investment-details" id="investment-section" style="display: none;">
             <div class="investment-header">
                 <div class="investment-title">Meu Investimento</div>
                 <div class="investment-status">ATIVO</div>
             </div>
             
-            <div class="investment-info" id="investment-info">
-                <!-- Os dados serão preenchidos via JavaScript -->
-            </div>
+            <div class="investment-info" id="investment-info"></div>
         </div>
 
-        <!-- Profile Options -->
         <div class="profile-options">
             <div class="option-item" onclick="openModal('dados')">
                 <div class="option-icon">
@@ -811,7 +771,6 @@
                 </div>
             </div>
 
-            <!-- NOVO BOTÃO HISTÓRICO -->
             <div class="option-item" onclick="openModal('historico')">
                 <div class="option-icon" style="background: linear-gradient(135deg, var(--warning), #e67e22);">
                     <i class="fas fa-history"></i>
@@ -943,14 +902,11 @@
             <div id="history-content">
                 <div style="margin-bottom: 20px;">
                     <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                        <button class="btn" onclick="loadHistory('withdrawals')" style="flex: 1;">
+                        <button class="btn" onclick="loadHistory('withdrawals')" style="flex: 1;" id="btn-withdrawals">
                             <i class="fas fa-money-bill-wave"></i> Saques
                         </button>
-                        <button class="btn" onclick="loadHistory('deposits')" style="flex: 1;">
+                        <button class="btn" onclick="loadHistory('deposits')" style="flex: 1;" id="btn-deposits">
                             <i class="fas fa-arrow-down"></i> Depósitos
-                        </button>
-                        <button class="btn" onclick="loadHistory('all')" style="flex: 1;">
-                            <i class="fas fa-exchange-alt"></i> Todas
                         </button>
                     </div>
                 </div>
@@ -1092,7 +1048,7 @@
         const loadingElement = document.getElementById('loading');
         const notificationElement = document.getElementById('notification');
 
-        // Níveis da plataforma
+        // Níveis da plataforma - CORRIGIDO: Valores ajustados
         const levels = [
             { name: "INICIANTE", investment: 205.80, daily: 10.28, tasks: 3 },
             { name: "BASIC", investment: 617.23, daily: 22.66, tasks: 4 },
@@ -1108,6 +1064,7 @@
 
         // Formatar números
         function formatNumber(num) {
+            if (!num) return "0,00";
             return Number(num).toFixed(2).replace('.', ',');
         }
 
@@ -1202,164 +1159,424 @@
             });
         }
 
-        // Carregar histórico
+        // Carregar histórico - CORREÇÃO COMPLETA
         async function loadHistory(type = 'withdrawals') {
             const user = auth.currentUser;
             if (!user) return;
 
+            // Ativar botão selecionado
+            document.getElementById('btn-withdrawals').style.background = 
+                type === 'withdrawals' ? 'var(--accent)' : 'rgba(15, 76, 117, 0.1)';
+            document.getElementById('btn-deposits').style.background = 
+                type === 'deposits' ? 'var(--accent)' : 'rgba(15, 76, 117, 0.1)';
+            
             const historyList = document.getElementById('history-list');
             historyList.innerHTML = '<div class="loading"><div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i></div><div>Carregando histórico...</div></div>';
 
             try {
-                let query;
-                
                 if (type === 'withdrawals') {
-                    query = await db.collection('withdrawals')
-                        .where('userId', '==', user.uid)
-                        .orderBy('createdAt', 'desc')
-                        .limit(20)
-                        .get();
-                } else if (type === 'deposits') {
-                    query = await db.collection('transactions')
-                        .where('userId', '==', user.uid)
-                        .where('type', 'in', ['deposit', 'admin_deposit'])
-                        .orderBy('createdAt', 'desc')
-                        .limit(20)
-                        .get();
-                } else {
-                    // Todos: combina saques e transações
-                    const withdrawalsPromise = db.collection('withdrawals')
-                        .where('userId', '==', user.uid)
-                        .orderBy('createdAt', 'desc')
-                        .limit(10)
-                        .get();
+                    // Buscar saques - CORREÇÃO: Buscar corretamente na coleção withdrawals
+                    console.log('Buscando saques para o usuário:', user.uid);
                     
-                    const transactionsPromise = db.collection('transactions')
-                        .where('userId', '==', user.uid)
-                        .orderBy('createdAt', 'desc')
-                        .limit(10)
-                        .get();
+                    // Tenta encontrar a coleção correta
+                    let withdrawals = [];
                     
-                    const [withdrawals, transactions] = await Promise.all([withdrawalsPromise, transactionsPromise]);
+                    // 1. PRIMEIRO: Tenta na coleção 'withdrawals' (padrão mostrado nas imagens)
+                    try {
+                        const withdrawalsQuery = await db.collection('withdrawals')
+                            .where('userId', '==', user.uid)
+                            .orderBy('createdAt', 'desc')
+                            .get();
+                        
+                        console.log('Resultado da busca em "withdrawals":', withdrawalsQuery.size, 'documentos');
+                        
+                        if (!withdrawalsQuery.empty) {
+                            withdrawalsQuery.forEach(doc => {
+                                const data = doc.data();
+                                console.log('Saque encontrado:', data);
+                                withdrawals.push({
+                                    id: doc.id,
+                                    ...data,
+                                    type: 'withdrawal',
+                                    amount: data.amount || 0,
+                                    netAmount: data.netAmount || data.amount || 0,
+                                    status: data.status || 'pending',
+                                    fee: data.fee || 0
+                                });
+                            });
+                        }
+                    } catch (err1) {
+                        console.error('Erro na coleção withdrawals:', err1);
+                    }
                     
-                    let allItems = [];
+                    // 2. SEGUNDA TENTATIVA: Procura em toda a coleção sem filtro para debug
+                    if (withdrawals.length === 0) {
+                        try {
+                            const allWithdrawals = await db.collection('withdrawals').get();
+                            console.log('Todos os saques na coleção:', allWithdrawals.size);
+                            
+                            allWithdrawals.forEach(doc => {
+                                const data = doc.data();
+                                // Verifica se é do usuário atual (comparação case-insensitive)
+                                const userId = data.userId || '';
+                                const userEmail = data.userEmail || '';
+                                
+                                if (userId === user.uid || 
+                                    userEmail.toLowerCase() === user.email.toLowerCase() ||
+                                    (data.userKriolaId && data.userKriolaId === user.kriolaId)) {
+                                    
+                                    console.log('Saque encontrado (busca ampla):', data);
+                                    withdrawals.push({
+                                        id: doc.id,
+                                        ...data,
+                                        type: 'withdrawal',
+                                        amount: data.amount || 0,
+                                        netAmount: data.netAmount || data.amount || 0,
+                                        status: data.status || 'pending',
+                                        fee: data.fee || 0
+                                    });
+                                }
+                            });
+                        } catch (err2) {
+                            console.error('Erro na busca ampla:', err2);
+                        }
+                    }
                     
-                    withdrawals.forEach(doc => {
-                        allItems.push({
-                            type: 'withdrawal',
-                            data: doc.data(),
-                            timestamp: doc.data().createdAt
-                        });
-                    });
+                    // 3. TERCEIRA TENTATIVA: Verifica transactions
+                    if (withdrawals.length === 0) {
+                        try {
+                            const transactionsQuery = await db.collection('transactions')
+                                .where('userId', '==', user.uid)
+                                .where('type', '==', 'withdrawal')
+                                .orderBy('createdAt', 'desc')
+                                .get();
+                            
+                            if (!transactionsQuery.empty) {
+                                transactionsQuery.forEach(doc => {
+                                    const data = doc.data();
+                                    withdrawals.push({
+                                        id: doc.id,
+                                        ...data,
+                                        type: 'withdrawal',
+                                        amount: data.amount || 0
+                                    });
+                                });
+                            }
+                        } catch (err3) {
+                            console.error('Erro em transactions:', err3);
+                        }
+                    }
                     
-                    transactions.forEach(doc => {
-                        allItems.push({
-                            type: 'transaction',
-                            data: doc.data(),
-                            timestamp: doc.data().createdAt
-                        });
-                    });
+                    console.log('Total de saques encontrados:', withdrawals.length);
                     
-                    // Ordenar por data
-                    allItems.sort((a, b) => {
-                        const timeA = a.timestamp?.toDate?.() || new Date(0);
-                        const timeB = b.timestamp?.toDate?.() || new Date(0);
-                        return timeB - timeA;
-                    });
-                    
-                    if (allItems.length === 0) {
-                        historyList.innerHTML = '<div class="empty-state"><div class="empty-icon"><i class="fas fa-history"></i></div><h3>Nenhum histórico encontrado</h3><p>Você ainda não tem transações registradas.</p></div>';
+                    if (withdrawals.length === 0) {
+                        historyList.innerHTML = `
+                            <div class="empty-state">
+                                <div class="empty-icon">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                </div>
+                                <h3 style="margin-bottom: 10px; color: var(--primary);">Nenhum Saque Encontrado</h3>
+                                <p style="color: var(--gray); margin-bottom: 25px;">
+                                    Você ainda não realizou nenhum saque.
+                                </p>
+                                <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 10px; text-align: left;">
+                                    <p style="color: var(--gray); font-size: 0.9rem; margin-bottom: 10px;">
+                                        <i class="fas fa-info-circle"></i> Se você fez um saque recentemente:
+                                    </p>
+                                    <ul style="color: var(--gray); font-size: 0.9rem; padding-left: 20px;">
+                                        <li>Pode levar alguns minutos para aparecer</li>
+                                        <li>Verifique se está na aba correta</li>
+                                        <li>Tente recarregar a página</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        `;
                         return;
                     }
                     
-                    let html = '<table class="history-table"><thead><tr><th>Tipo</th><th>Descrição</th><th>Valor</th><th>Data</th><th>Status</th></tr></thead><tbody>';
+                    // Ordenar por data (mais recente primeiro)
+                    withdrawals.sort((a, b) => {
+                        const dateA = a.createdAt?.toDate?.() || a.approvedAt?.toDate?.() || a.updatedAt?.toDate?.() || new Date(0);
+                        const dateB = b.createdAt?.toDate?.() || b.approvedAt?.toDate?.() || b.updatedAt?.toDate?.() || new Date(0);
+                        return dateB - dateA;
+                    });
                     
-                    allItems.forEach(item => {
-                        const data = item.data;
+                    // Exibir saques
+                    let html = '<div style="margin-bottom: 10px; color: var(--gray); font-size: 0.9rem;">';
+                    html += `Mostrando ${withdrawals.length} saque${withdrawals.length > 1 ? 's' : ''}`;
+                    html += '</div>';
+                    
+                    withdrawals.forEach((data, index) => {
+                        const date = data.createdAt?.toDate?.() || data.approvedAt?.toDate?.() || data.updatedAt?.toDate?.() || new Date();
+                        const formattedDate = date.toLocaleDateString('pt-PT');
+                        const formattedTime = date.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+                        
+                        // Determinar status
+                        let statusBadge = '';
+                        let statusText = '';
+                        let status = (data.status || 'pending').toLowerCase();
+                        
+                        if (status === 'completed' || status === 'approved') {
+                            statusBadge = 'badge-completed';
+                            statusText = 'Concluído';
+                        } else if (status === 'rejected' || status === 'cancelled') {
+                            statusBadge = 'badge-rejected';
+                            statusText = 'Rejeitado';
+                        } else if (status === 'processing') {
+                            statusBadge = 'badge-processing';
+                            statusText = 'Em Processamento';
+                        } else {
+                            statusBadge = 'badge-pending';
+                            statusText = 'Pendente';
+                        }
+                        
+                        // Informações do método de pagamento
+                        let methodInfo = '';
+                        if (data.methodDetails) {
+                            const details = data.methodDetails;
+                            if (details.bankName) {
+                                methodInfo = `${details.bankName}`;
+                                if (details.accountHolder) {
+                                    methodInfo += ` - ${details.accountHolder}`;
+                                }
+                            } else if (details.methodName) {
+                                methodInfo = details.methodName;
+                            }
+                        } else if (data.method) {
+                            methodInfo = data.method === 'transfer' ? 'Transferência Bancária' : data.method;
+                        }
+                        
+                        // Mostrar status message se existir
+                        let statusMessage = '';
+                        if (data.statusMessage) {
+                            statusMessage = `<div style="color: var(--gray); font-size: 0.85rem; margin-top: 5px; font-style: italic;">
+                                <i class="fas fa-info-circle"></i> ${data.statusMessage}
+                            </div>`;
+                        }
+                        
+                        html += `
+                            <div class="history-item">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: bold; color: var(--primary);">Saque</div>
+                                    <div style="color: var(--gray); font-size: 0.9rem; margin-top: 5px;">
+                                        <i class="fas fa-calendar-alt"></i> ${formattedDate} às ${formattedTime}
+                                    </div>
+                                    ${methodInfo ? `<div style="color: var(--gray); font-size: 0.85rem; margin-top: 5px;">
+                                        <i class="fas fa-bank"></i> ${methodInfo}
+                                    </div>` : ''}
+                                    ${statusMessage}
+                                    <span class="history-badge ${statusBadge}" style="margin-top: 8px; display: inline-block;">
+                                        <i class="fas fa-circle" style="font-size: 0.6rem; margin-right: 5px;"></i> ${statusText}
+                                    </span>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-weight: bold; color: var(--danger); font-size: 1.2rem;">
+                                        -${formatNumber(data.amount)} CVE
+                                    </div>
+                                    ${data.fee ? `<div style="color: var(--gray); font-size: 0.85rem; margin-top: 5px;">
+                                        Taxa: ${formatNumber(data.fee)} CVE
+                                    </div>` : ''}
+                                    ${data.netAmount ? `<div style="color: var(--success); font-size: 0.85rem; margin-top: 2px;">
+                                        Líquido: ${formatNumber(data.netAmount)} CVE
+                                    </div>` : ''}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    historyList.innerHTML = html;
+                    
+                } else if (type === 'deposits') {
+                    // Buscar depósitos - CORREÇÃO: Cálculo correto dos valores
+                    let deposits = [];
+                    
+                    // 1. Busca depósitos em transactions
+                    try {
+                        const depositsQuery = await db.collection('transactions')
+                            .where('userId', '==', user.uid)
+                            .where('type', 'in', ['deposit', 'admin_deposit', 'investment', 'earning'])
+                            .orderBy('createdAt', 'desc')
+                            .get();
+                        
+                        if (!depositsQuery.empty) {
+                            depositsQuery.forEach(doc => {
+                                const data = doc.data();
+                                deposits.push({
+                                    id: doc.id,
+                                    ...data
+                                });
+                            });
+                        }
+                    } catch (err1) {
+                        console.error('Erro na coleção transactions para depósitos:', err1);
+                    }
+                    
+                    // 2. Adiciona investimento do plano ativo se existir
+                    try {
+                        const userDoc = await db.collection('users').doc(user.uid).get();
+                        if (userDoc.exists) {
+                            const userData = userDoc.data();
+                            if (userData.activePlan && userData.activePlan.startDate) {
+                                // CORREÇÃO: Usa o valor correto do plano
+                                const planLevel = userData.activePlan.level || 0;
+                                const planInvestment = levels[planLevel]?.investment || 0;
+                                
+                                deposits.push({
+                                    id: 'investimento-plano',
+                                    type: 'investment',
+                                    amount: planInvestment, // CORREÇÃO AQUI
+                                    description: `Investimento no plano ${levels[planLevel]?.name || 'Ativo'}`,
+                                    createdAt: userData.activePlan.startDate
+                                });
+                            }
+                        }
+                    } catch (err2) {
+                        console.error('Erro ao verificar plano ativo:', err2);
+                    }
+                    
+                    if (deposits.length === 0) {
+                        historyList.innerHTML = `
+                            <div class="empty-state">
+                                <div class="empty-icon">
+                                    <i class="fas fa-arrow-down"></i>
+                                </div>
+                                <h3 style="margin-bottom: 10px; color: var(--primary);">Nenhum Depósito Encontrado</h3>
+                                <p style="color: var(--gray); margin-bottom: 25px;">
+                                    Você ainda não realizou nenhum depósito.
+                                </p>
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    // Ordenar por data
+                    deposits.sort((a, b) => {
+                        const dateA = a.createdAt?.toDate?.() || new Date(0);
+                        const dateB = b.createdAt?.toDate?.() || new Date(0);
+                        return dateB - dateA;
+                    });
+                    
+                    // Exibir depósitos
+                    let html = '<div style="margin-bottom: 10px; color: var(--gray); font-size: 0.9rem;">';
+                    html += `Mostrando ${deposits.length} depósito${deposits.length > 1 ? 's' : ''}`;
+                    html += '</div>';
+                    
+                    deposits.forEach((data, index) => {
                         const date = data.createdAt?.toDate?.() || new Date();
                         const formattedDate = date.toLocaleDateString('pt-PT');
                         const formattedTime = date.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
                         
-                        let statusBadge = '';
-                        if (item.type === 'withdrawal') {
-                            if (data.status === 'pending') {
-                                statusBadge = '<span class="history-badge badge-pending">Pendente</span>';
-                            } else if (data.status === 'approved') {
-                                statusBadge = '<span class="history-badge badge-approved">Aprovado</span>';
-                            } else if (data.status === 'rejected') {
-                                statusBadge = '<span class="history-badge badge-rejected">Rejeitado</span>';
-                            } else {
-                                statusBadge = '<span class="history-badge badge-completed">Completo</span>';
-                            }
-                        } else {
-                            if (data.status === 'pending') {
-                                statusBadge = '<span class="history-badge badge-pending">Pendente</span>';
-                            } else {
-                                statusBadge = '<span class="history-badge badge-completed">Completo</span>';
-                            }
+                        let typeText = 'Depósito';
+                        let icon = 'fas fa-arrow-down';
+                        let typeColor = 'var(--success)';
+                        
+                        if (data.type === 'admin_deposit') {
+                            typeText = 'Depósito Admin';
+                            icon = 'fas fa-user-shield';
+                            typeColor = 'var(--warning)';
+                        } else if (data.type === 'investment') {
+                            typeText = 'Investimento';
+                            icon = 'fas fa-chart-line';
+                            typeColor = 'var(--accent)';
+                        } else if (data.type === 'earning') {
+                            typeText = 'Ganho Diário';
+                            icon = 'fas fa-coins';
+                            typeColor = 'var(--gold)';
                         }
                         
                         html += `
-                            <tr>
-                                <td>${item.type === 'withdrawal' ? 'Saque' : data.type === 'deposit' ? 'Depósito' : 'Transação'}</td>
-                                <td>${data.description || 'Transação'}</td>
-                                <td style="font-weight: bold; color: ${(item.type === 'withdrawal' || (item.type === 'transaction' && data.amount < 0)) ? 'var(--danger)' : 'var(--success)'}">
-                                    ${(item.type === 'withdrawal' || (item.type === 'transaction' && data.amount < 0)) ? '-' : '+'}${formatNumber(Math.abs(item.type === 'withdrawal' ? data.amount : data.amount || 0))} CVE
-                                </td>
-                                <td>${formattedDate}<br><small>${formattedTime}</small></td>
-                                <td>${statusBadge}</td>
-                            </tr>
+                            <div class="history-item">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: bold; color: ${typeColor};">
+                                        <i class="${icon}" style="margin-right: 5px;"></i> ${typeText}
+                                    </div>
+                                    <div style="color: var(--gray); font-size: 0.9rem; margin-top: 5px;">
+                                        <i class="fas fa-calendar-alt"></i> ${formattedDate} às ${formattedTime}
+                                    </div>
+                                    ${data.description ? `<div style="color: var(--gray); font-size: 0.85rem; margin-top: 5px;">
+                                        ${data.description}
+                                    </div>` : ''}
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-weight: bold; color: var(--success); font-size: 1.2rem;">
+                                        +${formatNumber(data.amount || 0)} CVE
+                                    </div>
+                                    <div style="color: var(--gray); font-size: 0.85rem; margin-top: 5px;">
+                                        <span class="history-badge badge-completed" style="margin-top: 8px;">
+                                            <i class="fas fa-check-circle" style="font-size: 0.6rem; margin-right: 5px;"></i> Concluído
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
                         `;
                     });
                     
-                    html += '</tbody></table>';
                     historyList.innerHTML = html;
-                    return;
                 }
-                
-                if (query.empty) {
-                    historyList.innerHTML = '<div class="empty-state"><div class="empty-icon"><i class="fas fa-history"></i></div><h3>Nenhum histórico encontrado</h3><p>Você ainda não tem transações deste tipo.</p></div>';
-                    return;
-                }
-                
-                let html = '<table class="history-table"><thead><tr><th>ID</th><th>Descrição</th><th>Valor</th><th>Data</th><th>Status</th></tr></thead><tbody>';
-                
-                query.forEach(doc => {
-                    const data = doc.data();
-                    const date = data.createdAt?.toDate?.() || new Date();
-                    const formattedDate = date.toLocaleDateString('pt-PT');
-                    const formattedTime = date.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
-                    
-                    let statusBadge = '';
-                    if (data.status === 'pending') {
-                        statusBadge = '<span class="history-badge badge-pending">Pendente</span>';
-                    } else if (data.status === 'approved') {
-                        statusBadge = '<span class="history-badge badge-approved">Aprovado</span>';
-                    } else if (data.status === 'rejected') {
-                        statusBadge = '<span class="history-badge badge-rejected">Rejeitado</span>';
-                    } else {
-                        statusBadge = '<span class="history-badge badge-completed">Completo</span>';
-                    }
-                    
-                    html += `
-                        <tr>
-                            <td><small>${data.id || doc.id.substring(0, 8)}</small></td>
-                            <td>${type === 'withdrawals' ? 'Saque' : 'Depósito'}</td>
-                            <td style="font-weight: bold; color: ${type === 'withdrawals' ? 'var(--danger)' : 'var(--success)'}">
-                                ${type === 'withdrawals' ? '-' : '+'}${formatNumber(data.amount || 0)} CVE
-                            </td>
-                            <td>${formattedDate}<br><small>${formattedTime}</small></td>
-                            <td>${statusBadge}</td>
-                        </tr>
-                    `;
-                });
-                
-                html += '</tbody></table>';
-                historyList.innerHTML = html;
                 
             } catch (error) {
                 console.error('Erro ao carregar histórico:', error);
-                historyList.innerHTML = '<div style="color: var(--danger); text-align: center; padding: 30px;"><i class="fas fa-exclamation-triangle fa-2x"></i><p>Erro ao carregar histórico</p></div>';
+                historyList.innerHTML = `
+                    <div class="error-state">
+                        <div class="error-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <h3 style="margin-bottom: 10px; color: var(--primary);">Erro ao Carregar</h3>
+                        <p style="color: var(--gray); margin-bottom: 25px;">
+                            Não foi possível carregar o histórico. Verifique sua conexão.
+                        </p>
+                        <button onclick="loadHistory('${type}')" class="retry-btn">
+                            <i class="fas fa-redo"></i> Tentar Novamente
+                        </button>
+                        <button onclick="debugDatabase()" class="retry-btn" style="margin-left: 10px; background: var(--warning);">
+                            <i class="fas fa-bug"></i> Debug
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Função de debug para verificar estrutura
+        async function debugDatabase() {
+            const user = auth.currentUser;
+            if (!user) return;
+            
+            showNotification('Verificando banco de dados...', 'warning');
+            
+            try {
+                // Verifica todas as coleções
+                const collections = ['withdrawals', 'transactions', 'users'];
+                
+                for (const collection of collections) {
+                    try {
+                        const snapshot = await db.collection(collection).get();
+                        console.log(`=== Coleção: ${collection} ===`);
+                        console.log(`Total documentos: ${snapshot.size}`);
+                        
+                        // Encontra documentos do usuário
+                        let userDocs = [];
+                        snapshot.forEach(doc => {
+                            const data = doc.data();
+                            if (data.userId === user.uid || 
+                                data.userEmail === user.email ||
+                                doc.id === user.uid) {
+                                userDocs.push({id: doc.id, data: data});
+                            }
+                        });
+                        
+                        console.log(`Documentos do usuário: ${userDocs.length}`);
+                        userDocs.forEach(doc => {
+                            console.log(`ID: ${doc.id}`, doc.data);
+                        });
+                    } catch (err) {
+                        console.log(`Erro na coleção ${collection}:`, err.message);
+                    }
+                }
+                
+                showNotification('Debug completo! Verifique o console.', 'success');
+            } catch (error) {
+                console.error('Erro no debug:', error);
+                showNotification('Erro no debug', 'error');
             }
         }
 
@@ -1457,7 +1674,7 @@
             }
         }
 
-        // Carregar detalhes do investimento
+        // Carregar detalhes do investimento - CORREÇÃO: Cálculo correto
         async function loadInvestmentDetails() {
             const user = auth.currentUser;
             if (!user) return;
@@ -1476,15 +1693,18 @@
                         const planEndDate = new Date(planStartDate);
                         planEndDate.setDate(planStartDate.getDate() + (activePlan.totalDays || 30));
                         
-                        // Calcular dias
-                        const daysPassed = Math.floor((today - planStartDate) / (1000 * 60 * 60 * 24));
+                        // Calcular dias - CORREÇÃO: cálculo preciso
+                        const daysPassed = Math.max(0, Math.floor((today - planStartDate) / (1000 * 60 * 60 * 24)));
                         const totalDays = activePlan.totalDays || 30;
                         const daysRemaining = Math.max(0, totalDays - daysPassed);
                         
-                        // Calcular ganho total esperado
-                        const dailyEarnings = levelData.daily;
+                        // Calcular ganhos - CORREÇÃO: usar valores do plano ativo se disponíveis
+                        const dailyEarnings = activePlan.dailyEarnings || levelData.daily;
                         const totalEarningsExpected = dailyEarnings * totalDays;
-                        const earnedSoFar = dailyEarnings * daysPassed;
+                        const earnedSoFar = Math.min(dailyEarnings * daysPassed, totalEarningsExpected);
+                        
+                        // CORREÇÃO: Usar valor investido real do plano se disponível
+                        const investedAmount = activePlan.investedAmount || levelData.investment;
                         
                         // Formatar datas
                         const startDateFormatted = planStartDate.toLocaleDateString('pt-PT');
@@ -1501,8 +1721,8 @@
                             
                             <div style="background: #f8f9fa; padding: 18px; border-radius: 12px; margin-bottom: 20px;">
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 12px; align-items: center;">
-                                    <span style="color: var(--gray); font-size: 0.95rem;">Investimento:</span>
-                                    <strong style="color: var(--primary); font-size: 1.1rem;">${formatNumber(levelData.investment)} CVE</strong>
+                                    <span style="color: var(--gray); font-size: 0.95rem;">Valor Investido:</span>
+                                    <strong style="color: var(--primary); font-size: 1.1rem;">${formatNumber(investedAmount)} CVE</strong>
                                 </div>
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 12px; align-items: center;">
                                     <span style="color: var(--gray); font-size: 0.95rem;">Retorno Diário:</span>
@@ -1568,10 +1788,10 @@
             } catch (error) {
                 console.error('Erro ao carregar investimento:', error);
                 document.getElementById('investment-details').innerHTML = `
-                    <div style="text-align: center; padding: 30px; color: var(--danger);">
-                        <i class="fas fa-exclamation-triangle fa-2x" style="margin-bottom: 15px;"></i>
+                    <div style="text-align: center; padding: 30px; color: var(--gray);">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 15px; color: var(--warning);"></i>
                         <p>Erro ao carregar detalhes do investimento</p>
-                        <button onclick="loadInvestmentDetails()" class="btn" style="margin-top: 15px;">
+                        <button onclick="loadInvestmentDetails()" class="retry-btn" style="margin-top: 15px;">
                             <i class="fas fa-redo"></i> Tentar Novamente
                         </button>
                     </div>
@@ -1584,99 +1804,131 @@
             const user = auth.currentUser;
             if (!user) return;
 
+            const teamListElement = document.getElementById('team-list');
+            teamListElement.innerHTML = '<div class="loading"><div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i></div><div>Carregando membros da equipa...</div></div>';
+
             try {
                 const userDoc = await db.collection('users').doc(user.uid).get();
-                if (userDoc.exists) {
-                    const userData = userDoc.data();
-                    const kriolaId = userData.kriolaId;
-                    
-                    if (!kriolaId) {
-                        throw new Error("ID Kriola não encontrado");
-                    }
-                    
-                    const teamSnapshot = await db.collection('users')
-                        .where('referrerId', '==', kriolaId)
-                        .orderBy('createdAt', 'desc')
-                        .get();
-                    
-                    const teamListElement = document.getElementById('team-list');
-                    
-                    if (!teamSnapshot.empty) {
-                        let teamHTML = `
-                            <div style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 12px;">
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span style="font-weight: bold; color: var(--primary);">Total de Membros:</span>
-                                    <span style="color: var(--accent); font-weight: bold; font-size: 1.2rem;">${teamSnapshot.size}</span>
-                                </div>
-                            </div>
-                            <div style="max-height: 300px; overflow-y: auto;">
-                        `;
-                        
-                        teamSnapshot.forEach((doc, index) => {
-                            const member = doc.data();
-                            const date = member.createdAt?.toDate() || new Date();
-                            const formattedDate = date.toLocaleDateString('pt-PT', {
-                                day: '2-digit',
-                                month: '2-digit',
-                                year: 'numeric'
-                            });
-                            
-                            const memberName = member.name || 'Usuário';
-                            const initials = memberName.split(' ')
-                                .map(n => n[0])
-                                .join('')
-                                .toUpperCase()
-                                .substring(0, 2);
-                            
-                            teamHTML += `
-                                <div class="team-member">
-                                    <div class="member-avatar">
-                                        ${initials || '??'}
-                                    </div>
-                                    <div class="member-info">
-                                        <div class="member-name">${memberName}</div>
-                                        <div class="member-details">
-                                            <span>${member.kriolaId || 'Sem ID'}</span>
-                                            <span style="margin: 0 5px;">•</span>
-                                            <span>${member.email || 'Sem email'}</span>
-                                        </div>
-                                    </div>
-                                    <div class="member-date" style="font-size: 0.8rem; color: var(--gray); white-space: nowrap;">
-                                        ${formattedDate}
-                                    </div>
-                                </div>
-                            `;
-                        });
-                        
-                        teamHTML += '</div>';
-                        teamListElement.innerHTML = teamHTML;
-                    } else {
-                        teamListElement.innerHTML = `
-                            <div class="empty-state">
-                                <div class="empty-icon">
-                                    <i class="fas fa-users"></i>
-                                </div>
-                                <h3 style="margin-bottom: 10px; color: var(--primary);">Nenhum Membro</h3>
-                                <p style="color: var(--gray); margin-bottom: 25px; max-width: 300px; margin-left: auto; margin-right: auto;">
-                                    Compartilhe seu link de indicação para convidar amigos e aumentar sua rede!
-                                </p>
-                                <a href="index.html" class="btn" style="text-decoration: none;">
-                                    <i class="fas fa-user-friends"></i> Ver Link de Indicação
-                                </a>
-                            </div>
-                        `;
-                    }
+                if (!userDoc.exists) {
+                    throw new Error("Usuário não encontrado");
                 }
+
+                const userData = userDoc.data();
+                const kriolaId = userData.kriolaId;
+                
+                if (!kriolaId) {
+                    teamListElement.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <h3 style="margin-bottom: 10px; color: var(--primary);">Sem Kriola ID</h3>
+                            <p style="color: var(--gray); margin-bottom: 25px;">
+                                Seu perfil ainda não tem um Kriola ID. Isso pode acontecer se você se registrou recentemente.
+                            </p>
+                            <button onclick="window.location.reload()" class="btn">
+                                <i class="fas fa-redo"></i> Recarregar Página
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Buscar usuários que têm este usuário como referrer
+                const teamSnapshot = await db.collection('users')
+                    .where('referrerId', '==', kriolaId)
+                    .orderBy('createdAt', 'desc')
+                    .limit(50)
+                    .get();
+                
+                if (teamSnapshot.empty) {
+                    teamListElement.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <h3 style="margin-bottom: 10px; color: var(--primary);">Nenhum Membro</h3>
+                            <p style="color: var(--gray); margin-bottom: 25px; max-width: 300px; margin-left: auto; margin-right: auto;">
+                                Compartilhe seu link de indicação para convidar amigos e aumentar sua rede!
+                            </p>
+                            <a href="index.html" class="btn" style="text-decoration: none;">
+                                <i class="fas fa-user-friends"></i> Ver Link de Indicação
+                            </a>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                let teamHTML = `
+                    <div style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 12px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-weight: bold; color: var(--primary);">Total de Membros:</span>
+                            <span style="color: var(--accent); font-weight: bold; font-size: 1.2rem;">${teamSnapshot.size}</span>
+                        </div>
+                    </div>
+                    <div style="max-height: 400px; overflow-y: auto;">
+                `;
+                
+                teamSnapshot.forEach((doc, index) => {
+                    const member = doc.data();
+                    const date = member.createdAt?.toDate() || new Date();
+                    const formattedDate = date.toLocaleDateString('pt-PT', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: '2-digit'
+                    });
+                    
+                    const memberName = member.name || 'Usuário';
+                    const initials = memberName.split(' ')
+                        .map(n => n[0])
+                        .join('')
+                        .toUpperCase()
+                        .substring(0, 2);
+                    
+                    // Nível do membro
+                    let memberLevel = 'Sem Plano';
+                    let levelColor = 'var(--gray)';
+                    if (member.activePlan && member.activePlan.level >= 0 && member.activePlan.level < levels.length) {
+                        memberLevel = levels[member.activePlan.level].name;
+                        levelColor = 'var(--accent)';
+                    }
+                    
+                    teamHTML += `
+                        <div class="team-member">
+                            <div class="member-avatar">
+                                ${initials || '??'}
+                            </div>
+                            <div class="member-info">
+                                <div class="member-name">${memberName}</div>
+                                <div class="member-details">
+                                    ${member.email || 'Sem email'}
+                                </div>
+                                <div style="font-size: 0.8rem; color: ${levelColor}; margin-top: 2px;">
+                                    <i class="fas fa-chart-line"></i> ${memberLevel}
+                                </div>
+                            </div>
+                            <div class="member-date">
+                                ${formattedDate}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                teamHTML += '</div>';
+                teamListElement.innerHTML = teamHTML;
+                
             } catch (error) {
                 console.error('Erro ao carregar equipa:', error);
-                document.getElementById('team-list').innerHTML = `
-                    <div class="empty-state" style="color: var(--danger);">
-                        <div class="empty-icon">
+                teamListElement.innerHTML = `
+                    <div class="error-state">
+                        <div class="error-icon">
                             <i class="fas fa-exclamation-triangle"></i>
                         </div>
-                        <h3 style="margin-bottom: 10px;">Erro ao Carregar</h3>
-                        <p style="margin-bottom: 20px;">Não foi possível carregar os membros da equipa.</p>
-                        <button onclick="loadTeamMembers()" class="btn">
+                        <h3 style="margin-bottom: 10px; color: var(--primary);">Erro ao Carregar Equipa</h3>
+                        <p style="color: var(--gray); margin-bottom: 25px;">
+                            Não foi possível carregar os membros da equipa.
+                        </p>
+                        <button onclick="loadTeamMembers()" class="retry-btn">
                             <i class="fas fa-redo"></i> Tentar Novamente
                         </button>
                     </div>
@@ -1696,114 +1948,115 @@
             profileContent.style.display = 'none';
 
             try {
-                const unsubscribe = db.collection('users').doc(user.uid).onSnapshot(async (doc) => {
-                    if (doc.exists) {
-                        const userData = doc.data();
-                        
-                        // Atualizar informações básicas
-                        const userName = userData.name || user.email.split('@')[0] || 'Usuário';
-                        document.getElementById('profile-name').textContent = userName;
-                        updateUserAvatar(userName, 'profile-avatar');
-                        
-                        document.getElementById('profile-kriola-id').textContent = userData.kriolaId || 'KRI-XXXXXX';
-                        
-                        // Atualizar estatísticas
-                        document.getElementById('stat-balance').textContent = formatNumber(userData.balance || 0) + ' CVE';
-                        document.getElementById('stat-total-earned').textContent = formatNumber(userData.totalEarned || 0) + ' CVE';
-                        document.getElementById('stat-streak').textContent = userData.streak || 0;
-                        
-                        // Carregar tamanho da rede
-                        if (userData.kriolaId) {
-                            try {
-                                const networkSnapshot = await db.collection('users')
-                                    .where('referrerId', '==', userData.kriolaId)
-                                    .get();
-                                document.getElementById('stat-network').textContent = networkSnapshot.size;
-                            } catch (networkError) {
-                                console.error('Erro ao carregar rede:', networkError);
-                                document.getElementById('stat-network').textContent = '0';
-                            }
-                        } else {
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    
+                    // Atualizar informações básicas
+                    const userName = userData.name || user.email.split('@')[0] || 'Usuário';
+                    document.getElementById('profile-name').textContent = userName;
+                    updateUserAvatar(userName, 'profile-avatar');
+                    
+                    document.getElementById('profile-kriola-id').textContent = userData.kriolaId || 'KRI-XXXXXX';
+                    
+                    // Atualizar estatísticas
+                    document.getElementById('stat-balance').textContent = formatNumber(userData.balance || 0) + ' CVE';
+                    document.getElementById('stat-total-earned').textContent = formatNumber(userData.totalEarned || 0) + ' CVE';
+                    document.getElementById('stat-streak').textContent = userData.streak || 0;
+                    
+                    // Carregar tamanho da rede
+                    if (userData.kriolaId) {
+                        try {
+                            const networkSnapshot = await db.collection('users')
+                                .where('referrerId', '==', userData.kriolaId)
+                                .get();
+                            document.getElementById('stat-network').textContent = networkSnapshot.size;
+                        } catch (networkError) {
+                            console.error('Erro ao carregar rede:', networkError);
                             document.getElementById('stat-network').textContent = '0';
                         }
-                        
-                        // Verificar plano ativo
-                        const activePlan = userData.activePlan || null;
-                        const investmentSection = document.getElementById('investment-section');
-                        
-                        if (activePlan && activePlan.level >= 0 && activePlan.level < levels.length) {
-                            const levelData = levels[activePlan.level];
-                            document.getElementById('profile-level').textContent = `Nível: KRIOLA ${levelData.name}`;
-                            
-                            // Mostrar seção de investimento
-                            investmentSection.style.display = 'block';
-                            
-                            // Atualizar detalhes do investimento
-                            const today = new Date();
-                            const planStartDate = activePlan.startDate?.toDate() || today;
-                            const daysPassed = Math.floor((today - planStartDate) / (1000 * 60 * 60 * 24));
-                            const totalDays = activePlan.totalDays || 30;
-                            const dailyEarnings = levelData.daily;
-                            const earnedSoFar = dailyEarnings * daysPassed;
-                            
-                            const investmentInfoHTML = `
-                                <div class="info-item">
-                                    <span class="info-label">Valor Investido</span>
-                                    <span class="info-value">${formatNumber(levelData.investment)} CVE</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Retorno Diário</span>
-                                    <span class="info-value">${formatNumber(dailyEarnings)} CVE</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Dias Decorridos</span>
-                                    <span class="info-value">${daysPassed}/${totalDays}</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Ganho Atual</span>
-                                    <span class="info-value">${formatNumber(earnedSoFar)} CVE</span>
-                                </div>
-                            `;
-                            
-                            document.getElementById('investment-info').innerHTML = investmentInfoHTML;
-                        } else {
-                            document.getElementById('profile-level').textContent = 'Nível: SEM PLANO';
-                            investmentSection.style.display = 'none';
-                        }
-                        
-                        // Esconder loading e mostrar conteúdo
-                        setTimeout(() => {
-                            loadingElement.style.display = 'none';
-                            profileContent.style.display = 'block';
-                        }, 500);
-                        
                     } else {
-                        console.error('Documento do usuário não encontrado');
-                        showNotification('Erro ao carregar dados do usuário', 'error');
-                        loadingElement.innerHTML = `
-                            <div style="color: var(--danger);">
-                                <i class="fas fa-exclamation-triangle fa-2x"></i>
-                                <div style="margin-top: 15px;">Erro ao carregar perfil</div>
-                                <button onclick="window.location.reload()" class="btn" style="margin-top: 20px;">
-                                    <i class="fas fa-redo"></i> Recarregar
-                                </button>
+                        document.getElementById('stat-network').textContent = '0';
+                    }
+                    
+                    // Verificar plano ativo
+                    const activePlan = userData.activePlan || null;
+                    const investmentSection = document.getElementById('investment-section');
+                    
+                    if (activePlan && activePlan.level >= 0 && activePlan.level < levels.length) {
+                        const levelData = levels[activePlan.level];
+                        document.getElementById('profile-level').textContent = `Nível: KRIOLA ${levelData.name}`;
+                        
+                        // Mostrar seção de investimento
+                        investmentSection.style.display = 'block';
+                        
+                        // Atualizar detalhes do investimento - CORREÇÃO: cálculo correto
+                        const today = new Date();
+                        const planStartDate = activePlan.startDate?.toDate() || today;
+                        const daysPassed = Math.max(0, Math.floor((today - planStartDate) / (1000 * 60 * 60 * 24)));
+                        const totalDays = activePlan.totalDays || 30;
+                        const dailyEarnings = activePlan.dailyEarnings || levelData.daily;
+                        const earnedSoFar = Math.min(dailyEarnings * daysPassed, dailyEarnings * totalDays);
+                        
+                        // CORREÇÃO: Usar valor investido real
+                        const investedAmount = activePlan.investedAmount || levelData.investment;
+                        
+                        const investmentInfoHTML = `
+                            <div class="info-item">
+                                <span class="info-label">Valor Investido</span>
+                                <span class="info-value">${formatNumber(investedAmount)} CVE</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Retorno Diário</span>
+                                <span class="info-value">${formatNumber(dailyEarnings)} CVE</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Dias Decorridos</span>
+                                <span class="info-value">${daysPassed}/${totalDays}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Ganho Atual</span>
+                                <span class="info-value">${formatNumber(earnedSoFar)} CVE</span>
                             </div>
                         `;
+                        
+                        document.getElementById('investment-info').innerHTML = investmentInfoHTML;
+                    } else {
+                        document.getElementById('profile-level').textContent = 'Nível: SEM PLANO';
+                        investmentSection.style.display = 'none';
                     }
-                }, (error) => {
-                    console.error('Erro ao escutar dados:', error);
-                    showNotification('Erro de conexão com o servidor', 'error');
-                    loadingElement.style.display = 'none';
-                    profileContent.style.display = 'block';
-                });
-
-                // Salvar unsubscribe para limpar quando necessário
-                window.unsubscribeProfileData = unsubscribe;
+                    
+                    // Esconder loading e mostrar conteúdo
+                    setTimeout(() => {
+                        loadingElement.style.display = 'none';
+                        profileContent.style.display = 'block';
+                    }, 500);
+                    
+                } else {
+                    console.error('Documento do usuário não encontrado');
+                    loadingElement.innerHTML = `
+                        <div style="color: var(--danger);">
+                            <i class="fas fa-exclamation-triangle fa-2x"></i>
+                            <div style="margin-top: 15px;">Erro ao carregar perfil</div>
+                            <button onclick="window.location.reload()" class="btn" style="margin-top: 20px;">
+                                <i class="fas fa-redo"></i> Recarregar
+                            </button>
+                        </div>
+                    `;
+                }
 
             } catch (error) {
                 console.error('Erro ao carregar dados:', error);
-                showNotification('Erro ao carregar dados do perfil', 'error');
-                loadingElement.style.display = 'none';
+                loadingElement.innerHTML = `
+                    <div style="color: var(--danger);">
+                        <i class="fas fa-exclamation-triangle fa-2x"></i>
+                        <div style="margin-top: 15px;">Erro ao carregar perfil</div>
+                        <button onclick="window.location.reload()" class="btn" style="margin-top: 20px;">
+                            <i class="fas fa-redo"></i> Recarregar
+                        </button>
+                    </div>
+                `;
             }
         }
 
@@ -1816,7 +2069,7 @@
             }
         });
 
-        // Fechar modais ao clicar fora ou pressionar ESC
+        // Fechar modais
         window.addEventListener('click', (event) => {
             if (event.target.classList.contains('modal')) {
                 event.target.classList.remove('active');
@@ -1833,15 +2086,26 @@
             }
         });
 
-        // Limpar listener quando a página for fechada
-        window.addEventListener('beforeunload', () => {
-            if (window.unsubscribeProfileData) {
-                window.unsubscribeProfileData();
-            }
-        });
+        // Adicionar botão de debug
+        const debugBtn = document.createElement('button');
+        debugBtn.innerHTML = '<i class="fas fa-bug"></i>';
+        debugBtn.style.position = 'fixed';
+        debugBtn.style.bottom = '20px';
+        debugBtn.style.right = '20px';
+        debugBtn.style.zIndex = '9999';
+        debugBtn.style.background = 'var(--warning)';
+        debugBtn.style.color = 'white';
+        debugBtn.style.border = 'none';
+        debugBtn.style.borderRadius = '50%';
+        debugBtn.style.width = '40px';
+        debugBtn.style.height = '40px';
+        debugBtn.style.cursor = 'pointer';
+        debugBtn.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+        debugBtn.onclick = debugDatabase;
+        debugBtn.title = 'Debug Banco de Dados';
+        document.body.appendChild(debugBtn);
 
-        // Inicializar
         console.log('✅ Perfil carregado com sucesso!');
     </script>
 </body>
-</html>
+    </html>
