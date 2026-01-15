@@ -94,18 +94,89 @@
             gap: 15px;
         }
 
+        /* BOTÃO DE AVATAR GIRATÓRIO COM CORES MUTANTES */
         .user-avatar {
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--accent), var(--success));
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-weight: bold;
             cursor: pointer;
-            border: 2px solid var(--gold);
+            border: 3px solid transparent;
+            animation: rotateSlowly 20s linear infinite, colorChange 8s infinite;
+            background: linear-gradient(135deg, var(--accent), var(--success), var(--gold), var(--accent));
+            background-size: 400% 400%;
+            position: relative;
+            box-shadow: 0 0 20px rgba(15, 76, 117, 0.3);
+            transition: all 0.3s;
+        }
+
+        .user-avatar:hover {
+            animation: rotateSlowly 10s linear infinite, colorChange 4s infinite, pulseGlow 2s infinite;
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(15, 76, 117, 0.5);
+        }
+
+        .user-avatar:before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            background: linear-gradient(135deg, var(--accent), var(--success), var(--gold), var(--accent));
+            background-size: 400% 400%;
+            border-radius: 50%;
+            z-index: -1;
+            animation: rotateSlowly 15s linear infinite, colorChange 10s infinite;
+            opacity: 0.7;
+        }
+
+        .user-avatar i {
+            font-size: 1.3rem;
+            z-index: 1;
+        }
+
+        @keyframes rotateSlowly {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes colorChange {
+            0% {
+                background-position: 0% 50%;
+            }
+            25% {
+                background-position: 100% 50%;
+            }
+            50% {
+                background-position: 100% 0%;
+            }
+            75% {
+                background-position: 0% 100%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        @keyframes pulseGlow {
+            0% {
+                box-shadow: 0 0 20px rgba(15, 76, 117, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(0, 184, 148, 0.5), 0 0 40px rgba(255, 215, 0, 0.3);
+            }
+            100% {
+                box-shadow: 0 0 20px rgba(15, 76, 117, 0.3);
+            }
         }
 
         .user-text-info {
@@ -582,20 +653,24 @@
             background: var(--white);
             display: flex;
             justify-content: space-around;
-            padding: 15px 0;
-            border-top: 3px solid var(--accent);
+            padding: 12px 0;
+            border-top: 2px solid var(--accent);
             z-index: 1000;
-            box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+            height: 60px;
         }
 
         .nav-item {
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             color: var(--gray);
             text-decoration: none;
-            font-size: 0.9rem;
-            transition: color 0.3s;
+            font-size: 0;
+            transition: all 0.3s;
+            width: 25%;
+            height: 100%;
         }
 
         .nav-item.active {
@@ -603,8 +678,8 @@
         }
 
         .nav-icon {
-            font-size: 1.4rem;
-            margin-bottom: 5px;
+            font-size: 1.5rem;
+            margin-bottom: 0;
         }
 
         /* Loading */
@@ -728,6 +803,11 @@
                 width: 90px;
                 height: 90px;
             }
+            
+            .user-avatar {
+                width: 45px;
+                height: 45px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -737,6 +817,11 @@
             
             .progress-item {
                 padding: 12px;
+            }
+            
+            .user-avatar {
+                width: 40px;
+                height: 40px;
             }
         }
 
@@ -1041,23 +1126,19 @@
         </div>
     </div>
 
-    <!-- Bottom Navigation -->
+    <!-- Bottom Navigation (Modificada - Sem nomes, apenas ícones) -->
     <div class="bottom-nav">
         <a href="index.html" class="nav-item active">
             <i class="fas fa-home nav-icon"></i>
-            Início
         </a>
         <a href="tarefas.html" class="nav-item">
             <i class="fas fa-tasks nav-icon"></i>
-            Tarefas
         </a>
         <a href="depositar.html" class="nav-item">
             <i class="fas fa-arrow-down nav-icon"></i>
-            Depósitos
         </a>
         <a href="sacar.html" class="nav-item">
             <i class="fas fa-arrow-up nav-icon"></i>
-            Saques
         </a>
     </div>
 
@@ -1771,6 +1852,7 @@
         console.log('✅ Dashboard completo - Sistema de estatísticas de amigos completamente refeito!');
         console.log('📊 Agora mostra: Amigos Convidados, Amigos Investiram, Total Investido');
         console.log('💰 Comissões de 15% funcionando corretamente');
+        console.log('🔄 Botão de avatar giratório com cores mutantes adicionado');
     </script>
 </body>
-</html>
+    </html>
