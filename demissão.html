@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Âncora Patrimonial - Encerrar Conta</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <!-- Ionicons -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding-bottom: 70px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 20px;
+            padding-top: 40px;
+            position: relative;
+            text-align: center;
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .page-subtitle {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+        
+        .content-container {
+            padding: 20px;
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        .warning-card {
+            background: linear-gradient(45deg, #FF4757, #ff3838);
+            color: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 15px 35px rgba(255, 71, 87, 0.3);
+            text-align: center;
+            animation: pulse 2s infinite;
+        }
+        
+        .warning-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+        
+        .warning-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        
+        .warning-text {
+            font-size: 1.1rem;
+            opacity: 0.95;
+            line-height: 1.5;
+        }
+        
+        .info-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-left: 4px solid #FF8C00;
+        }
+        
+        .info-title {
+            color: #2a5298;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+        }
+        
+        .consequences-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .consequences-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #555;
+            font-size: 1rem;
+        }
+        
+        .consequences-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .consequence-icon {
+            color: #FF4757;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        
+        .checklist-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 2px solid #2ed573;
+        }
+        
+        .checklist-title {
+            color: #2a5298;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+        }
+        
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .checklist li {
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .checklist li.checked {
+            background: #d4edda;
+            border-left: 4px solid #2ed573;
+        }
+        
+        .checklist li:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .checklist-checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+        
+        .checklist li.checked .checklist-checkbox {
+            background: #2ed573;
+            border-color: #2ed573;
+            color: white;
+        }
+        
+        .checklist-text {
+            flex: 1;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .checklist li.checked .checklist-text {
+            color: #155724;
+            text-decoration: line-through;
+        }
+        
+        .withdraw-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 2px solid #2a5298;
+        }
+        
+        .withdraw-title {
+            color: #2a5298;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+        }
+        
+        .balance-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .balance-item {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .balance-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        .balance-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .balance-value.saldo {
+            color: #FF8C00;
+            animation: glow 2s infinite alternate;
+        }
+        
+        .balance-value.investido {
+            color: #FF4757;
+        }
+        
+        .withdraw-btn {
+            background: linear-gradient(45deg, #2ed573, #1dd1a1);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+            box-shadow: 0 5px 15px rgba(46, 213, 115, 0.3);
+        }
+        
+        .withdraw-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(46, 213, 115, 0.4);
+        }
+        
+        .close-account-section {
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        .close-btn {
+            background: linear-gradient(45deg, #FF4757, #ff3838);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px rgba(255, 71, 87, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .close-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(255, 71, 87, 0.4);
+        }
+        
+        .close-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .close-btn:disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+            border-top: 1px solid #e1e1e1;
+            z-index: 1000;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            color: #666;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .nav-item.active {
+            color: #2a5298;
+        }
+        
+        .nav-item:hover {
+            color: #2a5298;
+        }
+        
+        .nav-icon {
+            font-size: 20px;
+        }
+        
+        .nav-text {
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 5px rgba(255, 140, 0, 0.5);
+            }
+            to {
+                text-shadow: 0 0 15px rgba(255, 140, 0, 0.8);
+            }
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #FF4757;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            animation: slideUp 0.3s ease-out;
+            border: 4px solid #FF4757;
+        }
+        
+        .modal-icon {
+            font-size: 70px;
+            color: #FF4757;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-size: 1.8rem;
+            color: #2a5298;
+            margin-bottom: 15px;
+        }
+        
+        .modal-text {
+            color: #555;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .modal-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-btn.cancel {
+            background: #e9ecef;
+            color: #495057;
+        }
+        
+        .modal-btn.cancel:hover {
+            background: #dee2e6;
+        }
+        
+        .modal-btn.confirm {
+            background: linear-gradient(45deg, #FF4757, #ff3838);
+            color: white;
+        }
+        
+        .modal-btn.confirm:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 71, 87, 0.3);
+        }
+        
+        .success-message {
+            background: #2ed573;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .error-message {
+            background: #ff4757;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @media screen and (max-width: 768px) {
+            .balance-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <button class="back-btn" onclick="window.history.back()">
+            <ion-icon name="arrow-back"></ion-icon>
+        </button>
+        <h1 class="page-title">Encerrar Conta</h1>
+        <p class="page-subtitle">Processo de desativação da conta</p>
+    </div>
+    
+    <!-- Content -->
+    <div class="content-container">
+        <!-- Messages -->
+        <div id="successMessage" class="success-message"></div>
+        <div id="errorMessage" class="error-message"></div>
+        
+        <!-- Warning Card -->
+        <div class="warning-card">
+            <ion-icon name="warning" class="warning-icon"></ion-icon>
+            <h2 class="warning-title">ATENÇÃO!</h2>
+            <p class="warning-text">
+                Você está prestes a iniciar o processo de encerramento da sua conta.<br>
+                Esta ação é IRREVERSÍVEL e terá consequências permanentes.
+            </p>
+        </div>
+        
+        <!-- Consequences Card -->
+        <div class="info-card">
+            <h3 class="info-title">
+                <ion-icon name="alert-circle-outline"></ion-icon>
+                Consequências do Encerramento
+            </h3>
+            <ul class="consequences-list">
+                <li>
+                    <ion-icon name="close-circle" class="consequence-icon"></ion-icon>
+                    Perda de acesso permanente à sua conta
+                </li>
+                <li>
+                    <ion-icon name="close-circle" class="consequence-icon"></ion-icon>
+                    Todos os investimentos ativos serão cancelados
+                </li>
+                <li>
+                    <ion-icon name="close-circle" class="consequence-icon"></ion-icon>
+                    Perda de todos os lucros pendentes
+                </li>
+                <li>
+                    <ion-icon name="close-circle" class="consequence-icon"></ion-icon>
+                    Encerramento do programa de indicações
+                </li>
+                <li>
+                    <ion-icon name="close-circle" class="consequence-icon"></ion-icon>
+                    Exclusão de todos os dados pessoais após 30 dias
+                </li>
+                <li>
+                    <ion-icon name="close-circle" class="consequence-icon"></ion-icon>
+                    Impossibilidade de criar nova conta com mesmo CPF
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Checklist Card -->
+        <div class="checklist-card">
+            <h3 class="checklist-title">
+                <ion-icon name="list-circle-outline"></ion-icon>
+                Checklist Antes de Encerrar
+            </h3>
+            <ul class="checklist" id="checklist">
+                <li id="check1" onclick="toggleCheck(1)">
+                    <div class="checklist-checkbox">
+                        <ion-icon name="checkmark"></ion-icon>
+                    </div>
+                    <div class="checklist-text">Sacar todo o saldo disponível</div>
+                </li>
+                <li id="check2" onclick="toggleCheck(2)">
+                    <div class="checklist-checkbox">
+                        <ion-icon name="checkmark"></ion-icon>
+                    </div>
+                    <div class="checklist-text">Cancelar todos os investimentos ativos</div>
+                </li>
+                <li id="check3" onclick="toggleCheck(3)">
+                    <div class="checklist-checkbox">
+                        <ion-icon name="checkmark"></ion-icon>
+                    </div>
+                    <div class="checklist-text">Coletar todas as comissões pendentes</div>
+                </li>
+                <li id="check4" onclick="toggleCheck(4)">
+                    <div class="checklist-checkbox">
+                        <ion-icon name="checkmark"></ion-icon>
+                    </div>
+                    <div class="checklist-text">Informar seus indicados sobre a desativação</div>
+                </li>
+                <li id="check5" onclick="toggleCheck(5)">
+                    <div class="checklist-checkbox">
+                        <ion-icon name="checkmark"></ion-icon>
+                    </div>
+                    <div class="checklist-text">Salvar seus extratos e comprovantes</div>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Withdraw Card -->
+        <div class="withdraw-card">
+            <h3 class="withdraw-title">
+                <ion-icon name="cash-outline"></ion-icon>
+                Saldos Disponíveis
+            </h3>
+            <div class="balance-info">
+                <div class="balance-item">
+                    <div class="balance-label">Saldo Disponível</div>
+                    <div class="balance-value saldo" id="availableBalance">0 KZ</div>
+                </div>
+                <div class="balance-item">
+                    <div class="balance-label">Total Investido</div>
+                    <div class="balance-value investido" id="totalInvested">0 KZ</div>
+                </div>
+            </div>
+            <button class="withdraw-btn" onclick="withdrawAllFunds()">
+                <ion-icon name="download-outline"></ion-icon>
+                Sacar Todo o Saldo
+            </button>
+        </div>
+        
+        <!-- Close Account Button -->
+        <div class="close-account-section">
+            <button class="close-btn" id="closeAccountBtn" onclick="showConfirmationModal()" disabled>
+                <ion-icon name="close-circle-outline"></ion-icon>
+                Encerrar Conta Permanentemente
+            </button>
+            <p style="margin-top: 15px; color: #666; font-size: 0.9rem;">
+                Este botão só será ativado após completar o checklist acima
+            </p>
+        </div>
+    </div>
+    
+    <!-- Confirmation Modal -->
+    <div class="modal" id="confirmationModal">
+        <div class="modal-content">
+            <ion-icon name="warning" class="modal-icon"></ion-icon>
+            <h2 class="modal-title">Confirmação Final</h2>
+            <p class="modal-text">
+                <strong>Você tem certeza absoluta que deseja encerrar sua conta?</strong><br><br>
+                Esta ação não pode ser desfeita. Todos os seus dados serão permanentemente excluídos após 30 dias.
+            </p>
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" onclick="closeModal()">
+                    Cancelar
+                </button>
+                <button class="modal-btn confirm" onclick="closeAccount()">
+                    Sim, Encerrar Conta
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <ion-icon name="home" class="nav-icon"></ion-icon>
+            <span class="nav-text">Início</span>
+        </a>
+        <a href="compra.html" class="nav-item">
+            <ion-icon name="cart" class="nav-icon"></ion-icon>
+            <span class="nav-text">Compra</span>
+        </a>
+        <a href="Menu.html" class="nav-item active">
+            <ion-icon name="person" class="nav-icon"></ion-icon>
+            <span class="nav-text">Minha Conta</span>
+        </a>
+    </div>
+    
+    <!-- Loading Screen -->
+    <div class="loading" id="loadingScreen">
+        <div class="spinner"></div>
+        <p>Carregando dados da conta...</p>
+    </div>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBp8X1PPp3FqiQ6OXErr8Mu11GEp6MZ2-U",
+            authDomain: "ascend-34bf0.firebaseapp.com",
+            projectId: "ascend-34bf0",
+            storageBucket: "ascend-34bf0.firebasestorage.app",
+            messagingSenderId: "592623076677",
+            appId: "1:592623076677:web:c5615719870aefdabf6a2c"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let currentUser = null;
+        let userData = null;
+        let checkedItems = 0;
+        const totalItems = 5;
+
+        // Check authentication
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                currentUser = user;
+                await loadUserData(user.uid);
+                document.getElementById('loadingScreen').style.display = 'none';
+            } else {
+                window.location.href = 'registo.html';
+            }
+        });
+
+        async function loadUserData(uid) {
+            try {
+                const doc = await db.collection('users').doc(uid).get();
+                if (doc.exists) {
+                    userData = doc.data();
+                    updateBalanceInfo();
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+
+        function updateBalanceInfo() {
+            document.getElementById('availableBalance').textContent = 
+                userData.saldo.toLocaleString('pt-AO') + ' KZ';
+            document.getElementById('totalInvested').textContent = 
+                userData.saldoInvestido.toLocaleString('pt-AO') + ' KZ';
+        }
+
+        function toggleCheck(itemNumber) {
+            const item = document.getElementById(`check${itemNumber}`);
+            const isChecked = item.classList.contains('checked');
+            
+            if (isChecked) {
+                item.classList.remove('checked');
+                checkedItems--;
+            } else {
+                item.classList.add('checked');
+                checkedItems++;
+            }
+            
+            // Enable/disable close account button
+            const closeBtn = document.getElementById('closeAccountBtn');
+            closeBtn.disabled = checkedItems !== totalItems;
+        }
+
+        function showConfirmationModal() {
+            if (checkedItems !== totalItems) {
+                showError('Complete todas as etapas do checklist antes de encerrar a conta.');
+                return;
+            }
+            
+            document.getElementById('confirmationModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('confirmationModal').style.display = 'none';
+        }
+
+        async function closeAccount() {
+            const closeBtn = document.querySelector('.modal-btn.confirm');
+            closeBtn.disabled = true;
+            closeBtn.innerHTML = '<ion-icon name="sync-outline" class="spinning"></ion-icon> Processando...';
+            
+            try {
+                // Update user status to "closing"
+                await db.collection('users').doc(currentUser.uid).update({
+                    status: 'closing',
+                    closingDate: firebase.firestore.FieldValue.serverTimestamp(),
+                    closingReason: 'user_request'
+                });
+                
+                // Sign out user
+                await auth.signOut();
+                
+                // Show success message
+                closeModal();
+                showSuccess('✅ Conta marcada para encerramento. Todos os dados serão excluídos em 30 dias.');
+                
+                // Redirect to registration page after 3 seconds
+                setTimeout(() => {
+                    window.location.href = 'registo.html';
+                }, 3000);
+                
+            } catch (error) {
+                console.error('Error closing account:', error);
+                showError('Erro ao encerrar conta. Tente novamente.');
+                closeBtn.disabled = false;
+                closeBtn.innerHTML = 'Sim, Encerrar Conta';
+            }
+        }
+
+        async function withdrawAllFunds() {
+            if (userData.saldo <= 0) {
+                showError('Não há saldo disponível para saque.');
+                return;
+            }
+            
+            const withdrawBtn = document.querySelector('.withdraw-btn');
+            withdrawBtn.disabled = true;
+            withdrawBtn.innerHTML = '<ion-icon name="sync-outline" class="spinning"></ion-icon> Processando...';
+            
+            try {
+                // Create withdrawal request for full balance
+                const withdrawalRef = await db.collection('withdrawals').add({
+                    userId: currentUser.uid,
+                    amount: userData.saldo,
+                    fee: 0, // No fee for account closure withdrawal
+                    netAmount: userData.saldo,
+                    accountId: userData.contaBancaria?.id || 'unknown',
+                    status: 'processing',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    type: 'account_closure',
+                    reference: 'CLOSE-' + Date.now()
+                });
+                
+                // Update user balance to zero
+                await db.collection('users').doc(currentUser.uid).update({
+                    saldo: 0,
+                    totalRetirado: firebase.firestore.FieldValue.increment(userData.saldo)
+                });
+                
+                // Update local data
+                userData.saldo = 0;
+                updateBalanceInfo();
+                
+                showSuccess(`✅ Saque de ${userData.saldo.toLocaleString('pt-AO')} KZ solicitado com sucesso!`);
+                
+                // Update checklist
+                const check1 = document.getElementById('check1');
+                check1.classList.add('checked');
+                checkedItems++;
+                
+            } catch (error) {
+                console.error('Error withdrawing funds:', error);
+                showError('Erro ao processar saque. Tente novamente.');
+            } finally {
+                withdrawBtn.disabled = false;
+                withdrawBtn.innerHTML = '<ion-icon name="download-outline"></ion-icon> Sacar Todo o Saldo';
+            }
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Show loading on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('loadingScreen').style.display = 'block';
+        });
+
+        // Add CSS for spinning icon
+        const style = document.createElement('style');
+        style.textContent = `
+            .spinning {
+                animation: spin 1s linear infinite;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

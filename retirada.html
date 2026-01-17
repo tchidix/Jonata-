@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Âncora Patrimonial - Retirada</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <!-- Ionicons -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding-bottom: 70px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 20px;
+            padding-top: 40px;
+            position: relative;
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        .page-title {
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .page-subtitle {
+            text-align: center;
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+        
+        .content-container {
+            padding: 20px;
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        .info-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border-left: 4px solid #2ed573;
+        }
+        
+        .info-card h3 {
+            color: #2a5298;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .rules-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .rules-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #555;
+        }
+        
+        .rules-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .rule-icon {
+            color: #2ed573;
+            font-size: 18px;
+        }
+        
+        .continue-btn {
+            background: linear-gradient(45deg, #2ed573, #1dd1a1);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            box-shadow: 0 10px 20px rgba(46, 213, 115, 0.3);
+        }
+        
+        .continue-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 25px rgba(46, 213, 115, 0.4);
+        }
+        
+        .continue-btn:active {
+            transform: translateY(0);
+        }
+        
+        .withdraw-form {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #2ed573;
+            box-shadow: 0 0 0 3px rgba(46, 213, 115, 0.1);
+            background: white;
+        }
+        
+        .tax-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .tax-info h4 {
+            color: #856404;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .tax-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        
+        .tax-item {
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            background: #fff;
+        }
+        
+        .tax-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .tax-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+        
+        .tax-value.fee {
+            color: #FF4757;
+        }
+        
+        .tax-value.net {
+            color: #2ed573;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(45deg, #2a5298, #1e3c72);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(42, 82, 152, 0.3);
+        }
+        
+        .history-btn {
+            background: linear-gradient(45deg, #FFA500, #FF8C00);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+        
+        .history-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(255, 140, 0, 0.3);
+        }
+        
+        .history-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .history-title {
+            color: #2a5298;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .history-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .history-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s;
+        }
+        
+        .history-item:hover {
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .history-info h4 {
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 1rem;
+        }
+        
+        .history-info p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .history-amount {
+            text-align: right;
+        }
+        
+        .amount-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #2ed573;
+        }
+        
+        .amount-details {
+            font-size: 0.8rem;
+            color: #666;
+        }
+        
+        .history-status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 5px;
+            display: inline-block;
+        }
+        
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .no-history {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .no-history ion-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #ccc;
+        }
+        
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+        
+        .filter-btn {
+            padding: 8px 16px;
+            border: 2px solid #e1e1e1;
+            background: white;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        
+        .filter-btn.active {
+            background: #2a5298;
+            color: white;
+            border-color: #2a5298;
+        }
+        
+        .filter-btn:hover:not(.active) {
+            border-color: #2a5298;
+            color: #2a5298;
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+            border-top: 1px solid #e1e1e1;
+            z-index: 1000;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            color: #666;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .nav-item.active {
+            color: #2a5298;
+        }
+        
+        .nav-item:hover {
+            color: #2a5298;
+        }
+        
+        .nav-icon {
+            font-size: 20px;
+        }
+        
+        .nav-text {
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .success-message {
+            background: #2ed573;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .error-message {
+            background: #ff4757;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2ed573;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .back-to-form {
+            background: #e9ecef;
+            color: #495057;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+        
+        .back-to-form:hover {
+            background: #dee2e6;
+        }
+        
+        .history-loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+        
+        .retry-btn {
+            background: #2a5298;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        .retry-btn:hover {
+            background: #1e3c72;
+        }
+        
+        .index-info {
+            background: #e3f2fd;
+            border: 1px solid #90caf9;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .index-info h4 {
+            color: #1565c0;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .index-link {
+            color: #1976d2;
+            text-decoration: underline;
+            word-break: break-all;
+            margin: 10px 0;
+            display: block;
+        }
+        
+        .index-link:hover {
+            color: #0d47a1;
+        }
+        
+        .create-index-btn {
+            background: #1976d2;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .create-index-btn:hover {
+            background: #1565c0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <button class="back-btn" onclick="window.history.back()">
+            <ion-icon name="arrow-back"></ion-icon>
+        </button>
+        <h1 class="page-title">Retirada</h1>
+        <p class="page-subtitle">Saques rápidos e seguros</p>
+    </div>
+    
+    <!-- Content -->
+    <div class="content-container">
+        <!-- Messages -->
+        <div id="successMessage" class="success-message"></div>
+        <div id="errorMessage" class="error-message"></div>
+        
+        <!-- Index Info (hidden by default) -->
+        <div id="indexInfo" class="index-info">
+            <h4><ion-icon name="information-circle-outline"></ion-icon> Ação Necessária no Firebase</h4>
+            <p>Para ver o histórico de retiradas, é necessário criar um índice no Firestore:</p>
+            <a id="indexLink" class="index-link" href="#" target="_blank">
+                Clique aqui para criar o índice
+            </a>
+            <p>Após criar o índice, clique no botão abaixo:</p>
+            <button class="create-index-btn" onclick="createIndexAndReload()">
+                <ion-icon name="refresh-outline"></ion-icon>
+                Já criei o índice - Recarregar
+            </button>
+        </div>
+        
+        <!-- Rules Card -->
+        <div class="info-card">
+            <h3><ion-icon name="information-circle-outline"></ion-icon> Regras de Retirada</h3>
+            <ul class="rules-list">
+                <li>
+                    <ion-icon name="checkmark-circle" class="rule-icon"></ion-icon>
+                    Saque mínimo: 500 KZ
+                </li>
+                <li>
+                    <ion-icon name="checkmark-circle" class="rule-icon"></ion-icon>
+                    Taxa de serviço: 15% sobre o valor solicitado
+                </li>
+                <li>
+                    <ion-icon name="checkmark-circle" class="rule-icon"></ion-icon>
+                    Processamento em 24-48 horas
+                </li>
+                <li>
+                    <ion-icon name="checkmark-circle" class="rule-icon"></ion-icon>
+                    Necessário ter conta bancária cadastrada
+                </li>
+                <li>
+                    <ion-icon name="checkmark-circle" class="rule-icon"></ion-icon>
+                    Limite diário: 50.000 KZ
+                </li>
+                <li>
+                    <ion-icon name="checkmark-circle" class="rule-icon"></ion-icon>
+                    Verificação de segurança obrigatória
+                </li>
+            </ul>
+            
+            <button class="continue-btn" onclick="showWithdrawForm()">
+                <ion-icon name="arrow-forward-outline"></ion-icon>
+                Solicitar Retirada
+            </button>
+            
+            <button class="history-btn" onclick="showHistory()">
+                <ion-icon name="time-outline"></ion-icon>
+                Histórico de Retiradas
+            </button>
+        </div>
+        
+        <!-- Withdraw Form -->
+        <div id="withdrawForm" class="withdraw-form">
+            <h3><ion-icon name="cash-outline"></ion-icon> Solicitar Retirada</h3>
+            
+            <!-- Tax Information -->
+            <div class="tax-info" id="taxInfo">
+                <h4><ion-icon name="calculator-outline"></ion-icon> Detalhes da Taxa</h4>
+                <div class="tax-details">
+                    <div class="tax-item">
+                        <div class="tax-label">Valor Solicitado</div>
+                        <div class="tax-value" id="requestedAmount">0 KZ</div>
+                    </div>
+                    <div class="tax-item">
+                        <div class="tax-label">Taxa (15%)</div>
+                        <div class="tax-value fee" id="taxAmount">0 KZ</div>
+                    </div>
+                    <div class="tax-item">
+                        <div class="tax-label">Valor Líquido</div>
+                        <div class="tax-value net" id="netAmount">0 KZ</div>
+                    </div>
+                    <div class="tax-item">
+                        <div class="tax-label">Disponível</div>
+                        <div class="tax-value" id="availableAmount">0 KZ</div>
+                    </div>
+                </div>
+            </div>
+            
+            <form id="withdrawalForm">
+                <div class="form-group">
+                    <label for="withdrawAmount">Valor (KZ)</label>
+                    <input type="number" id="withdrawAmount" min="500" step="100" placeholder="500" required
+                           oninput="calculateTax()">
+                    <small>Mínimo: 500 KZ | Máximo: 50.000 KZ</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="selectedAccount">Conta Cadastrada</label>
+                    <select id="selectedAccount" required>
+                        <option value="">Selecione uma conta</option>
+                        <!-- Accounts will be populated dynamically -->
+                    </select>
+                </div>
+                
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <ion-icon name="paper-plane-outline"></ion-icon>
+                    Confirmar Retirada
+                </button>
+            </form>
+            
+            <button class="back-to-form" onclick="hideWithdrawForm()">
+                <ion-icon name="arrow-back-outline"></ion-icon>
+                Voltar
+            </button>
+        </div>
+        
+        <!-- History Section -->
+        <div id="historySection" class="history-section">
+            <h3 class="history-title">
+                <ion-icon name="time-outline"></ion-icon>
+                Histórico de Retiradas
+            </h3>
+            
+            <!-- Loading indicator for history -->
+            <div class="history-loading" id="historyLoading">
+                <div class="spinner"></div>
+                <p>Carregando histórico...</p>
+            </div>
+            
+            <!-- Filter Buttons -->
+            <div class="filter-buttons" id="filterButtons" style="display: none;">
+                <button class="filter-btn active" onclick="filterHistory('all')">Todas</button>
+                <button class="filter-btn" onclick="filterHistory('completed')">Concluídas</button>
+                <button class="filter-btn" onclick="filterHistory('pending')">Processando</button>
+                <button class="filter-btn" onclick="filterHistory('rejected')">Rejeitadas</button>
+            </div>
+            
+            <div class="history-list" id="historyList">
+                <!-- History will be loaded dynamically -->
+            </div>
+            
+            <button class="back-to-form" onclick="hideHistory()">
+                <ion-icon name="arrow-back-outline"></ion-icon>
+                Voltar
+            </button>
+        </div>
+    </div>
+    
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <ion-icon name="home" class="nav-icon"></ion-icon>
+            <span class="nav-text">Início</span>
+        </a>
+        <a href="compra.html" class="nav-item">
+            <ion-icon name="cart" class="nav-icon"></ion-icon>
+            <span class="nav-text">Compra</span>
+        </a>
+        <a href="Menu.html" class="nav-item active">
+            <ion-icon name="person" class="nav-icon"></ion-icon>
+            <span class="nav-text">Minha Conta</span>
+        </a>
+    </div>
+    
+    <!-- Loading Screen -->
+    <div class="loading" id="loadingScreen">
+        <div class="spinner"></div>
+        <p>Carregando...</p>
+    </div>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBp8X1PPp3FqiQ6OXErr8Mu11GEp6MZ2-U",
+            authDomain: "ascend-34bf0.firebaseapp.com",
+            projectId: "ascend-34bf0",
+            storageBucket: "ascend-34bf0.firebasestorage.app",
+            messagingSenderId: "592623076677",
+            appId: "1:592623076677:web:c5615719870aefdabf6a2c"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let currentUser = null;
+        let userData = null;
+        let withdrawals = [];
+        let currentFilter = 'all';
+        let indexError = false;
+
+        // Check authentication
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                currentUser = user;
+                await loadUserData(user.uid);
+                document.getElementById('loadingScreen').style.display = 'none';
+            } else {
+                window.location.href = 'registo.html';
+            }
+        });
+
+        async function loadUserData(uid) {
+            try {
+                const doc = await db.collection('users').doc(uid).get();
+                if (doc.exists) {
+                    userData = doc.data();
+                    populateAccountSelect();
+                } else {
+                    // Create user document if it doesn't exist
+                    await db.collection('users').doc(uid).set({
+                        nomeCompleto: user.displayName || 'Usuário',
+                        email: user.email,
+                        userId: 'ANC' + Date.now().toString().slice(-6),
+                        saldo: 500,
+                        saldoInvestido: 0,
+                        dataCadastro: firebase.firestore.FieldValue.serverTimestamp(),
+                        totalRetirado: 0,
+                        contaBancaria: null,
+                        status: 'ativo'
+                    }, { merge: true });
+                    
+                    // Reload data
+                    const newDoc = await db.collection('users').doc(uid).get();
+                    userData = newDoc.data();
+                    populateAccountSelect();
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+                showError('Erro ao carregar dados do usuário');
+            }
+        }
+
+        function populateAccountSelect() {
+            const select = document.getElementById('selectedAccount');
+            select.innerHTML = '<option value="">Selecione uma conta</option>';
+            
+            if (userData && userData.contaBancaria) {
+                const option = document.createElement('option');
+                const account = userData.contaBancaria;
+                const bankName = account.banco || 'Banco';
+                const accountNumber = account.conta || 'Conta';
+                const holderName = account.titular || '';
+                
+                option.value = JSON.stringify({
+                    banco: bankName,
+                    conta: accountNumber,
+                    titular: holderName,
+                    iban: account.iban || ''
+                });
+                
+                option.textContent = `${bankName} - ${accountNumber}${holderName ? ` (${holderName})` : ''}`;
+                select.appendChild(option);
+                
+                // Update available amount
+                document.getElementById('availableAmount').textContent = 
+                    (userData.saldo || 0).toLocaleString('pt-AO') + ' KZ';
+            } else {
+                select.innerHTML = '<option value="">Nenhuma conta cadastrada</option>';
+                select.disabled = true;
+            }
+        }
+
+        function showWithdrawForm() {
+            if (!userData || !userData.contaBancaria) {
+                showError('Por favor, cadastre uma conta bancária em "Minha Conta" primeiro.');
+                return;
+            }
+            
+            document.getElementById('withdrawForm').style.display = 'block';
+            document.getElementById('historySection').style.display = 'none';
+            document.getElementById('indexInfo').style.display = 'none';
+            document.getElementById('withdrawAmount').focus();
+            
+            // Reset form
+            document.getElementById('withdrawAmount').value = '';
+            document.getElementById('taxInfo').style.display = 'none';
+        }
+
+        function hideWithdrawForm() {
+            document.getElementById('withdrawForm').style.display = 'none';
+        }
+
+        function showHistory() {
+            document.getElementById('withdrawForm').style.display = 'none';
+            document.getElementById('historySection').style.display = 'block';
+            document.getElementById('indexInfo').style.display = 'none';
+            
+            // Tentar carregar com a nova abordagem sem necessidade de índice
+            loadWithdrawalHistoryWithFallback();
+        }
+
+        function hideHistory() {
+            document.getElementById('historySection').style.display = 'none';
+        }
+
+        // NOVA FUNÇÃO: Carregar histórico com fallback
+        async function loadWithdrawalHistoryWithFallback() {
+            try {
+                // Show loading indicator
+                document.getElementById('historyLoading').style.display = 'block';
+                document.getElementById('filterButtons').style.display = 'none';
+                document.getElementById('historyList').innerHTML = '';
+                
+                if (!currentUser) {
+                    throw new Error('Usuário não autenticado');
+                }
+                
+                // TENTATIVA 1: Usar approach sem orderBy (que não requer índice)
+                try {
+                    console.log('Tentando carregar histórico sem orderBy...');
+                    const snapshot = await db.collection('withdrawals')
+                        .where('userId', '==', currentUser.uid)
+                        .limit(50)
+                        .get();
+                    
+                    withdrawals = [];
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        withdrawals.push({
+                            id: doc.id,
+                            ...data,
+                            // Ensure createdAt is a Date object
+                            createdAt: data.createdAt ? 
+                                (data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt)) : 
+                                new Date()
+                        });
+                    });
+                    
+                    // Ordenar localmente por data (decrescente)
+                    withdrawals.sort((a, b) => {
+                        const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt);
+                        const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt);
+                        return dateB.getTime() - dateA.getTime();
+                    });
+                    
+                    console.log(`Carregadas ${withdrawals.length} retiradas`);
+                    
+                    renderHistory(currentFilter);
+                    document.getElementById('historyLoading').style.display = 'none';
+                    document.getElementById('filterButtons').style.display = 'flex';
+                    
+                } catch (error1) {
+                    console.log('Erro no approach 1:', error1);
+                    
+                    // TENTATIVA 2: Usar approach com timestamp como número
+                    try {
+                        console.log('Tentando approach alternativo com timestamp...');
+                        
+                        // Vamos buscar tudo e filtrar localmente
+                        const snapshot = await db.collection('withdrawals')
+                            .where('userId', '==', currentUser.uid)
+                            .get();
+                        
+                        withdrawals = [];
+                        snapshot.forEach(doc => {
+                            const data = doc.data();
+                            withdrawals.push({
+                                id: doc.id,
+                                ...data
+                            });
+                        });
+                        
+                        // Converter timestamps e ordenar
+                        withdrawals = withdrawals.map(w => {
+                            let date;
+                            if (w.createdAt && w.createdAt.toDate) {
+                                date = w.createdAt.toDate();
+                            } else if (w.createdAt && w.createdAt.seconds) {
+                                date = new Date(w.createdAt.seconds * 1000);
+                            } else if (w.createdAt) {
+                                date = new Date(w.createdAt);
+                            } else {
+                                date = new Date();
+                            }
+                            return {
+                                ...w,
+                                createdAt: date
+                            };
+                        });
+                        
+                        // Ordenar por data (mais recente primeiro)
+                        withdrawals.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+                        
+                        renderHistory(currentFilter);
+                        document.getElementById('historyLoading').style.display = 'none';
+                        document.getElementById('filterButtons').style.display = 'flex';
+                        
+                    } catch (error2) {
+                        console.log('Erro no approach 2:', error2);
+                        
+                        // TENTATIVA 3: Mostrar instruções para criar índice
+                        if (error2.code === 'failed-precondition' || error1.code === 'failed-precondition') {
+                            showIndexInstructions();
+                        } else {
+                            throw error2;
+                        }
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Erro crítico ao carregar histórico:', error);
+                showHistoryError(error);
+            }
+        }
+
+        function showIndexInstructions() {
+            document.getElementById('historyLoading').style.display = 'none';
+            document.getElementById('indexInfo').style.display = 'block';
+            document.getElementById('historyList').innerHTML = '';
+            
+            // Criar link para criar índice
+            const projectId = firebaseConfig.projectId;
+            const indexUrl = `https://console.firebase.google.com/v1/r/project/${projectId}/firestore/indexes?create_composite=ClBwcm9qZWN0cy9hc2NlbmQtbW9uZXktYWRtaW4vZGF0YWJhc2VzLyhkZWZhdWx0KS9jb2xsZWN0aW9uR3JvdXBzL3dpdGhkcmF3YWxzL2luZGV4ZXMvXxABGhEKCXVzZXJJZBAFGg0KCWNyZWF0ZWRBdBgB`;
+            
+            document.getElementById('indexLink').href = indexUrl;
+            document.getElementById('indexLink').textContent = indexUrl;
+            
+            indexError = true;
+        }
+
+        function createIndexAndReload() {
+            // Salvar que o usuário criou o índice
+            localStorage.setItem('indexCreated', 'true');
+            
+            // Recarregar a página
+            location.reload();
+        }
+
+        function showHistoryError(error) {
+            // Show error in history list
+            let errorMessage = 'Erro ao carregar histórico';
+            if (error.message === 'Usuário não autenticado') {
+                errorMessage = 'Faça login para ver o histórico';
+            } else if (error.code === 'permission-denied') {
+                errorMessage = 'Permissão negada para acessar o histórico';
+            }
+            
+            document.getElementById('historyList').innerHTML = `
+                <div class="no-history">
+                    <ion-icon name="alert-circle-outline"></ion-icon>
+                    <p>${errorMessage}</p>
+                    <p style="font-size: 12px; margin-top: 10px; color: #888;">${error.message || 'Erro desconhecido'}</p>
+                    <button class="retry-btn" onclick="retryHistoryLoad()">Tentar Novamente</button>
+                </div>
+            `;
+            
+            document.getElementById('historyLoading').style.display = 'none';
+        }
+
+        function filterHistory(filter) {
+            currentFilter = filter;
+            
+            // Update active filter button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            renderHistory(filter);
+        }
+
+        function renderHistory(filter) {
+            const historyList = document.getElementById('historyList');
+            
+            if (!withdrawals || withdrawals.length === 0) {
+                historyList.innerHTML = `
+                    <div class="no-history">
+                        <ion-icon name="receipt-outline"></ion-icon>
+                        <p>Nenhuma retirada realizada ainda</p>
+                        <small>Faça sua primeira retirada usando o botão acima</small>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Filter withdrawals
+            let filteredWithdrawals = withdrawals;
+            if (filter !== 'all') {
+                filteredWithdrawals = withdrawals.filter(w => {
+                    const status = w.status ? w.status.toLowerCase() : 'pending';
+                    if (filter === 'completed') return status === 'completed' || status === 'success' || status === 'approved';
+                    if (filter === 'pending') return status === 'pending' || status === 'processing';
+                    if (filter === 'rejected') return status === 'rejected' || status === 'failed' || status === 'declined';
+                    return true;
+                });
+            }
+            
+            if (filteredWithdrawals.length === 0) {
+                historyList.innerHTML = `
+                    <div class="no-history">
+                        <ion-icon name="filter-outline"></ion-icon>
+                        <p>Nenhuma retirada encontrada com este filtro</p>
+                        <button class="filter-btn" onclick="filterHistory('all')" style="margin-top: 10px;">Ver Todas</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            historyList.innerHTML = '';
+            
+            filteredWithdrawals.forEach(withdrawal => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                
+                // Format date safely
+                let dateText = 'Data não disponível';
+                try {
+                    if (withdrawal.createdAt) {
+                        const date = withdrawal.createdAt instanceof Date ? 
+                            withdrawal.createdAt : 
+                            new Date(withdrawal.createdAt);
+                        
+                        if (!isNaN(date.getTime())) {
+                            dateText = date.toLocaleDateString('pt-AO') + ' ' +
+                                      date.toLocaleTimeString('pt-AO', { hour: '2-digit', minute: '2-digit' });
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Error formatting date:', e);
+                }
+                
+                // Determine status class and text
+                let statusClass = 'status-pending';
+                let statusText = 'Processando';
+                const status = withdrawal.status ? withdrawal.status.toLowerCase() : 'pending';
+                
+                if (status === 'completed' || status === 'success' || status === 'approved') {
+                    statusClass = 'status-success';
+                    statusText = 'Concluído';
+                } else if (status === 'rejected' || status === 'failed' || status === 'declined') {
+                    statusClass = 'status-rejected';
+                    statusText = 'Rejeitado';
+                }
+                
+                // Format amounts safely
+                const amount = withdrawal.amount || 0;
+                const tax = withdrawal.tax || (amount * 0.15);
+                const netAmount = withdrawal.netAmount || (amount - tax);
+                
+                historyItem.innerHTML = `
+                    <div class="history-info">
+                        <h4>Retirada ${withdrawal.reference ? '#' + withdrawal.reference : ''}</h4>
+                        <p>${dateText}</p>
+                        <p>${withdrawal.statusMessage || withdrawal.account || 'Conta bancária'}</p>
+                        <span class="history-status ${statusClass}">${statusText}</span>
+                    </div>
+                    <div class="history-amount">
+                        <div class="amount-value" style="color: ${statusClass === 'status-success' ? '#2ed573' : statusClass === 'status-rejected' ? '#FF4757' : '#FFA500'}">
+                            -${amount.toLocaleString('pt-AO')} KZ
+                        </div>
+                        <div class="amount-details">
+                            Taxa: ${tax.toLocaleString('pt-AO')} KZ<br>
+                            Líquido: ${netAmount.toLocaleString('pt-AO')} KZ
+                        </div>
+                    </div>
+                `;
+                
+                historyList.appendChild(historyItem);
+            });
+        }
+
+        function calculateTax() {
+            const amountInput = document.getElementById('withdrawAmount');
+            const amount = parseFloat(amountInput.value) || 0;
+            
+            if (amount < 500) {
+                document.getElementById('taxInfo').style.display = 'none';
+                return;
+            }
+            
+            // Calculate 15% tax
+            const tax = amount * 0.15;
+            const netAmount = amount - tax;
+            
+            // Update display
+            document.getElementById('requestedAmount').textContent = 
+                amount.toLocaleString('pt-AO') + ' KZ';
+            document.getElementById('taxAmount').textContent = 
+                tax.toLocaleString('pt-AO') + ' KZ';
+            document.getElementById('netAmount').textContent = 
+                netAmount.toLocaleString('pt-AO') + ' KZ';
+            
+            // Show tax info
+            document.getElementById('taxInfo').style.display = 'block';
+            
+            // Validate against available balance
+            if (amount > (userData.saldo || 0)) {
+                amountInput.style.borderColor = '#FF4757';
+                amountInput.style.boxShadow = '0 0 0 3px rgba(255, 71, 87, 0.1)';
+            } else {
+                amountInput.style.borderColor = '#2ed573';
+                amountInput.style.boxShadow = '0 0 0 3px rgba(46, 213, 115, 0.1)';
+            }
+        }
+
+        // Form submission
+        document.getElementById('withdrawalForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!currentUser || !userData) {
+                showError('Usuário não autenticado. Por favor, faça login novamente.');
+                return;
+            }
+            
+            const amount = parseFloat(document.getElementById('withdrawAmount').value);
+            const accountSelect = document.getElementById('selectedAccount');
+            const accountValue = accountSelect.value;
+            
+            // Validations
+            if (amount < 500) {
+                showError('Valor mínimo para saque é 500 KZ');
+                return;
+            }
+            
+            if (amount > 50000) {
+                showError('Valor máximo para saque é 50.000 KZ');
+                return;
+            }
+            
+            if (amount > (userData.saldo || 0)) {
+                showError('Saldo insuficiente para esta retirada');
+                return;
+            }
+            
+            if (!accountValue) {
+                showError('Selecione uma conta bancária');
+                return;
+            }
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<ion-icon name="sync-outline"></ion-icon> Processando...';
+            
+            try {
+                // Parse account data
+                const accountData = JSON.parse(accountValue);
+                
+                // Calculate 15% tax
+                const tax = amount * 0.15;
+                const netAmount = amount - tax;
+                
+                // Generate unique reference
+                const reference = 'ANC-W' + Date.now().toString().slice(-8) + Math.floor(Math.random() * 100).toString().padStart(2, '0');
+                
+                // Create withdrawal request
+                const withdrawalData = {
+                    userId: currentUser.uid,
+                    userName: userData.nomeCompleto || 'Usuário',
+                    userEmail: userData.email || '',
+                    userAccount: accountData,
+                    amount: amount,
+                    tax: tax,
+                    netAmount: netAmount,
+                    taxPercentage: 15,
+                    account: accountData.banco + ' - ' + accountData.conta,
+                    status: 'pending',
+                    statusMessage: 'Solicitação recebida. Processando...',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    reference: reference,
+                    type: 'withdrawal'
+                };
+                
+                // Add to Firestore em um batch para garantir atomicidade
+                const batch = db.batch();
+                const withdrawalRef = db.collection('withdrawals').doc();
+                batch.set(withdrawalRef, withdrawalData);
+                
+                // Update user balance
+                const userRef = db.collection('users').doc(currentUser.uid);
+                batch.update(userRef, {
+                    saldo: firebase.firestore.FieldValue.increment(-amount),
+                    totalRetirado: firebase.firestore.FieldValue.increment(amount),
+                    ultimaRetirada: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                // Commit the batch
+                await batch.commit();
+                
+                // Update user data locally
+                userData.saldo -= amount;
+                userData.totalRetirado = (userData.totalRetirado || 0) + amount;
+                
+                // Show success message
+                showSuccess(`✅ Retirada solicitada com sucesso!<br>
+                           Referência: ${reference}<br>
+                           Valor solicitado: ${amount.toLocaleString('pt-AO')} KZ<br>
+                           Taxa (15%): ${tax.toLocaleString('pt-AO')} KZ<br>
+                           Valor líquido: ${netAmount.toLocaleString('pt-AO')} KZ<br>
+                           Status: Processando`);
+                
+                // Reset form
+                document.getElementById('withdrawalForm').reset();
+                document.getElementById('taxInfo').style.display = 'none';
+                
+                // Update available amount display
+                document.getElementById('availableAmount').textContent = 
+                    userData.saldo.toLocaleString('pt-AO') + ' KZ';
+                
+                // Se estiver na página de histórico, forçar atualização
+                if (document.getElementById('historySection').style.display === 'block') {
+                    // Recarregar histórico
+                    loadWithdrawalHistoryWithFallback();
+                }
+                
+            } catch (error) {
+                console.error('Error processing withdrawal:', error);
+                if (error.code === 'permission-denied') {
+                    showError('Permissão negada. Verifique as regras de segurança do Firestore.');
+                } else if (error.message.includes('JSON')) {
+                    showError('Erro ao processar dados da conta bancária.');
+                } else if (error.code === 'failed-precondition') {
+                    showError('Erro de concorrência. Por favor, tente novamente.');
+                } else {
+                    showError('Erro ao processar retirada: ' + error.message);
+                }
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<ion-icon name="paper-plane-outline"></ion-icon> Confirmar Retirada';
+            }
+        });
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.innerHTML = message;
+            successDiv.style.display = 'block';
+            
+            // Scroll to top to show message
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 10000);
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            
+            // Scroll to top to show message
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 8000);
+        }
+
+        // Show loading on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('loadingScreen').style.display = 'block';
+            
+            // Verificar se já foi criado o índice
+            if (localStorage.getItem('indexCreated') === 'true') {
+                console.log('Índice já foi criado pelo usuário');
+            }
+        });
+
+        // Initialize form validation
+        document.addEventListener('DOMContentLoaded', () => {
+            const amountInput = document.getElementById('withdrawAmount');
+            if (amountInput) {
+                amountInput.addEventListener('input', calculateTax);
+                
+                // Prevent form submission on Enter key in amount field
+                amountInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                    }
+                });
+            }
+        });
+
+        // Add retry mechanism for history loading
+        function retryHistoryLoad() {
+            if (document.getElementById('historySection').style.display === 'block') {
+                loadWithdrawalHistoryWithFallback();
+            }
+        }
+
+        // Limpar listener ao sair da página
+        window.addEventListener('beforeunload', () => {
+            // Limpar flag de índice se necessário
+            // localStorage.removeItem('indexCreated');
+        });
+    </script>
+</body>
+</html>

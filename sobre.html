@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Âncora Patrimonial - Sobre</title>
+    <!-- Ionicons -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding-bottom: 70px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 20px;
+            padding-top: 40px;
+            position: relative;
+            text-align: center;
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .page-subtitle {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+        
+        .content-container {
+            padding: 20px;
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        .about-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 2px solid transparent;
+            transition: transform 0.3s ease;
+        }
+        
+        .about-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .about-card:nth-child(1) {
+            border-color: #2a5298;
+        }
+        
+        .about-card:nth-child(2) {
+            border-color: #2ed573;
+        }
+        
+        .about-card:nth-child(3) {
+            border-color: #FFA500;
+        }
+        
+        .about-card:nth-child(4) {
+            border-color: #9c88ff;
+        }
+        
+        .about-card:nth-child(5) {
+            border-color: #FF4757;
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .card-icon {
+            font-size: 40px;
+            color: #2a5298;
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2a5298;
+        }
+        
+        .card-content {
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .card-content p {
+            margin-bottom: 15px;
+        }
+        
+        .highlight {
+            background: linear-gradient(45deg, #2a5298, #1e3c72);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: center;
+            animation: pulse 2s infinite;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .feature-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-item:hover {
+            background: #eef2ff;
+            transform: translateY(-3px);
+        }
+        
+        .feature-icon {
+            font-size: 24px;
+            color: #2a5298;
+            margin-bottom: 10px;
+        }
+        
+        .feature-text {
+            font-size: 0.9rem;
+            color: #333;
+        }
+        
+        .launch-info {
+            background: linear-gradient(45deg, #FFA500, #FF8C00);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 30px 0;
+            box-shadow: 0 10px 25px rgba(255, 140, 0, 0.3);
+        }
+        
+        .launch-date {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .launch-label {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+            border-top: 1px solid #e1e1e1;
+            z-index: 1000;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            color: #666;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .nav-item.active {
+            color: #2a5298;
+        }
+        
+        .nav-item:hover {
+            color: #2a5298;
+        }
+        
+        .nav-icon {
+            font-size: 20px;
+        }
+        
+        .nav-text {
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        
+        .timeline {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .timeline::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            background: #2a5298;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -3px;
+            border-radius: 3px;
+        }
+        
+        .timeline-item {
+            padding: 10px 40px;
+            position: relative;
+            width: 50%;
+            box-sizing: border-box;
+        }
+        
+        .timeline-item:nth-child(odd) {
+            left: 0;
+        }
+        
+        .timeline-item:nth-child(even) {
+            left: 50%;
+        }
+        
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            background: white;
+            border: 4px solid #2a5298;
+            top: 15px;
+            border-radius: 50%;
+            z-index: 1;
+        }
+        
+        .timeline-item:nth-child(odd)::after {
+            right: -17px;
+        }
+        
+        .timeline-item:nth-child(even)::after {
+            left: -17px;
+        }
+        
+        .timeline-content {
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .timeline-date {
+            font-weight: 700;
+            color: #2a5298;
+            margin-bottom: 10px;
+        }
+        
+        @media screen and (max-width: 768px) {
+            .timeline::after {
+                left: 31px;
+            }
+            
+            .timeline-item {
+                width: 100%;
+                padding-left: 70px;
+                padding-right: 25px;
+            }
+            
+            .timeline-item:nth-child(even) {
+                left: 0;
+            }
+            
+            .timeline-item::after {
+                left: 18px;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <button class="back-btn" onclick="window.history.back()">
+            <ion-icon name="arrow-back"></ion-icon>
+        </button>
+        <h1 class="page-title">Sobre a Plataforma</h1>
+        <p class="page-subtitle">Âncora Patrimonial - Sua segurança em investimentos</p>
+    </div>
+    
+    <!-- Content -->
+    <div class="content-container">
+        <!-- Launch Date -->
+        <div class="launch-info">
+            <div class="launch-date">18/01/2025</div>
+            <div class="launch-label">Data de Lançamento</div>
+        </div>
+        
+        <!-- About Card 1 -->
+        <div class="about-card">
+            <div class="card-header">
+                <ion-icon name="rocket-outline" class="card-icon"></ion-icon>
+                <h2 class="card-title">Porque Foi Lançada</h2>
+            </div>
+            <div class="card-content">
+                <p>A Âncora Patrimonial nasceu da necessidade de oferecer uma plataforma de investimentos segura, transparente e acessível para todos os angolanos que desejam construir patrimônio de forma consistente.</p>
+                <p>Com o crescimento econômico de Angola e a necessidade de educação financeira, identificamos a oportunidade de criar uma solução que combina tecnologia avançada com princípios sólidos de investimento.</p>
+                <p>Nossa missão é democratizar o acesso a investimentos de qualidade, oferecendo retornos justos e um sistema de apoio completo para nossos investidores.</p>
+            </div>
+        </div>
+        
+        <!-- About Card 2 -->
+        <div class="about-card">
+            <div class="card-header">
+                <ion-icon name="shield-checkmark-outline" class="card-icon"></ion-icon>
+                <h2 class="card-title">Garantia com Investidores</h2>
+            </div>
+            <div class="card-content">
+                <p>Na Âncora Patrimonial, a segurança dos investimentos é nossa prioridade máxima. Implementamos várias camadas de proteção:</p>
+                
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <ion-icon name="lock-closed-outline" class="feature-icon"></ion-icon>
+                        <div class="feature-text">Criptografia de ponta a ponta</div>
+                    </div>
+                    <div class="feature-item">
+                        <ion-icon name="card-outline" class="feature-icon"></ion-icon>
+                        <div class="feature-text">Fundos segregados em bancos</div>
+                    </div>
+                    <div class="feature-item">
+                        <ion-icon name="document-text-outline" class="feature-icon"></ion-icon>
+                        <div class="feature-text">Auditoria independente mensal</div>
+                    </div>
+                    <div class="feature-item">
+                        <ion-icon name="people-outline" class="feature-icon"></ion-icon>
+                        <div class="feature-text">Equipe de gestão experiente</div>
+                    </div>
+                </div>
+                
+                <div class="highlight">
+                    <p><strong>100% dos fundos estão garantidos</strong> por reservas bancárias e seguros especializados. Trabalhamos com os maiores bancos de Angola para garantir a segurança absoluta dos seus investimentos.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- About Card 3 -->
+        <div class="about-card">
+            <div class="card-header">
+                <ion-icon name="flash-outline" class="card-icon"></ion-icon>
+                <h2 class="card-title">Como Funciona</h2>
+            </div>
+            <div class="card-content">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <div class="timeline-date">Passo 1: Cadastro</div>
+                            <p>Crie sua conta em minutos e receba 500 KZ de bônus de boas-vindas. Verificação de identidade rápida e segura.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <div class="timeline-date">Passo 2: Depósito</div>
+                            <p>Adicione fundos à sua conta através de múltiplos métodos de pagamento seguros. Depósito mínimo de 2.000 KZ.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <div class="timeline-date">Passo 3: Investir</div>
+                            <p>Escolha entre nossos planos de investimento com retornos diários garantidos. Mínimo de 2.000 KZ e máximo de 50.000 KZ por plano.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <div class="timeline-date">Passo 4: Lucrar</div>
+                            <p>Receba lucros diários automaticamente. Complete tarefas simples para otimizar seus rendimentos.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <div class="timeline-date">Passo 5: Retirar</div>
+                            <p>Saque seus lucros a qualquer momento. Processamento rápido em 24-48 horas para contas angolanas.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- About Card 4 -->
+        <div class="about-card">
+            <div class="card-header">
+                <ion-icon name="stats-chart-outline" class="card-icon"></ion-icon>
+                <h2 class="card-title">Funcionalidades Principais</h2>
+            </div>
+            <div class="card-content">
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <ion-icon name="trending-up-outline" class="feature-icon"></ion-icon>
+                        <div class="feature-text">Investimentos diários</div>
+                    </div>
+                    <div class="feature-item">
+                        <ion-icon name="people-outline" class="feature-icon"></ion-icon>
+                        <div class="feature-text">Programa de indicações</div>
+                    </div>
+                    <div class="feature-item">
+                        <ion-icon name="trophy-outline" class="feature-icon"></ion-icon>
+                        <div class="feature-text">Sistema de premiação</div>
+                    </div>
+                    <div class="feature-item">
+                        <ion-icon name="shield-outline" class="feature-icon"></ion-icon>
+                        <div class="feature-text">Segurança máxima</div>
+                    </div>
+                    <div class="feature-item">
+                        <ion-icon name="phone-portrait-outline" class="feature-icon"></ion-icon>
+                        <div class="feature-text">App mobile amigável</div>
+                    </div>
+                    <div class="feature-item">
+                        <ion-icon name="headset-outline" class="feature-icon"></ion-icon>
+                        <div class="feature-text">Suporte 24/7</div>
+                    </div>
+                    <div class="feature-item">
+                        <ion-icon name="document-text-outline" class="feature-icon"></ion-icon>
+                        <div class="feature-text">Relatórios detalhados</div>
+                    </div>
+                    <div class="feature-item">
+                        <ion-icon name="refresh-outline" class="feature-icon"></ion-icon>
+                        <div class="feature-text">Reinvestimento automático</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- About Card 5 -->
+        <div class="about-card">
+            <div class="card-header">
+                <ion-icon name="business-outline" class="card-icon"></ion-icon>
+                <h2 class="card-title">Nosso Compromisso</h2>
+            </div>
+            <div class="card-content">
+                <p>A Âncora Patrimonial se compromete com:</p>
+                <ul style="padding-left: 20px; margin: 15px 0; color: #555;">
+                    <li style="margin-bottom: 10px;">Transparência total em todas as operações</li>
+                    <li style="margin-bottom: 10px;">Conformidade com todas as regulamentações financeiras</li>
+                    <li style="margin-bottom: 10px;">Educação financeira gratuita para nossos membros</li>
+                    <li style="margin-bottom: 10px;">Inovação constante para melhorar nossos serviços</li>
+                    <li style="margin-bottom: 10px;">Suporte personalizado para cada investidor</li>
+                </ul>
+                <div class="highlight">
+                    <p><strong>Junte-se a mais de 10.000 investidores</strong> que já confiaram na Âncora Patrimonial para construir seu futuro financeiro.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <ion-icon name="home" class="nav-icon"></ion-icon>
+            <span class="nav-text">Início</span>
+        </a>
+        <a href="compra.html" class="nav-item">
+            <ion-icon name="cart" class="nav-icon"></ion-icon>
+            <span class="nav-text">Compra</span>
+        </a>
+        <a href="Menu.html" class="nav-item active">
+            <ion-icon name="person" class="nav-icon"></ion-icon>
+            <span class="nav-text">Minha Conta</span>
+        </a>
+    </div>
+
+    <script>
+        // Simple animations for timeline
+        document.addEventListener('DOMContentLoaded', () => {
+            const timelineItems = document.querySelectorAll('.timeline-item');
+            timelineItems.forEach((item, index) => {
+                item.style.animationDelay = `${index * 0.2}s`;
+                item.style.animation = 'slideUp 0.5s ease-out';
+            });
+        });
+    </script>
+</body>
+</html>
