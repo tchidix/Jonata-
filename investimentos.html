@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Âncora Patrimonial - Meus Investimentos</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <!-- Ionicons -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding-bottom: 70px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 20px;
+            padding-top: 40px;
+            position: relative;
+            text-align: center;
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .page-subtitle {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+        
+        .content-container {
+            padding: 20px;
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .stat-card.active {
+            border-color: #2ed573;
+        }
+        
+        .stat-card.pending {
+            border-color: #FFA500;
+        }
+        
+        .stat-card.completed {
+            border-color: #2a5298;
+        }
+        
+        .stat-card.total {
+            border-color: #FF4757;
+        }
+        
+        .stat-icon {
+            font-size: 30px;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card.active .stat-icon {
+            color: #2ed573;
+        }
+        
+        .stat-card.pending .stat-icon {
+            color: #FFA500;
+        }
+        
+        .stat-card.completed .stat-icon {
+            color: #2a5298;
+        }
+        
+        .stat-card.total .stat-icon {
+            color: #FF4757;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+        
+        .stat-card.active .stat-value {
+            color: #2ed573;
+        }
+        
+        .stat-card.pending .stat-value {
+            color: #FFA500;
+        }
+        
+        .stat-card.completed .stat-value {
+            color: #2a5298;
+        }
+        
+        .stat-card.total .stat-value {
+            color: #FF4757;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .tabs {
+            display: flex;
+            background: white;
+            border-radius: 12px;
+            padding: 5px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+        
+        .tab.active {
+            background: linear-gradient(45deg, #2a5298, #1e3c72);
+            color: white;
+            box-shadow: 0 3px 10px rgba(42, 82, 152, 0.2);
+        }
+        
+        .investments-list {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .investments-list.active {
+            display: block;
+        }
+        
+        .investment-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border-left: 4px solid #2a5298;
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .investment-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .investment-card.active {
+            border-left-color: #2ed573;
+        }
+        
+        .investment-card.completed {
+            border-left-color: #2a5298;
+        }
+        
+        .investment-card.expired {
+            border-left-color: #FF4757;
+        }
+        
+        .investment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .investment-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #2a5298;
+        }
+        
+        .investment-status {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-completed {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .status-expired {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .investment-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .detail-item {
+            text-align: center;
+            padding: 12px;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+        
+        .detail-label {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .detail-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #2a5298;
+        }
+        
+        .detail-value.highlight {
+            color: #FF8C00;
+        }
+        
+        .progress-container {
+            margin-top: 15px;
+        }
+        
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background: #e9ecef;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2ed573, #1dd1a1);
+            border-radius: 5px;
+            width: 0%;
+            transition: width 1s ease-out;
+        }
+        
+        .tasks-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .tasks-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #2a5298;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .tasks-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        
+        .task-item {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .task-item.completed {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .action-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .collect-btn {
+            background: linear-gradient(45deg, #2ed573, #1dd1a1);
+            color: white;
+        }
+        
+        .collect-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(46, 213, 115, 0.3);
+        }
+        
+        .collect-btn.disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .collect-btn.disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .extend-btn {
+            background: linear-gradient(45deg, #FFA500, #FF8C00);
+            color: white;
+        }
+        
+        .extend-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 140, 0, 0.3);
+        }
+        
+        .no-investments {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .no-investments ion-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #ccc;
+        }
+        
+        .info-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border-left: 4px solid #2a5298;
+        }
+        
+        .info-card h3 {
+            color: #2a5298;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .rules-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .rules-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #555;
+        }
+        
+        .rules-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .rule-icon {
+            color: #2a5298;
+            font-size: 16px;
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+            border-top: 1px solid #e1e1e1;
+            z-index: 1000;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            color: #666;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .nav-item.active {
+            color: #2a5298;
+        }
+        
+        .nav-item:hover {
+            color: #2a5298;
+        }
+        
+        .nav-icon {
+            font-size: 20px;
+        }
+        
+        .nav-text {
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2a5298;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .success-message {
+            background: #2ed573;
+            color: white;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .error-message {
+            background: #ff4757;
+            color: white;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <button class="back-btn" onclick="window.history.back()">
+            <ion-icon name="arrow-back"></ion-icon>
+        </button>
+        <h1 class="page-title">Meus Investimentos</h1>
+        <p class="page-subtitle">Acompanhe seus investimentos ativos</p>
+    </div>
+    
+    <!-- Content -->
+    <div class="content-container">
+        <!-- Messages -->
+        <div id="successMessage" class="success-message"></div>
+        <div id="errorMessage" class="error-message"></div>
+        
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card active">
+                <ion-icon name="play-circle" class="stat-icon"></ion-icon>
+                <div class="stat-value" id="activeInvestmentsCount">0</div>
+                <div class="stat-label">Ativos</div>
+            </div>
+            
+            <div class="stat-card pending">
+                <ion-icon name="time" class="stat-icon"></ion-icon>
+                <div class="stat-value" id="pendingProfit">0 KZ</div>
+                <div class="stat-label">Lucros Pendentes</div>
+            </div>
+            
+            <div class="stat-card completed">
+                <ion-icon name="checkmark-circle" class="stat-icon"></ion-icon>
+                <div class="stat-value" id="totalProfit">0 KZ</div>
+                <div class="stat-label">Lucros Recebidos</div>
+            </div>
+            
+            <div class="stat-card total">
+                <ion-icon name="trending-up" class="stat-icon"></ion-icon>
+                <div class="stat-value" id="totalInvested">0 KZ</div>
+                <div class="stat-label">Total Investido</div>
+            </div>
+        </div>
+        
+        <!-- Rules Card -->
+        <div class="info-card">
+            <h3><ion-icon name="information-circle-outline"></ion-icon> Informações Importantes</h3>
+            <ul class="rules-list">
+                <li>
+                    <ion-icon name="checkmark-circle" class="rule-icon"></ion-icon>
+                    Lucros são creditados automaticamente diariamente
+                </li>
+                <li>
+                    <ion-icon name="checkmark-circle" class="rule-icon"></ion-icon>
+                    Complete as tarefas para liberar lucros
+                </li>
+                <li>
+                    <ion-icon name="checkmark-circle" class="rule-icon"></ion-icon>
+                    Cada investimento tem 2 tarefas por nível
+                </li>
+                <li>
+                    <ion-icon name="checkmark-circle" class="rule-icon"></ion-icon>
+                    Reinvestimento automático disponível
+                </li>
+                <li>
+                    <ion-icon name="checkmark-circle" class="rule-icon"></ion-icon>
+                    Suporte técnico 24/7 para dúvidas
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab active" data-tab="active" onclick="switchTab('active')">
+                Ativos
+            </div>
+            <div class="tab" data-tab="completed" onclick="switchTab('completed')">
+                Concluídos
+            </div>
+            <div class="tab" data-tab="all" onclick="switchTab('all')">
+                Todos
+            </div>
+        </div>
+        
+        <!-- Active Investments -->
+        <div id="activeTab" class="investments-list active">
+            <div id="activeInvestmentsList">
+                <!-- Active investments will be loaded here -->
+            </div>
+        </div>
+        
+        <!-- Completed Investments -->
+        <div id="completedTab" class="investments-list">
+            <div id="completedInvestmentsList">
+                <!-- Completed investments will be loaded here -->
+            </div>
+        </div>
+        
+        <!-- All Investments -->
+        <div id="allTab" class="investments-list">
+            <div id="allInvestmentsList">
+                <!-- All investments will be loaded here -->
+            </div>
+        </div>
+        
+        <!-- No Investments Message -->
+        <div id="noInvestments" class="no-investments" style="display: none;">
+            <ion-icon name="trending-up-outline"></ion-icon>
+            <h3>Nenhum investimento encontrado</h3>
+            <p>Comece a investir agora e multiplique seu dinheiro!</p>
+            <a href="compra.html" style="display: inline-block; margin-top: 15px; padding: 10px 20px; 
+               background: linear-gradient(45deg, #2a5298, #1e3c72); color: white; text-decoration: none; 
+               border-radius: 8px; font-weight: 600;">
+                Ver Planos de Investimento
+            </a>
+        </div>
+    </div>
+    
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <ion-icon name="home" class="nav-icon"></ion-icon>
+            <span class="nav-text">Início</span>
+        </a>
+        <a href="compra.html" class="nav-item">
+            <ion-icon name="cart" class="nav-icon"></ion-icon>
+            <span class="nav-text">Compra</span>
+        </a>
+        <a href="Menu.html" class="nav-item active">
+            <ion-icon name="person" class="nav-icon"></ion-icon>
+            <span class="nav-text">Minha Conta</span>
+        </a>
+    </div>
+    
+    <!-- Loading Screen -->
+    <div class="loading" id="loadingScreen">
+        <div class="spinner"></div>
+        <p>Carregando investimentos...</p>
+    </div>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBp8X1PPp3FqiQ6OXErr8Mu11GEp6MZ2-U",
+            authDomain: "ascend-34bf0.firebaseapp.com",
+            projectId: "ascend-34bf0",
+            storageBucket: "ascend-34bf0.firebasestorage.app",
+            messagingSenderId: "592623076677",
+            appId: "1:592623076677:web:c5615719870aefdabf6a2c"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let currentUser = null;
+        let userData = null;
+        let investments = [];
+
+        // Check authentication
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                currentUser = user;
+                await loadUserData(user.uid);
+                await loadInvestments(user.uid);
+                document.getElementById('loadingScreen').style.display = 'none';
+            } else {
+                window.location.href = 'registo.html';
+            }
+        });
+
+        async function loadUserData(uid) {
+            try {
+                const doc = await db.collection('users').doc(uid).get();
+                if (doc.exists) {
+                    userData = doc.data();
+                    document.getElementById('totalInvested').textContent = 
+                        (userData.saldoInvestido || 0).toLocaleString('pt-AO') + ' KZ';
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+
+        async function loadInvestments(uid) {
+            try {
+                const snapshot = await db.collection('investments')
+                    .where('userId', '==', uid)
+                    .orderBy('startDate', 'desc')
+                    .get();
+                
+                investments = [];
+                let totalProfit = 0;
+                let pendingProfit = 0;
+                let activeCount = 0;
+                
+                snapshot.forEach(doc => {
+                    const investment = {
+                        id: doc.id,
+                        ...doc.data()
+                    };
+                    investments.push(investment);
+                    
+                    if (investment.status === 'active') {
+                        activeCount++;
+                        // Calculate pending profit (for demo purposes)
+                        if (investment.lastProfitDate) {
+                            const lastProfit = investment.lastProfitDate.toDate();
+                            const now = new Date();
+                            const hoursDiff = (now - lastProfit) / (1000 * 60 * 60);
+                            
+                            if (hoursDiff >= 24) {
+                                pendingProfit += investment.dailyProfit;
+                            }
+                        } else {
+                            pendingProfit += investment.dailyProfit;
+                        }
+                    }
+                    
+                    totalProfit += investment.totalProfit || 0;
+                });
+                
+                // Update stats
+                document.getElementById('activeInvestmentsCount').textContent = activeCount;
+                document.getElementById('pendingProfit').textContent = pendingProfit.toLocaleString('pt-AO') + ' KZ';
+                document.getElementById('totalProfit').textContent = totalProfit.toLocaleString('pt-AO') + ' KZ';
+                
+                // Render investments
+                renderInvestments();
+                
+                // Show/hide no investments message
+                if (investments.length === 0) {
+                    document.getElementById('noInvestments').style.display = 'block';
+                } else {
+                    document.getElementById('noInvestments').style.display = 'none';
+                }
+                
+            } catch (error) {
+                console.error('Error loading investments:', error);
+            }
+        }
+
+        function renderInvestments() {
+            const activeList = document.getElementById('activeInvestmentsList');
+            const completedList = document.getElementById('completedInvestmentsList');
+            const allList = document.getElementById('allInvestmentsList');
+            
+            activeList.innerHTML = '';
+            completedList.innerHTML = '';
+            allList.innerHTML = '';
+            
+            let hasActive = false;
+            let hasCompleted = false;
+            
+            investments.forEach(investment => {
+                const investmentCard = createInvestmentCard(investment);
+                allList.appendChild(investmentCard.cloneNode(true));
+                
+                if (investment.status === 'active') {
+                    activeList.appendChild(investmentCard);
+                    hasActive = true;
+                } else {
+                    const completedCard = investmentCard.cloneNode(true);
+                    completedList.appendChild(completedCard);
+                    hasCompleted = true;
+                }
+            });
+            
+            // Show appropriate messages if no investments in category
+            if (!hasActive) {
+                activeList.innerHTML = `
+                    <div class="no-investments" style="padding: 20px;">
+                        <ion-icon name="play-circle-outline"></ion-icon>
+                        <p>Nenhum investimento ativo no momento</p>
+                    </div>
+                `;
+            }
+            
+            if (!hasCompleted) {
+                completedList.innerHTML = `
+                    <div class="no-investments" style="padding: 20px;">
+                        <ion-icon name="checkmark-circle-outline"></ion-icon>
+                        <p>Nenhum investimento concluído</p>
+                    </div>
+                `;
+            }
+        }
+
+        function createInvestmentCard(investment) {
+            const card = document.createElement('div');
+            card.className = `investment-card ${investment.status}`;
+            
+            const startDate = investment.startDate ? 
+                investment.startDate.toDate().toLocaleDateString('pt-AO') : 'Data não disponível';
+            
+            // Calculate days active
+            const start = investment.startDate ? investment.startDate.toDate() : new Date();
+            const now = new Date();
+            const daysActive = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+            
+            // Calculate progress (for demo, using 30-day cycle)
+            const progress = Math.min((daysActive / 30) * 100, 100);
+            
+            card.innerHTML = `
+                <div class="investment-header">
+                    <h3 class="investment-name">${investment.planName || 'Investimento'}</h3>
+                    <span class="investment-status status-${investment.status}">
+                        ${investment.status === 'active' ? 'Ativo' : 
+                          investment.status === 'completed' ? 'Concluído' : 'Expirado'}
+                    </span>
+                </div>
+                
+                <div class="investment-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Investido</div>
+                        <div class="detail-value">${investment.investmentAmount.toLocaleString('pt-AO')} KZ</div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">Lucro Diário</div>
+                        <div class="detail-value highlight">${investment.dailyProfit.toLocaleString('pt-AO')} KZ</div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">Início</div>
+                        <div class="detail-value">${startDate}</div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">Lucro Total</div>
+                        <div class="detail-value">${(investment.totalProfit || 0).toLocaleString('pt-AO')} KZ</div>
+                    </div>
+                </div>
+                
+                <div class="progress-container">
+                    <div class="progress-label">
+                        <span>Progresso</span>
+                        <span>${Math.round(progress)}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${progress}%"></div>
+                    </div>
+                </div>
+                
+                ${investment.status === 'active' ? `
+                    <div class="tasks-section">
+                        <h4 class="tasks-title">
+                            <ion-icon name="checkbox-outline"></ion-icon>
+                            Tarefas do Dia (${investment.tasksCompleted || 0}/${investment.tasks || 0})
+                        </h4>
+                        <div class="tasks-grid">
+                            <div class="task-item ${(investment.tasksCompleted || 0) >= 1 ? 'completed' : ''}">
+                                <ion-icon name="${(investment.tasksCompleted || 0) >= 1 ? 'checkmark-circle' : 'ellipse-outline'}"></ion-icon>
+                                Tarefa 1
+                            </div>
+                            <div class="task-item ${(investment.tasksCompleted || 0) >= 2 ? 'completed' : ''}">
+                                <ion-icon name="${(investment.tasksCompleted || 0) >= 2 ? 'checkmark-circle' : 'ellipse-outline'}"></ion-icon>
+                                Tarefa 2
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="action-btn collect-btn ${(investment.tasksCompleted || 0) < (investment.tasks || 2) ? 'disabled' : ''}"
+                                onclick="collectProfit('${investment.id}')"
+                                ${(investment.tasksCompleted || 0) < (investment.tasks || 2) ? 'disabled' : ''}>
+                            <ion-icon name="cash-outline"></ion-icon>
+                            Coletar Lucro
+                        </button>
+                        <button class="action-btn extend-btn" onclick="extendInvestment('${investment.id}')">
+                            <ion-icon name="refresh-outline"></ion-icon>
+                            Estender
+                        </button>
+                    </div>
+                ` : ''}
+            `;
+            
+            return card;
+        }
+
+        function switchTab(tabName) {
+            // Update tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`.tab[data-tab="${tabName}"]`).classList.add('active');
+            
+            // Update content
+            document.querySelectorAll('.investments-list').forEach(list => {
+                list.classList.remove('active');
+            });
+            document.getElementById(`${tabName}Tab`).classList.add('active');
+        }
+
+        async function collectProfit(investmentId) {
+            const investment = investments.find(i => i.id === investmentId);
+            if (!investment) return;
+            
+            try {
+                // Update investment
+                await db.collection('investments').doc(investmentId).update({
+                    totalProfit: firebase.firestore.FieldValue.increment(investment.dailyProfit),
+                    lastProfitDate: firebase.firestore.FieldValue.serverTimestamp(),
+                    tasksCompleted: 0 // Reset tasks for next day
+                });
+                
+                // Update user balance
+                await db.collection('users').doc(currentUser.uid).update({
+                    saldo: firebase.firestore.FieldValue.increment(investment.dailyProfit),
+                    totalGanhos: firebase.firestore.FieldValue.increment(investment.dailyProfit)
+                });
+                
+                showSuccess(`✅ Lucro de ${investment.dailyProfit} KZ coletado com sucesso!`);
+                
+                // Reload data
+                await loadInvestments(currentUser.uid);
+                await loadUserData(currentUser.uid);
+                
+            } catch (error) {
+                console.error('Error collecting profit:', error);
+                showError('Erro ao coletar lucro. Tente novamente.');
+            }
+        }
+
+        function extendInvestment(investmentId) {
+            showError('Funcionalidade de extensão em desenvolvimento.');
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // Show loading on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('loadingScreen').style.display = 'block';
+        });
+    </script>
+</body>
+</html>
