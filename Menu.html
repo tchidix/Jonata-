@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Âncora Patrimonial - Minha Conta</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <!-- Ionicons -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding-bottom: 70px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 20px;
+            padding-top: 40px;
+            position: relative;
+            text-align: center;
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 0 auto 15px;
+            border: 3px solid white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .user-name {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .user-id {
+            opacity: 0.9;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+        
+        .menu-container {
+            padding: 20px;
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        .menu-section {
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            color: #2a5298;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e1e1e1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .menu-item {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border: 2px solid transparent;
+            text-align: center;
+        }
+        
+        .menu-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-color: #2a5298;
+        }
+        
+        .menu-item.blue:hover {
+            background: linear-gradient(45deg, #2a5298, #1e3c72);
+            color: white;
+        }
+        
+        .menu-item.green:hover {
+            background: linear-gradient(45deg, #2ed573, #1dd1a1);
+            color: white;
+        }
+        
+        .menu-item.orange:hover {
+            background: linear-gradient(45deg, #FFA500, #FF8C00);
+            color: white;
+        }
+        
+        .menu-item.red:hover {
+            background: linear-gradient(45deg, #FF4757, #ff3838);
+            color: white;
+        }
+        
+        .menu-item.purple:hover {
+            background: linear-gradient(45deg, #9c88ff, #8c7ae6);
+            color: white;
+        }
+        
+        .menu-icon {
+            font-size: 28px;
+        }
+        
+        .menu-text {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .menu-description {
+            font-size: 0.8rem;
+            color: #666;
+            opacity: 0.8;
+        }
+        
+        .menu-item:hover .menu-description {
+            color: white;
+            opacity: 0.9;
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+            border-top: 1px solid #e1e1e1;
+            z-index: 1000;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            color: #666;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .nav-item.active {
+            color: #2a5298;
+        }
+        
+        .nav-item:hover {
+            color: #2a5298;
+        }
+        
+        .nav-icon {
+            font-size: 20px;
+        }
+        
+        .nav-text {
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .logout-btn {
+            background: linear-gradient(45deg, #FF4757, #ff3838);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(255, 71, 87, 0.3);
+        }
+        
+        .logout-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(255, 71, 87, 0.4);
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2a5298;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .whatsapp-btn {
+            background: linear-gradient(45deg, #25D366, #128C7E);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            text-decoration: none;
+        }
+        
+        .whatsapp-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(37, 211, 102, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <button class="back-btn" onclick="window.history.back()">
+            <ion-icon name="arrow-back"></ion-icon>
+        </button>
+        
+        <div class="user-avatar" id="userAvatar">U</div>
+        <h2 class="user-name" id="userName">Usuário</h2>
+        <p class="user-id" id="userId">ID: ---</p>
+    </div>
+    
+    <!-- Menu Content -->
+    <div class="menu-container">
+        <!-- Main Options -->
+        <div class="menu-section">
+            <h3 class="section-title">
+                <ion-icon name="grid-outline"></ion-icon>
+                Minha Conta
+            </h3>
+            
+            <div class="menu-grid">
+                <a href="equipas.html" class="menu-item blue">
+                    <ion-icon name="people-outline" class="menu-icon"></ion-icon>
+                    <span class="menu-text">Equipas</span>
+                    <span class="menu-description">Amigos e comissões</span>
+                </a>
+                
+                <a href="invest.html" class="menu-item green">
+                    <ion-icon name="trending-up-outline" class="menu-icon"></ion-icon>
+                    <span class="menu-text">Meus Investimentos</span>
+                    <span class="menu-description">Ativos e histórico</span>
+                </a>
+                
+                <a href="recebimento.html" class="menu-item orange">
+                    <ion-icon name="card-outline" class="menu-icon"></ion-icon>
+                    <span class="menu-text">Recepção de Retirada</span>
+                    <span class="menu-description">Configurar conta</span>
+                </a>
+                
+                <a href="sobre.html" class="menu-item purple">
+                    <ion-icon name="information-circle-outline" class="menu-icon"></ion-icon>
+                    <span class="menu-text">Sobre</span>
+                    <span class="menu-description">Como funciona</span>
+                </a>
+                
+                <a href="dados.html" class="menu-item blue">
+                    <ion-icon name="person-circle-outline" class="menu-icon"></ion-icon>
+                    <span class="menu-text">Meus Dados</span>
+                    <span class="menu-description">Informações pessoais</span>
+                </a>
+                
+                <a href="premiacao.html" class="menu-item green">
+                    <ion-icon name="trophy-outline" class="menu-icon"></ion-icon>
+                    <span class="menu-text">Premiação</span>
+                    <span class="menu-description">Prêmios e conquistas</span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- System Options -->
+        <div class="menu-section">
+            <h3 class="section-title">
+                <ion-icon name="settings-outline"></ion-icon>
+                Sistema
+            </h3>
+            
+            <div class="menu-grid">
+                <a href="demissao.html" class="menu-item red">
+                    <ion-icon name="close-circle-outline" class="menu-icon"></ion-icon>
+                    <span class="menu-text">Demissão</span>
+                    <span class="menu-description">Encerrar conta</span>
+                </a>
+                
+                <a href="emergencia.html" class="menu-item orange">
+                    <ion-icon name="warning-outline" class="menu-icon"></ion-icon>
+                    <span class="menu-text">Modo de Emergência</span>
+                    <span class="menu-description">Ajustes de segurança</span>
+                </a>
+                
+                <a href="#" class="whatsapp-btn" onclick="openWhatsApp()">
+                    <ion-icon name="logo-whatsapp"></ion-icon>
+                    Telegram: 
+                </a>
+            </div>
+        </div>
+        
+        <!-- Logout Button -->
+        <button class="logout-btn" onclick="logout()">
+            <ion-icon name="log-out-outline"></ion-icon>
+            Terminar Sessão
+        </button>
+    </div>
+    
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <ion-icon name="home" class="nav-icon"></ion-icon>
+            <span class="nav-text">Início</span>
+        </a>
+        <a href="compra.html" class="nav-item">
+            <ion-icon name="cart" class="nav-icon"></ion-icon>
+            <span class="nav-text">Compra</span>
+        </a>
+        <a href="Menu.html" class="nav-item active">
+            <ion-icon name="person" class="nav-icon"></ion-icon>
+            <span class="nav-text">Minha Conta</span>
+        </a>
+    </div>
+    
+    <!-- Loading Screen -->
+    <div class="loading" id="loadingScreen">
+       <div class="spinner"></div>
+        <p>Carregando...</p>
+    </div>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBp8X1PPp3FqiQ6OXErr8Mu11GEp6MZ2-U",
+            authDomain: "ascend-34bf0.firebasapp.com",
+            projectId: "ascend-34bf0",
+            storageBucket: "ascend-34bf0.firebasestorage.app",
+            messagingSenderId: "592623076677",
+            appId: "1:592623076677:web:c5615719870aefdabf6a2c"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let currentUser = null;
+        let userData = null;
+
+        // Check authentication
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                currentUser = user;
+                await loadUserData(user.uid);
+                document.getElementById('loadingScreen').style.display = 'none';
+            } else {
+                window.location.href = 'registo.html';
+            }
+        });
+
+        async function loadUserData(uid) {
+            try {
+                const doc = await db.collection('users').doc(uid).get();
+                if (doc.exists) {
+                    userData = doc.data();
+                    updateUI();
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+
+        function updateUI() {
+            // Update user info
+            document.getElementById('userName').textContent = userData.nomeCompleto;
+            document.getElementById('userId').textContent = `ID: ${userData.userId}`;
+            
+            // Update avatar with first letter
+            const firstLetter = userData.nomeCompleto.charAt(0).toUpperCase();
+            document.getElementById('userAvatar').textContent = firstLetter;
+            
+            // Add animations to menu items
+            const menuItems = document.querySelectorAll('.menu-item');
+            menuItems.forEach((item, index) => {
+                item.style.animationDelay = `${index * 0.05}s`;
+            });
+        }
+
+        function openWhatsApp() {
+            const phone = 'https://t.me/ancoraPatrimonial';
+            const message = 'Olá, preciso de ajuda com a Âncora Patrimonial!';
+            const url = `https://t.me/ancoraPatrimonial${phone}?text=${encodeURIComponent(message)}`;
+            window.open(url, '_blank');
+        }
+
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.href = 'registo.html';
+            });
+        }
+
+        // Show loading on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('loadingScreen').style.display = 'block';
+        });
+    </script>
+</body>
+</html>
