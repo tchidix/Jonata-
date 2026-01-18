@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Âncora Patrimonial - Sistema de Depósito</title>
+    <!-- Ionicons -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .page-subtitle {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .steps-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        .steps-container::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 10%;
+            right: 10%;
+            height: 3px;
+            background: #e0e0e0;
+            z-index: 1;
+        }
+        
+        .step {
+            text-align: center;
+            position: relative;
+            z-index: 2;
+            flex: 1;
+        }
+        
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            background: #e0e0e0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+        
+        .step.active .step-circle {
+            background: #2a5298;
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(42, 82, 152, 0.3);
+        }
+        
+        .step.completed .step-circle {
+            background: #2ed573;
+        }
+        
+        .step-label {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .step.active .step-label {
+            color: #2a5298;
+            font-weight: 600;
+        }
+        
+        .step-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .step-content.active {
+            display: block;
+        }
+        
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .payment-method {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .payment-method:hover {
+            transform: translateY(-5px);
+            border-color: #2a5298;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .payment-method.active {
+            border-color: #2a5298;
+            background: #f0f4ff;
+        }
+        
+        .method-icon {
+            font-size: 32px;
+            color: #2a5298;
+            margin-bottom: 10px;
+        }
+        
+        .method-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .method-desc {
+            font-size: 0.8rem;
+            color: #666;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #2a5298;
+            box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
+        }
+        
+        .form-select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .form-select:focus {
+            outline: none;
+            border-color: #2a5298;
+            box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
+        }
+        
+        .amount-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .amount-option {
+            padding: 15px;
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .amount-option:hover {
+            border-color: #2a5298;
+            background: #f0f4ff;
+        }
+        
+        .amount-option.active {
+            border-color: #2a5298;
+            background: #2a5298;
+            color: white;
+        }
+        
+        .custom-amount {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .currency-symbol {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2a5298;
+        }
+        
+        .payment-details {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 2px dashed #2a5298;
+        }
+        
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .detail-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .detail-label {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .detail-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #2a5298;
+            word-break: break-all;
+        }
+        
+        .copy-btn {
+            width: 100%;
+            padding: 12px;
+            background: #2a5298;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .copy-btn:hover {
+            background: #1e3c72;
+            transform: translateY(-2px);
+        }
+        
+        .copy-btn:active {
+            transform: translateY(0);
+        }
+        
+        .instructions {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+        
+        .instructions h4 {
+            color: #856404;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .instructions ol {
+            padding-left: 20px;
+            color: #856404;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        .upload-section {
+            background: #f8f9fa;
+            border: 2px dashed #2a5298;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-section:hover {
+            background: #f0f4ff;
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            color: #2a5298;
+            margin-bottom: 15px;
+        }
+        
+        .upload-text {
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .file-name {
+            color: #2a5298;
+            font-weight: 600;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .preview-image {
+            max-width: 200px;
+            max-height: 200px;
+            margin: 15px auto;
+            display: none;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .telegram-info {
+            background: linear-gradient(135deg, #0088cc 0%, #1e96c8 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .telegram-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+        
+        .telegram-link {
+            display: inline-block;
+            background: white;
+            color: #0088cc;
+            padding: 12px 25px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .telegram-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 18px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(42, 82, 152, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #e9ecef;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #dee2e6;
+            transform: translateY(-3px);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #2ed573 0%, #1dd1a1 100%);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(46, 213, 115, 0.3);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            animation: slideUp 0.3s ease;
+        }
+        
+        .modal-icon {
+            font-size: 60px;
+            color: #2ed573;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            color: #2a5298;
+            margin-bottom: 15px;
+        }
+        
+        .modal-message {
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        /* New styles for IBAN section */
+        .iban-section {
+            background: linear-gradient(135deg, #f0f4ff 0%, #e6eeff 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 2px solid #2a5298;
+        }
+        
+        .iban-title {
+            color: #2a5298;
+            margin-bottom: 20px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .bank-options {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .bank-option {
+            flex: 1;
+            padding: 15px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .bank-option:hover {
+            border-color: #2a5298;
+            background: #f8f9fa;
+        }
+        
+        .bank-option.active {
+            border-color: #2a5298;
+            background: #2a5298;
+            color: white;
+        }
+        
+        .bank-logo {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .iban-details {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .iban-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .iban-row:last-child {
+            border-bottom: none;
+        }
+        
+        .iban-label {
+            font-weight: 600;
+            color: #333;
+            min-width: 120px;
+        }
+        
+        .iban-value {
+            color: #2a5298;
+            font-weight: 700;
+            font-size: 1.1rem;
+            word-break: break-all;
+            text-align: right;
+        }
+        
+        .copy-iban-btn {
+            width: 100%;
+            padding: 12px;
+            background: #2a5298;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .copy-iban-btn:hover {
+            background: #1e3c72;
+            transform: translateY(-2px);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .history-section {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #e0e0e0;
+        }
+        
+        .history-title {
+            color: #2a5298;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .history-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #2a5298;
+        }
+        
+        .history-status {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-approved {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .steps-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .steps-container::before {
+                display: none;
+            }
+            
+            .step {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }
+            
+            .step-circle {
+                margin: 0;
+                min-width: 40px;
+            }
+            
+            .amount-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .bank-options {
+                flex-direction: column;
+            }
+            
+            .iban-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            
+            .iban-value {
+                text-align: left;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <button class="back-btn" onclick="window.history.back()">
+                <ion-icon name="arrow-back"></ion-icon>
+            </button>
+            <h1 class="page-title">Sistema de Depósito</h1>
+            <p class="page-subtitle">Âncora Patrimonial - Recarregue sua conta rapidamente</p>
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            <!-- Steps -->
+            <div class="steps-container">
+                <div class="step active" id="step1">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">Valor</div>
+                </div>
+                <div class="step" id="step2">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Pagamento</div>
+                </div>
+                <div class="step" id="step3">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Comprovante</div>
+                </div>
+            </div>
+            
+            <!-- Step 1: Amount Selection -->
+            <div class="step-content active" id="stepContent1">
+                <h2 style="color: #2a5298; margin-bottom: 20px;">Selecione o Valor</h2>
+                
+                <div class="form-group">
+                    <label class="form-label">Valor do Depósito (KZ)</label>
+                    <div class="amount-grid">
+                        <div class="amount-option" data-amount="5000">5.000 KZ</div>
+                        <div class="amount-option" data-amount="10000">10.000 KZ</div>
+                        <div class="amount-option" data-amount="20000">20.000 KZ</div>
+                        <div class="amount-option" data-amount="50000">50.000 KZ</div>
+                        <div class="amount-option" data-amount="100000">100.000 KZ</div>
+                        <div class="amount-option" data-amount="200000">200.000 KZ</div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Ou digite um valor personalizado</label>
+                    <div class="custom-amount">
+                        <span class="currency-symbol">KZ</span>
+                        <input type="number" id="customAmount" class="form-input" 
+                               placeholder="Digite o valor" min="1000" step="100">
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" onclick="window.history.back()">
+                        <ion-icon name="arrow-back"></ion-icon>
+                        Voltar
+                    </button>
+                    <button class="btn btn-primary" onclick="nextStep(2)">
+                        Continuar
+                        <ion-icon name="arrow-forward"></ion-icon>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Step 2: Payment Details -->
+            <div class="step-content" id="stepContent2">
+                <h2 style="color: #2a5298; margin-bottom: 20px;">Detalhes do Pagamento</h2>
+                
+                <div class="payment-methods">
+                    <div class="payment-method active" data-method="multicaixa">
+                        <ion-icon name="card" class="method-icon"></ion-icon>
+                        <div class="method-name">Multicaixa Express</div>
+                        <div class="method-desc">Pagamento por Referência</div>
+                    </div>
+                    <div class="payment-method" data-method="atm">
+                        <ion-icon name="cash" class="method-icon"></ion-icon>
+                        <div class="method-name">Multicaixa ATM</div>
+                        <div class="method-desc">Caixa Automático</div>
+                    </div>
+                    <div class="payment-method" data-method="internet">
+                        <ion-icon name="globe" class="method-icon"></ion-icon>
+                        <div class="method-name">Internet Banking</div>
+                        <div class="method-desc">Transferência Online</div>
+                    </div>
+                </div>
+                
+                <!-- Multicaixa Payment Section -->
+                <div class="payment-details" id="multicaixaSection">
+                    <h3 style="color: #2a5298; margin-bottom: 20px; text-align: center;">
+                        <ion-icon name="information-circle"></ion-icon>
+                        Dados para Pagamento Multicaixa
+                    </h3>
+                    
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <div class="detail-label">Entidade</div>
+                            <div class="detail-value" id="entityNumber">10116</div>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <div class="detail-label">Referência</div>
+                            <div class="detail-value" id="referenceNumber">976137142</div>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <div class="detail-label">Valor</div>
+                            <div class="detail-value" id="displayAmount">0 KZ</div>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <div class="detail-label">Válido até</div>
+                            <div class="detail-value" id="expiryDate">--/--/----</div>
+                        </div>
+                    </div>
+                    
+                    <button class="copy-btn" onclick="copyPaymentDetails()">
+                        <ion-icon name="copy-outline"></ion-icon>
+                        Copiar Dados do Pagamento
+                    </button>
+                </div>
+                
+                <!-- IBAN Bank Transfer Section -->
+                <div class="iban-section" id="ibanSection">
+                    <h3 class="iban-title">
+                        <ion-icon name="bank"></ion-icon>
+                        Transferência Bancária (IBAN)
+                    </h3>
+                    
+                    <div class="bank-options">
+                        <div class="bank-option active" data-bank="bai">
+                            <ion-icon name="card" class="bank-logo"></ion-icon>
+                            <div class="method-name">BAI</div>
+                        </div>
+                        <div class="bank-option" data-bank="bic">
+                            <ion-icon name="card" class="bank-logo"></ion-icon>
+                            <div class="method-name">BIC</div>
+                        </div>
+                        <div class="bank-option" data-bank="bfa">
+                            <ion-icon name="card" class="bank-logo"></ion-icon>
+                            <div class="method-name">BFA</div>
+                        </div>
+                    </div>
+                    
+                    <div class="iban-details" id="baiDetails">
+                        <div class="iban-row">
+                            <span class="iban-label">Banco:</span>
+                            <span class="iban-value">BAI (Banco Angolano de Investimentos)</span>
+                        </div>
+                        <div class="iban-row">
+                            <span class="iban-label">IBAN:</span>
+                            <span class="iban-value">AO06 0040 0000 5823 3661 1013 5</span>
+                        </div>
+                        <div class="iban-row">
+                            <span class="iban-label">Titular:</span>
+                            <span class="iban-value">Domingos</span>
+                        </div>
+                        <div class="iban-row">
+                            <span class="iban-label">Valor:</span>
+                            <span class="iban-value" id="ibanAmount">0 KZ</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iban-details" id="bicDetails" style="display: none;">
+                        <div class="iban-row">
+                            <span class="iban-label">Banco:</span>
+                            <span class="iban-value">BIC (Banco de Investimento Crédito)</span>
+                        </div>
+                        <div class="iban-row">
+                            <span class="iban-label">IBAN:</span>
+                            <span class="iban-value">AO06 0006 0000 9095 7416 3015 7</span>
+                        </div>
+                        <div class="iban-row">
+                            <span class="iban-label">Titular:</span>
+                            <span class="iban-value">Domingos</span>
+                        </div>
+                        <div class="iban-row">
+                            <span class="iban-label">Valor:</span>
+                            <span class="iban-value" id="ibanAmountBIC">0 KZ</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iban-details" id="bfaDetails" style="display: none;">
+                        <div class="iban-row">
+                            <span class="iban-label">Banco:</span>
+                            <span class="iban-value">BFA (Banco de Fomento Angola)</span>
+                        </div>
+                        <div class="iban-row">
+                            <span class="iban-label">IBAN:</span>
+                            <span class="iban-value">AO06 0006 0000 9095 7416 3015 7</span>
+                        </div>
+                        <div class="iban-row">
+                            <span class="iban-label">Titular:</span>
+                            <span class="iban-value">Domingos</span>
+                        </div>
+                        <div class="iban-row">
+                            <span class="iban-label">Valor:</span>
+                            <span class="iban-value" id="ibanAmountBFA">0 KZ</span>
+                        </div>
+                    </div>
+                    
+                    <button class="copy-iban-btn" onclick="copyIBAN()">
+                        <ion-icon name="copy-outline"></ion-icon>
+                        Copiar Dados Bancários
+                    </button>
+                </div>
+                
+                <div class="instructions">
+                    <h4><ion-icon name="information-circle-outline"></ion-icon> Como Pagar:</h4>
+                    <ol id="paymentInstructions">
+                        <li>Acesse o Multicaixa Express no seu banco</li>
+                        <li>Selecione "Pagamento de Serviços"</li>
+                        <li>Insira a Entidade: <strong>10116</strong></li>
+                        <li>Insira a Referência: <strong id="referenceCopy">976137142</strong></li>
+                        <li>Confirme o valor e finalize o pagamento</li>
+                    </ol>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" onclick="prevStep(1)">
+                        <ion-icon name="arrow-back"></ion-icon>
+                        Voltar
+                    </button>
+                    <button class="btn btn-primary" onclick="nextStep(3)">
+                        Já Paguei
+                        <ion-icon name="checkmark-circle"></ion-icon>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Step 3: Receipt Upload -->
+            <div class="step-content" id="stepContent3">
+                <h2 style="color: #2a5298; margin-bottom: 20px;">Enviar Comprovante</h2>
+                
+                <div class="telegram-info">
+                    <ion-icon name="paper-plane" class="telegram-icon"></ion-icon>
+                    <h3>Envie o comprovante via Telegram</h3>
+                    <p>Após o pagamento, tire uma foto do comprovante e envie para nossa equipe no Telegram.</p>
+                    
+                    <a href="https://t.me/ancoraPatrimonial" target="_blank" class="telegram-link" id="telegramLink">
+                        <ion-icon name="send"></ion-icon>
+                        Enviar para @ancoraPatrimonial
+                    </a>
+                </div>
+                
+                <div class="upload-section" onclick="document.getElementById('fileInput').click()">
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileUpload(event)">
+                    <ion-icon name="cloud-upload" class="upload-icon"></ion-icon>
+                    <h3>Ou faça upload do comprovante</h3>
+                    <p class="upload-text">Clique para selecionar uma foto do comprovante</p>
+                    <p class="upload-text" style="font-size: 0.9rem;">Formatos aceitos: JPG, PNG (Máx: 5MB)</p>
+                    
+                    <div id="fileName" class="file-name"></div>
+                    <img id="previewImage" class="preview-image" alt="Preview">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Seu Nome (Opcional)</label>
+                    <input type="text" id="userName" class="form-input" placeholder="Digite seu nome para identificação">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Observações (Opcional)</label>
+                    <textarea id="userNotes" class="form-input" rows="3" placeholder="Adicione alguma observação sobre o depósito..."></textarea>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" onclick="prevStep(2)">
+                        <ion-icon name="arrow-back"></ion-icon>
+                        Voltar
+                    </button>
+                    <button class="btn btn-success" onclick="submitDeposit()">
+                        <ion-icon name="checkmark-circle-outline"></ion-icon>
+                        Concluir Depósito
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Deposit History -->
+            <div class="history-section" id="historySection">
+                <h3 class="history-title">
+                    <ion-icon name="time-outline"></ion-icon>
+                    Histórico de Depósitos
+                </h3>
+                <div id="depositHistory">
+                    <!-- History will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Success Modal -->
+    <div class="modal" id="successModal">
+        <div class="modal-content">
+            <ion-icon name="checkmark-circle" class="modal-icon"></ion-icon>
+            <h2 class="modal-title">Depósito Enviado!</h2>
+            <p class="modal-message">
+                Seu depósito foi registrado com sucesso! 
+                Nossa equipe irá verificar o comprovante e aprovar seu saldo em até 2 horas úteis.
+            </p>
+            <p class="modal-message">
+                <strong>Número do Pedido:</strong> <span id="depositId">DP-000001</span>
+            </p>
+            <div class="modal-buttons">
+                <button class="btn btn-primary" onclick="closeModal()" style="flex: 1;">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Error Modal -->
+    <div class="modal" id="errorModal">
+        <div class="modal-content">
+            <ion-icon name="alert-circle" class="modal-icon" style="color: #ff4757;"></ion-icon>
+            <h2 class="modal-title">Erro!</h2>
+            <p class="modal-message" id="errorMessage">
+                Ocorreu um erro ao processar seu depósito. Tente novamente.
+            </p>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal()" style="flex: 1;">
+                    Tentar Novamente
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Current deposit data
+        let depositData = {
+            amount: 0,
+            method: 'multicaixa',
+            bank: 'bai',
+            entity: '10116',
+            reference: '976137142',
+            fileName: '',
+            fileData: null,
+            userName: '',
+            notes: '',
+            status: 'pending',
+            date: new Date(),
+            depositId: ''
+        };
+
+        // Bank data
+        const bankData = {
+            bai: {
+                name: 'BAI (Banco Angolano de Investimentos)',
+                iban: 'AO06 0040 0000 5823 3661 1013 5',
+                holder: 'Domingos'
+            },
+            bic: {
+                name: 'BIC (Banco de Investimento Crédito)',
+                iban: 'AO06 0006 0000 9095 7416 3015 7',
+                holder: 'Domingos'
+            },
+            bfa: {
+                name: 'BFA (Banco de Fomento Angola)',
+                iban: 'AO06 0006 0000 9095 7416 3015 7',
+                holder: 'Domingos'
+            }
+        };
+
+        // Deposit history
+        let depositHistory = JSON.parse(localStorage.getItem('depositHistory')) || [];
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set expiry date (3 days from now)
+            const expiryDate = new Date();
+            expiryDate.setDate(expiryDate.getDate() + 3);
+            document.getElementById('expiryDate').textContent = 
+                expiryDate.toLocaleDateString('pt-AO');
+            
+            // Load history
+            loadDepositHistory();
+            
+            // Update reference number display
+            document.getElementById('referenceCopy').textContent = depositData.reference;
+            
+            // Set default amount
+            selectAmount(5000);
+            
+            // Initialize bank options
+            initializeBankOptions();
+        });
+
+        // Step navigation
+        function nextStep(step) {
+            if (step === 2 && !validateStep1()) return;
+            if (step === 3 && !validateStep2()) return;
+            
+            // Hide all step contents
+            document.querySelectorAll('.step-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Deactivate all steps
+            document.querySelectorAll('.step').forEach(stepEl => {
+                stepEl.classList.remove('active');
+                stepEl.classList.remove('completed');
+            });
+            
+            // Activate current step
+            document.getElementById(`step${step}`).classList.add('active');
+            document.getElementById(`stepContent${step}`).classList.add('active');
+            
+            // Mark previous steps as completed
+            for (let i = 1; i < step; i++) {
+                document.getElementById(`step${i}`).classList.add('completed');
+            }
+            
+            // Update payment details if going to step 2
+            if (step === 2) {
+                updatePaymentDetails();
+                updateIBANAmount();
+            }
+            
+            // Show history after step 3
+            if (step === 3) {
+                document.getElementById('historySection').style.display = 'block';
+            }
+        }
+
+        function prevStep(step) {
+            nextStep(step);
+        }
+
+        // Step 1: Amount Selection
+        function selectAmount(amount) {
+            // Remove active class from all amount options
+            document.querySelectorAll('.amount-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            
+            // Add active class to selected option
+            const selectedOption = document.querySelector(`[data-amount="${amount}"]`);
+            if (selectedOption) {
+                selectedOption.classList.add('active');
+            }
+            
+            // Update custom amount input
+            document.getElementById('customAmount').value = amount;
+            
+            // Update deposit data
+            depositData.amount = parseInt(amount);
+            updatePaymentDetails();
+            updateIBANAmount();
+        }
+
+        // Handle custom amount input
+        document.getElementById('customAmount').addEventListener('input', function(e) {
+            const amount = parseInt(e.target.value) || 0;
+            if (amount >= 1000) {
+                depositData.amount = amount;
+                updatePaymentDetails();
+                updateIBANAmount();
+                
+                // Remove active class from all amount options
+                document.querySelectorAll('.amount-option').forEach(option => {
+                    option.classList.remove('active');
+                });
+            }
+        });
+
+        // Step 1 validation
+        function validateStep1() {
+            if (depositData.amount < 1000) {
+                showError('Por favor, selecione um valor de pelo menos 1.000 KZ');
+                return false;
+            }
+            return true;
+        }
+
+        // Step 2: Payment Details
+        function updatePaymentDetails() {
+            // Update amount display
+            const amountDisplay = depositData.amount.toLocaleString('pt-AO') + ' KZ';
+            document.getElementById('displayAmount').textContent = amountDisplay;
+            
+            // Generate dynamic reference (for demo purposes)
+            const dynamicReference = generateDynamicReference();
+            depositData.reference = dynamicReference;
+            
+            // Update reference displays
+            document.getElementById('referenceNumber').textContent = dynamicReference;
+            document.getElementById('referenceCopy').textContent = dynamicReference;
+        }
+
+        function generateDynamicReference() {
+            // Generate a random reference for demo
+            const baseRef = '976137';
+            const randomPart = Math.floor(Math.random() * 900 + 100);
+            return baseRef + randomPart;
+        }
+
+        function copyPaymentDetails() {
+            const details = `Âncora Patrimonial - Depósito Multicaixa
+Entidade: ${depositData.entity}
+Referência: ${depositData.reference}
+Valor: ${depositData.amount.toLocaleString('pt-AO')} KZ
+Data: ${new Date().toLocaleDateString('pt-AO')}`;
+            
+            navigator.clipboard.writeText(details)
+                .then(() => {
+                    const btn = document.querySelector('.copy-btn');
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<ion-icon name="checkmark"></ion-icon> Copiado!';
+                    btn.style.background = '#2ed573';
+                    
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        btn.style.background = '';
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Erro ao copiar:', err);
+                    showError('Erro ao copiar. Tente novamente.');
+                });
+        }
+
+        // Initialize bank options
+        function initializeBankOptions() {
+            // Set up bank option click handlers
+            document.querySelectorAll('.bank-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remove active class from all bank options
+                    document.querySelectorAll('.bank-option').forEach(opt => {
+                        opt.classList.remove('active');
+                    });
+                    
+                    // Add active class to selected option
+                    this.classList.add('active');
+                    
+                    // Update deposit data
+                    const bank = this.getAttribute('data-bank');
+                    depositData.bank = bank;
+                    
+                    // Show corresponding bank details
+                    document.querySelectorAll('.iban-details').forEach(detail => {
+                        detail.style.display = 'none';
+                    });
+                    document.getElementById(`${bank}Details`).style.display = 'block';
+                });
+            });
+            
+            // Set up payment method click handlers
+            document.querySelectorAll('.payment-method').forEach(method => {
+                method.addEventListener('click', function() {
+                    // Remove active class from all methods
+                    document.querySelectorAll('.payment-method').forEach(m => {
+                        m.classList.remove('active');
+                    });
+                    
+                    // Add active class to selected method
+                    this.classList.add('active');
+                    
+                    // Update deposit data
+                    depositData.method = this.getAttribute('data-method');
+                    
+                    // Update instructions based on method
+                    updateInstructions();
+                });
+            });
+        }
+
+        // Update payment instructions based on method
+        function updateInstructions() {
+            const instructions = document.getElementById('paymentInstructions');
+            
+            if (depositData.method === 'internet') {
+                instructions.innerHTML = `
+                    <li>Acesse o Internet Banking do seu banco</li>
+                    <li>Selecione "Transferência" ou "Pagamentos"</li>
+                    <li>Use os dados bancários (IBAN) fornecidos acima</li>
+                    <li>Confirme o valor de <strong>${depositData.amount.toLocaleString('pt-AO')} KZ</strong></li>
+                    <li>Finalize a transferência e guarde o comprovante</li>
+                `;
+            } else {
+                instructions.innerHTML = `
+                    <li>Acesse o Multicaixa Express no seu banco</li>
+                    <li>Selecione "Pagamento de Serviços"</li>
+                    <li>Insira a Entidade: <strong>10116</strong></li>
+                    <li>Insira a Referência: <strong>${depositData.reference}</strong></li>
+                    <li>Confirme o valor e finalize o pagamento</li>
+                `;
+            }
+        }
+
+        // Update IBAN amount display
+        function updateIBANAmount() {
+            const amount = depositData.amount.toLocaleString('pt-AO') + ' KZ';
+            document.getElementById('ibanAmount').textContent = amount;
+            document.getElementById('ibanAmountBIC').textContent = amount;
+            document.getElementById('ibanAmountBFA').textContent = amount;
+        }
+
+        // Copy IBAN details
+        function copyIBAN() {
+            const bank = depositData.bank;
+            const bankInfo = bankData[bank];
+            
+            const details = `Âncora Patrimonial - Transferência Bancária
+Banco: ${bankInfo.name}
+IBAN: ${bankInfo.iban}
+Titular: ${bankInfo.holder}
+Valor: ${depositData.amount.toLocaleString('pt-AO')} KZ
+Data: ${new Date().toLocaleDateString('pt-AO')}`;
+            
+            navigator.clipboard.writeText(details)
+                .then(() => {
+                    const btn = document.querySelector('.copy-iban-btn');
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<ion-icon name="checkmark"></ion-icon> Copiado!';
+                    btn.style.background = '#2ed573';
+                    
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        btn.style.background = '';
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Erro ao copiar:', err);
+                    showError('Erro ao copiar. Tente novamente.');
+                });
+        }
+
+        // Step 2 validation
+        function validateStep2() {
+            if (depositData.amount < 1000) {
+                showError('Valor inválido. Selecione um valor válido.');
+                return false;
+            }
+            return true;
+        }
+
+        // Step 3: File Upload
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            // Check file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                showError('O arquivo é muito grande. Tamanho máximo: 5MB');
+                return;
+            }
+            
+            // Check file type
+            if (!file.type.match('image.*')) {
+                showError('Por favor, selecione apenas imagens');
+                return;
+            }
+            
+            // Update deposit data
+            depositData.fileName = file.name;
+            depositData.fileData = file;
+            
+            // Show file name
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileName').style.display = 'block';
+            
+            // Preview image
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('previewImage');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        }
+
+        // Submit deposit
+        function submitDeposit() {
+            // Get user name and notes
+            depositData.userName = document.getElementById('userName').value || 'Anônimo';
+            depositData.notes = document.getElementById('userNotes').value;
+            depositData.date = new Date();
+            
+            // Generate deposit ID
+            depositData.depositId = 'DP-' + String(depositHistory.length + 1).padStart(6, '0');
+            
+            // Add to history
+            depositHistory.unshift({
+                ...depositData,
+                fileData: null, // Don't store file data in localStorage
+                timestamp: new Date().getTime()
+            });
+            
+            // Save to localStorage
+            localStorage.setItem('depositHistory', JSON.stringify(depositHistory));
+            
+            // Show success modal
+            document.getElementById('depositId').textContent = depositData.depositId;
+            document.getElementById('successModal').style.display = 'flex';
+            
+            // Reset form after 3 seconds
+            setTimeout(() => {
+                resetForm();
+            }, 3000);
+        }
+
+        // Load deposit history
+        function loadDepositHistory() {
+            const historyContainer = document.getElementById('depositHistory');
+            
+            if (depositHistory.length === 0) {
+                historyContainer.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: #666;">
+                        <ion-icon name="document-text-outline" style="font-size: 48px; margin-bottom: 10px;"></ion-icon>
+                        <p>Nenhum depósito registrado ainda.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            historyContainer.innerHTML = '';
+            
+            depositHistory.forEach((deposit, index) => {
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                
+                const statusClass = `status-${deposit.status || 'pending'}`;
+                const statusText = deposit.status === 'approved' ? 'Aprovado' : 
+                                 deposit.status === 'rejected' ? 'Rejeitado' : 'Pendente';
+                
+                item.innerHTML = `
+                    <div>
+                        <div style="font-weight: 600;">${deposit.depositId || 'DP-' + String(index + 1).padStart(6, '0')}</div>
+                        <div style="font-size: 0.9rem; color: #666;">
+                            ${new Date(deposit.timestamp || deposit.date).toLocaleDateString('pt-AO')}
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-weight: 700; color: #2a5298;">
+                            ${deposit.amount.toLocaleString('pt-AO')} KZ
+                        </div>
+                        <div class="history-status ${statusClass}">${statusText}</div>
+                    </div>
+                `;
+                
+                historyContainer.appendChild(item);
+            });
+        }
+
+        // Reset form
+        function resetForm() {
+            // Reset deposit data
+            depositData = {
+                amount: 5000,
+                method: 'multicaixa',
+                bank: 'bai',
+                entity: '10116',
+                reference: generateDynamicReference(),
+                fileName: '',
+                fileData: null,
+                userName: '',
+                notes: '',
+                status: 'pending',
+                date: new Date(),
+                depositId: ''
+            };
+            
+            // Reset form fields
+            document.getElementById('customAmount').value = '5000';
+            document.getElementById('fileName').style.display = 'none';
+            document.getElementById('previewImage').style.display = 'none';
+            document.getElementById('previewImage').src = '';
+            document.getElementById('userName').value = '';
+            document.getElementById('userNotes').value = '';
+            document.getElementById('fileInput').value = '';
+            
+            // Reset selections
+            selectAmount(5000);
+            
+            // Reset bank selection
+            document.querySelectorAll('.bank-option').forEach(opt => {
+                opt.classList.remove('active');
+            });
+            document.querySelector('.bank-option[data-bank="bai"]').classList.add('active');
+            
+            document.querySelectorAll('.iban-details').forEach(detail => {
+                detail.style.display = 'none';
+            });
+            document.getElementById('baiDetails').style.display = 'block';
+            
+            // Go back to step 1
+            nextStep(1);
+            
+            // Reload history
+            loadDepositHistory();
+        }
+
+        // Modal functions
+        function closeModal() {
+            document.getElementById('successModal').style.display = 'none';
+            document.getElementById('errorModal').style.display = 'none';
+        }
+
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorModal').style.display = 'flex';
+        }
+
+        // Initialize amount options
+        document.querySelectorAll('.amount-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const amount = parseInt(this.getAttribute('data-amount'));
+                selectAmount(amount);
+            });
+        });
+
+        // Telegram link enhancement
+        document.getElementById('telegramLink').addEventListener('click', function(e) {
+            // Prepare message for Telegram
+            let methodText = '';
+            if (depositData.method === 'internet') {
+                methodText = `Transferência Bancária (${depositData.bank.toUpperCase()})`;
+            } else {
+                methodText = 'Multicaixa Express';
+            }
+            
+            const message = `Olá Âncora Patrimonial!%0A%0A
+Acabei de fazer um depósito de ${depositData.amount.toLocaleString('pt-AO')} KZ.%0A
+Método: ${methodText}%0A`;
+            
+            if (depositData.method === 'internet') {
+                const bankInfo = bankData[depositData.bank];
+                message += `Banco: ${bankInfo.name}%0A`;
+                message += `IBAN: ${bankInfo.iban}%0A`;
+            } else {
+                message += `Entidade: ${depositData.entity}%0A`;
+                message += `Referência: ${depositData.reference}%0A`;
+            }
+            
+            message += `Nome: ${document.getElementById('userName').value || 'Não informado'}%0A%0A
+Anexei o comprovante. Por favor, confirme o recebimento!`;
+            
+            // Update Telegram link with pre-filled message
+            this.href = `https://t.me/ancoraPatrimonial?text=${encodeURIComponent(message)}`;
+            
+            // Continue with default link behavior
+        });
+    </script>
+</body>
+</html>

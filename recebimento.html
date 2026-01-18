@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Âncora Patrimonial - Conta Bancária</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <!-- Ionicons -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding-bottom: 70px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 20px;
+            padding-top: 40px;
+            position: relative;
+            text-align: center;
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .page-subtitle {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+        
+        .content-container {
+            padding: 20px;
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        .info-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border-left: 4px solid #2a5298;
+        }
+        
+        .info-card h3 {
+            color: #2a5298;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .rules-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .rules-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #555;
+        }
+        
+        .rules-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .rule-icon {
+            color: #2a5298;
+            font-size: 18px;
+        }
+        
+        .form-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border: 2px solid transparent;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-container.locked {
+            border-color: #FF4757;
+            background: #fff5f5;
+        }
+        
+        .form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .form-title {
+            color: #2a5298;
+            font-size: 1.3rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .lock-status {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .status-locked {
+            background: #ffeaa7;
+            color: #d35400;
+        }
+        
+        .status-unlocked {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .required {
+            color: #FF4757;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+        
+        .form-container.locked .form-group input,
+        .form-container.locked .form-group select {
+            background: #f8f9fa;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #2a5298;
+            box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
+            background: white;
+        }
+        
+        .iban-display {
+            background: #f8f9fa;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 16px;
+            letter-spacing: 1px;
+            color: #333;
+            user-select: none;
+            position: relative;
+            overflow: hidden;
+            min-height: 52px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .iban-hidden {
+            color: transparent;
+            text-shadow: 0 0 8px rgba(0,0,0,0.5);
+        }
+        
+        .iban-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #2a5298;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        
+        .save-btn {
+            background: linear-gradient(45deg, #2ed573, #1dd1a1);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            box-shadow: 0 5px 15px rgba(46, 213, 115, 0.3);
+        }
+        
+        .save-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(46, 213, 115, 0.4);
+        }
+        
+        .save-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+        
+        .save-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        
+        .save-btn:disabled:hover {
+            transform: none;
+        }
+        
+        .edit-btn {
+            background: linear-gradient(45deg, #FFA500, #FF8C00);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .edit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(255, 140, 0, 0.3);
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+            border-top: 1px solid #e1e1e1;
+            z-index: 1000;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            color: #666;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .nav-item.active {
+            color: #2a5298;
+        }
+        
+        .nav-item:hover {
+            color: #2a5298;
+        }
+        
+        .nav-icon {
+            font-size: 20px;
+        }
+        
+        .nav-text {
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2a5298;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .success-message {
+            background: #2ed573;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .error-message {
+            background: #ff4757;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .warning-message {
+            background: #ffeaa7;
+            color: #d35400;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .bank-logos {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .bank-logo {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .bank-logo:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-color: #2a5298;
+        }
+        
+        .bank-logo.active {
+            border-color: #2ed573;
+            background: #f0fff4;
+        }
+        
+        .bank-placeholder {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 600;
+        }
+        
+        .iban-input-container {
+            display: none;
+        }
+        
+        .iban-input-container.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <button class="back-btn" onclick="window.history.back()">
+            <ion-icon name="arrow-back"></ion-icon>
+        </button>
+        <h1 class="page-title">Conta Bancária</h1>
+        <p class="page-subtitle">Configurar conta para recebimentos</p>
+    </div>
+    
+    <!-- Content -->
+    <div class="content-container">
+        <!-- Messages -->
+        <div id="successMessage" class="success-message"></div>
+        <div id="errorMessage" class="error-message"></div>
+        <div id="warningMessage" class="warning-message"></div>
+        
+        <!-- Rules Card -->
+        <div class="info-card">
+            <h3><ion-icon name="shield-checkmark-outline"></ion-icon> Regras Importantes</h3>
+            <ul class="rules-list">
+                <li>
+                    <ion-icon name="warning" class="rule-icon"></ion-icon>
+                    Após salvar, os dados ficarão invisíveis e bloqueados para edição
+                </li>
+                <li>
+                    <ion-icon name="warning" class="rule-icon"></ion-icon>
+                    Alterações só são permitidas mediante solicitação ao suporte
+                </li>
+                <li>
+                    <ion-icon name="checkmark-circle" class="rule-icon"></ion-icon>
+                    Todas as transações são seguras e criptografadas
+                </li>
+                <li>
+                    <ion-icon name="checkmark-circle" class="rule-icon"></ion-icon>
+                    Dados protegidos pela Lei de Proteção de Dados
+                </li>
+                <li>
+                    <ion-icon name="checkmark-circle" class="rule-icon"></ion-icon>
+                    Confirmação por e-mail para alterações
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Bank Account Form -->
+        <div class="form-container" id="bankForm">
+            <div class="form-header">
+                <h3 class="form-title">
+                    <ion-icon name="card-outline"></ion-icon>
+                    Dados Bancários
+                </h3>
+                <div class="lock-status" id="lockStatus">
+                    <!-- Status will be set dynamically -->
+                </div>
+            </div>
+            
+            <form id="accountForm">
+                <div class="form-group">
+                    <label for="bankName">
+                        <ion-icon name="business-outline"></ion-icon>
+                        Nome do Banco <span class="required">*</span>
+                    </label>
+                    <select id="bankName" required>
+                        <option value="">Selecione o banco</option>
+                        <option value="BAI">BAI - Banco Angolano de Investimentos</option>
+                        <option value="BFA">BFA - Banco de Fomento Angola</option>
+                        <option value="BCI">BCI - Banco Comercial e de Investimentos</option>
+                        <option value="BPC">BPC - Banco de Poupança e Crédito</option>
+                        <option value="ATLANTICO">Atlântico - Banco Atlântico</option>
+                        <option value="SOL">Banco Sol</option>
+                        <option value="KEVE">Banco Keve</option>
+                        <option value="OUTRO">Outro Banco</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="iban">
+                        <ion-icon name="key-outline"></ion-icon>
+                        IBAN/Número da Conta <span class="required">*</span>
+                    </label>
+                    
+                    <!-- IBAN Display (for viewing) -->
+                    <div class="iban-display" id="ibanDisplay">
+                        <span id="ibanText">Não configurado</span>
+                        <button type="button" class="iban-toggle" id="toggleIban" onclick="toggleIbanVisibility()">
+                            <ion-icon name="eye-outline"></ion-icon>
+                        </button>
+                    </div>
+                    
+                    <!-- IBAN Input (for editing) -->
+                    <div class="iban-input-container" id="ibanInputContainer">
+                        <input type="text" id="ibanInput" 
+                               pattern="[A-Z]{2}[0-9]{2}[A-Z0-9]{1,30}" 
+                               placeholder="Ex: AO06004000008043144110176">
+                        <small style="color: #666; display: block; margin-top: 5px;">
+                            Formato: 2 letras do país + 2 dígitos + até 30 caracteres
+                        </small>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="accountHolder">
+                        <ion-icon name="person-outline"></ion-icon>
+                        Titular da Conta <span class="required">*</span>
+                    </label>
+                    <input type="text" id="accountHolder" required 
+                           placeholder="Nome completo do titular">
+                </div>
+                
+                <div class="form-group">
+                    <label for="accountNumber">
+                        <ion-icon name="document-text-outline"></ion-icon>
+                        Número da Conta <span class="required">*</span>
+                    </label>
+                    <input type="text" id="accountNumber" required 
+                           placeholder="Número da conta bancária">
+                </div>
+                
+                <div class="form-group">
+                    <label for="accountType">
+                        <ion-icon name="wallet-outline"></ion-icon>
+                        Tipo de Conta <span class="required">*</span>
+                    </label>
+                    <select id="accountType" required>
+                        <option value="">Selecione o tipo</option>
+                        <option value="CONTA_CORRENTE">Conta Corrente</option>
+                        <option value="CONTA_POUPANCA">Conta Poupança</option>
+                        <option value="CONTA_SALARIO">Conta Salário</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <ion-icon name="logo-angular"></ion-icon>
+                        Bancos Suportados
+                    </label>
+                    <div class="bank-logos">
+                        <div class="bank-logo" data-bank="BAI" onclick="selectBank('BAI')">
+                            <div class="bank-placeholder">BAI</div>
+                        </div>
+                        <div class="bank-logo" data-bank="BFA" onclick="selectBank('BFA')">
+                            <div class="bank-placeholder">BFA</div>
+                        </div>
+                        <div class="bank-logo" data-bank="BCI" onclick="selectBank('BCI')">
+                            <div class="bank-placeholder">BCI</div>
+                        </div>
+                        <div class="bank-logo" data-bank="BPC" onclick="selectBank('BPC')">
+                            <div class="bank-placeholder">BPC</div>
+                        </div>
+                        <div class="bank-logo" data-bank="ATLANTICO" onclick="selectBank('ATLANTICO')">
+                            <div class="bank-placeholder">Atlântico</div>
+                        </div>
+                        <div class="bank-logo" data-bank="SOL" onclick="selectBank('SOL')">
+                            <div class="bank-placeholder">Banco Sol</div>
+                        </div>
+                        <div class="bank-logo" data-bank="KEVE" onclick="selectBank('KEVE')">
+                            <div class="bank-placeholder">Banco Keve</div>
+                        </div>
+                        <div class="bank-logo" data-bank="OUTRO" onclick="selectBank('OUTRO')">
+                            <div class="bank-placeholder">Outro</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="save-btn" id="saveBtn">
+                    <ion-icon name="save-outline"></ion-icon>
+                    Salvar Conta Bancária
+                </button>
+                
+                <button type="button" class="edit-btn" id="editBtn" onclick="enableEditing()">
+                    <ion-icon name="create-outline"></ion-icon>
+                    Solicitar Alteração
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <ion-icon name="home" class="nav-icon"></ion-icon>
+            <span class="nav-text">Início</span>
+        </a>
+        <a href="compra.html" class="nav-item">
+            <ion-icon name="cart" class="nav-icon"></ion-icon>
+            <span class="nav-text">Compra</span>
+        </a>
+        <a href="Menu.html" class="nav-item active">
+            <ion-icon name="person" class="nav-icon"></ion-icon>
+            <span class="nav-text">Minha Conta</span>
+        </a>
+    </div>
+    
+    <!-- Loading Screen -->
+    <div class="loading" id="loadingScreen">
+        <div class="spinner"></div>
+        <p>Carregando dados bancários...</p>
+    </div>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBp8X1PPp3FqiQ6OXErr8Mu11GEp6MZ2-U",
+            authDomain: "ascend-34bf0.firebaseapp.com",
+            projectId: "ascend-34bf0",
+            storageBucket: "ascend-34bf0.firebasestorage.app",
+            messagingSenderId: "592623076677",
+            appId: "1:592623076677:web:c5615719870aefdabf6a2c"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let currentUser = null;
+        let userData = null;
+        let accountData = null;
+        let isEditing = false;
+        let isIbanVisible = false;
+
+        // Check authentication
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                currentUser = user;
+                await loadUserData(user.uid);
+                await loadBankAccount(user.uid);
+                document.getElementById('loadingScreen').style.display = 'none';
+            } else {
+                window.location.href = 'registo.html';
+            }
+        });
+
+        async function loadUserData(uid) {
+            try {
+                const doc = await db.collection('users').doc(uid).get();
+                if (doc.exists) {
+                    userData = doc.data();
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+                showError('Erro ao carregar dados do usuário');
+            }
+        }
+
+        async function loadBankAccount(uid) {
+            try {
+                const doc = await db.collection('users').doc(uid).get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    accountData = data.contaBancaria;
+                    
+                    if (accountData) {
+                        // Account is saved, show data and lock form
+                        displayAccountData(accountData);
+                        lockForm();
+                    } else {
+                        // No account saved, allow editing
+                        unlockForm();
+                        // Show IBAN input field for new entries
+                        document.getElementById('ibanInputContainer').classList.add('show');
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading bank account:', error);
+                showError('Erro ao carregar dados bancários');
+                unlockForm();
+                document.getElementById('ibanInputContainer').classList.add('show');
+            }
+        }
+
+        function displayAccountData(data) {
+            // Set bank name
+            document.getElementById('bankName').value = data.banco || '';
+            
+            // Display IBAN (hidden by default)
+            const ibanText = document.getElementById('ibanText');
+            if (data.iban) {
+                ibanText.textContent = data.iban;
+                ibanText.className = 'iban-hidden';
+            }
+            
+            // Set other fields
+            document.getElementById('accountHolder').value = data.titular || '';
+            document.getElementById('accountNumber').value = data.conta || '';
+            document.getElementById('accountType').value = data.tipo || '';
+            document.getElementById('ibanInput').value = data.iban || '';
+            
+            // Highlight selected bank logo
+            if (data.banco) {
+                selectBank(data.banco);
+            }
+        }
+
+        function toggleIbanVisibility() {
+            const ibanText = document.getElementById('ibanText');
+            const toggleBtn = document.getElementById('toggleIban');
+            
+            if (!accountData || !accountData.iban) return;
+            
+            isIbanVisible = !isIbanVisible;
+            
+            if (isIbanVisible) {
+                ibanText.textContent = accountData.iban;
+                ibanText.className = '';
+                toggleBtn.innerHTML = '<ion-icon name="eye-off-outline"></ion-icon>';
+            } else {
+                ibanText.textContent = maskIban(accountData.iban);
+                ibanText.className = 'iban-hidden';
+                toggleBtn.innerHTML = '<ion-icon name="eye-outline"></ion-icon>';
+            }
+        }
+
+        function maskIban(iban) {
+            if (!iban) return 'Não configurado';
+            // Keep first 4 and last 4 characters visible, mask the rest
+            if (iban.length <= 8) return iban;
+            const firstPart = iban.substring(0, 4);
+            const lastPart = iban.substring(iban.length - 4);
+            const middle = '•'.repeat(iban.length - 8);
+            return firstPart + middle + lastPart;
+        }
+
+        function lockForm() {
+            const form = document.getElementById('bankForm');
+            const lockStatus = document.getElementById('lockStatus');
+            const saveBtn = document.getElementById('saveBtn');
+            const editBtn = document.getElementById('editBtn');
+            const ibanDisplay = document.getElementById('ibanDisplay');
+            const ibanInputContainer = document.getElementById('ibanInputContainer');
+            
+            form.classList.add('locked');
+            lockStatus.className = 'lock-status status-locked';
+            lockStatus.innerHTML = '<ion-icon name="lock-closed"></ion-icon> Bloqueado';
+            
+            // Disable all inputs
+            const inputs = form.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.disabled = true;
+            });
+            
+            // Show IBAN display, hide input
+            ibanDisplay.style.display = 'flex';
+            ibanInputContainer.classList.remove('show');
+            
+            // Hide save button, show edit button
+            saveBtn.style.display = 'none';
+            editBtn.style.display = 'block';
+            
+            isEditing = false;
+        }
+
+        function unlockForm() {
+            const form = document.getElementById('bankForm');
+            const lockStatus = document.getElementById('lockStatus');
+            const saveBtn = document.getElementById('saveBtn');
+            const editBtn = document.getElementById('editBtn');
+            const ibanDisplay = document.getElementById('ibanDisplay');
+            const ibanInputContainer = document.getElementById('ibanInputContainer');
+            
+            form.classList.remove('locked');
+            lockStatus.className = 'lock-status status-unlocked';
+            lockStatus.innerHTML = '<ion-icon name="lock-open"></ion-icon> Editável';
+            
+            // Enable all inputs
+            const inputs = form.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.disabled = false;
+            });
+            
+            // Hide IBAN display, show input for editing
+            if (!accountData || accountData.iban) {
+                // If we have existing data, show both
+                ibanDisplay.style.display = 'flex';
+                ibanInputContainer.classList.add('show');
+            } else {
+                // For new entries, show only input
+                ibanDisplay.style.display = 'none';
+                ibanInputContainer.classList.add('show');
+            }
+            
+            // Show save button, hide edit button
+            saveBtn.style.display = 'flex';
+            editBtn.style.display = 'none';
+            
+            isEditing = true;
+        }
+
+        function enableEditing() {
+            if (!accountData) return;
+            
+            // Show warning message
+            const warningDiv = document.getElementById('warningMessage');
+            warningDiv.innerHTML = `
+                <strong>Atenção!</strong><br>
+                Para alterar os dados bancários, entre em contato com o suporte através do WhatsApp:<br>
+                <strong>937 369 777</strong>
+            `;
+            warningDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                warningDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function selectBank(bankCode) {
+            // Remove active class from all logos
+            document.querySelectorAll('.bank-logo').forEach(logo => {
+                logo.classList.remove('active');
+            });
+            
+            // Add active class to selected bank
+            const selectedLogo = document.querySelector(`.bank-logo[data-bank="${bankCode}"]`);
+            if (selectedLogo) {
+                selectedLogo.classList.add('active');
+            }
+            
+            // Set bank name in select
+            document.getElementById('bankName').value = bankCode;
+        }
+
+        // Form submission
+        document.getElementById('accountForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!isEditing) return;
+            
+            const bankName = document.getElementById('bankName').value;
+            const ibanInput = document.getElementById('ibanInput');
+            const iban = ibanInput ? ibanInput.value : '';
+            const accountHolder = document.getElementById('accountHolder').value;
+            const accountNumber = document.getElementById('accountNumber').value;
+            const accountType = document.getElementById('accountType').value;
+            
+            // Validate required fields
+            if (!bankName || !iban || !accountHolder || !accountNumber || !accountType) {
+                showError('Por favor, preencha todos os campos obrigatórios.');
+                return;
+            }
+            
+            // Validate IBAN format (simplified for Angola)
+            const ibanRegex = /^[A-Z]{2}[0-9]{2}[A-Z0-9]{1,30}$/i;
+            if (!ibanRegex.test(iban)) {
+                showError('Formato de IBAN inválido. Use o formato correto: 2 letras do país + 2 dígitos + até 30 caracteres.');
+                return;
+            }
+            
+            // Validate account holder name
+            if (accountHolder.length < 3) {
+                showError('Nome do titular muito curto. Use o nome completo.');
+                return;
+            }
+            
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<ion-icon name="sync-outline"></ion-icon> Salvando...';
+            
+            try {
+                const newAccountData = {
+                    banco: bankName,
+                    iban: iban.toUpperCase(), // Convert to uppercase for consistency
+                    titular: accountHolder,
+                    conta: accountNumber,
+                    tipo: accountType,
+                    dataCadastro: firebase.firestore.FieldValue.serverTimestamp(),
+                    ultimaAtualizacao: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                
+                // Update user document with bank account
+                await db.collection('users').doc(currentUser.uid).update({
+                    contaBancaria: newAccountData
+                });
+                
+                // Show success message
+                showSuccess('✅ Conta bancária salva com sucesso! Os dados agora estão bloqueados para edição.');
+                
+                // Update local data
+                accountData = newAccountData;
+                
+                // Update IBAN display
+                const ibanText = document.getElementById('ibanText');
+                ibanText.textContent = accountData.iban;
+                ibanText.className = 'iban-hidden';
+                
+                // Lock the form
+                setTimeout(() => {
+                    lockForm();
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Error saving bank account:', error);
+                if (error.code === 'permission-denied') {
+                    showError('Permissão negada. Verifique se você está logado corretamente.');
+                } else {
+                    showError('Erro ao salvar conta bancária. Tente novamente.');
+                }
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<ion-icon name="save-outline"></ion-icon> Salvar Conta Bancária';
+            }
+        });
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Show loading on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('loadingScreen').style.display = 'block';
+            
+            // Add CSS for spinning icon
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+                ion-icon[name="sync-outline"] {
+                    animation: spin 1s linear infinite;
+                }
+            `;
+            document.head.appendChild(style);
+        });
+
+        // Initialize bank logos selection
+        document.addEventListener('DOMContentLoaded', () => {
+            const bankLogos = document.querySelectorAll('.bank-logo');
+            bankLogos.forEach(logo => {
+                logo.addEventListener('click', function() {
+                    const bankCode = this.getAttribute('data-bank');
+                    selectBank(bankCode);
+                });
+            });
+            
+            // Set up IBAN input validation
+            const ibanInput = document.getElementById('ibanInput');
+            if (ibanInput) {
+                ibanInput.addEventListener('input', function(e) {
+                    // Auto-uppercase and remove spaces
+                    this.value = this.value.toUpperCase().replace(/\s/g, '');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

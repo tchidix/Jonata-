@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Âncora Patrimonial - Equipes</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Ionicons -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding-bottom: 70px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 20px;
+            padding-top: 40px;
+            position: relative;
+            text-align: center;
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .page-subtitle {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+        
+        .content-container {
+            padding: 20px;
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .stat-card:nth-child(1) {
+            border-color: #2a5298;
+        }
+        
+        .stat-card:nth-child(2) {
+            border-color: #2ed573;
+        }
+        
+        .stat-card:nth-child(3) {
+            border-color: #FFA500;
+        }
+        
+        .stat-card:nth-child(4) {
+            border-color: #9c88ff;
+        }
+        
+        .stat-icon {
+            font-size: 30px;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card:nth-child(1) .stat-icon {
+            color: #2a5298;
+        }
+        
+        .stat-card:nth-child(2) .stat-icon {
+            color: #2ed573;
+        }
+        
+        .stat-card:nth-child(3) .stat-icon {
+            color: #FFA500;
+        }
+        
+        .stat-card:nth-child(4) .stat-icon {
+            color: #9c88ff;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+        
+        .stat-card:nth-child(1) .stat-value {
+            color: #2a5298;
+        }
+        
+        .stat-card:nth-child(2) .stat-value {
+            color: #2ed573;
+        }
+        
+        .stat-card:nth-child(3) .stat-value {
+            color: #FFA500;
+        }
+        
+        .stat-card:nth-child(4) .stat-value {
+            color: #9c88ff;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .info-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border-left: 4px solid #2a5298;
+        }
+        
+        .info-card h3 {
+            color: #2a5298;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .rules-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .rules-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #555;
+        }
+        
+        .rules-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .rule-icon {
+            color: #2a5298;
+            font-size: 18px;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .chart-title {
+            color: #2a5298;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .referral-link {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border: 2px dashed #2a5298;
+            text-align: center;
+        }
+        
+        .referral-title {
+            color: #2a5298;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .link-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .link-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            font-size: 14px;
+            background: #f8f9fa;
+            user-select: all;
+        }
+        
+        .copy-btn {
+            background: linear-gradient(45deg, #2a5298, #1e3c72);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(42, 82, 152, 0.3);
+        }
+        
+        .commission-list {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .list-title {
+            color: #2a5298;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .commission-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s;
+        }
+        
+        .commission-item:hover {
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .commission-info h4 {
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 1rem;
+        }
+        
+        .commission-info p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .commission-amount {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #2ed573;
+        }
+        
+        .commission-status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .status-paid {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .no-data ion-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #ccc;
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+            border-top: 1px solid #e1e1e1;
+            z-index: 1000;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            color: #666;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .nav-item.active {
+            color: #2a5298;
+        }
+        
+        .nav-item:hover {
+            color: #2a5298;
+        }
+        
+        .nav-icon {
+            font-size: 20px;
+        }
+        
+        .nav-text {
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2a5298;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .success-message {
+            background: #2ed573;
+            color: white;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <button class="back-btn" onclick="window.history.back()">
+            <ion-icon name="arrow-back"></ion-icon>
+        </button>
+        <h1 class="page-title">Minha Equipe</h1>
+        <p class="page-subtitle">Convide amigos e ganhe comissões</p>
+    </div>
+    
+    <!-- Content -->
+    <div class="content-container">
+        <!-- Success Message -->
+        <div id="successMessage" class="success-message"></div>
+        
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <ion-icon name="people" class="stat-icon"></ion-icon>
+                <div class="stat-value" id="totalReferrals">0</div>
+                <div class="stat-label">Amigos Convidados</div>
+            </div>
+            
+            <div class="stat-card">
+                <ion-icon name="cash" class="stat-icon"></ion-icon>
+                <div class="stat-value" id="totalCommissions">0 KZ</div>
+                <div class="stat-label">Comissões Recebidas</div>
+            </div>
+            
+            <div class="stat-card">
+                <ion-icon name="trending-up" class="stat-icon"></ion-icon>
+                <div class="stat-value" id="pendingCommissions">0 KZ</div>
+                <div class="stat-label">Comissões Pendentes</div>
+            </div>
+            
+            <div class="stat-card">
+                <ion-icon name="trophy" class="stat-icon"></ion-icon>
+                <div class="stat-value" id="teamLevel">Nível 1</div>
+                <div class="stat-label">Nível da Equipe</div>
+            </div>
+        </div>
+        
+        <!-- Rules Card -->
+        <div class="info-card">
+            <h3><ion-icon name="information-circle-outline"></ion-icon> Regras de Comissões</h3>
+            <ul class="rules-list">
+                <li>
+                    <ion-icon name="checkmark-circle" class="rule-icon"></ion-icon>
+                    Ganhe 10 KZ por cada amigo cadastrado pelo seu link
+                </li>
+                <li>
+                    <ion-icon name="checkmark-circle" class="rule-icon"></ion-icon>
+                    Receba 15% automaticamente sobre valores investidos pelo amigo
+                </li>
+                <li>
+                    <ion-icon name="checkmark-circle" class="rule-icon"></ion-icon>
+                    Comissões pagas diariamente
+                </li>
+                <li>
+                    <ion-icon name="checkmark-circle" class="rule-icon"></ion-icon>
+                    Sem limites de indicações
+                </li>
+                <li>
+                    <ion-icon name="checkmark-circle" class="rule-icon"></ion-icon>
+                    Sistema de multi-níveis (em breve)
+                </li>
+                <li>
+                    <ion-icon name="checkmark-circle" class="rule-icon"></ion-icon>
+                    Bônus por equipes grandes
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Referral Link -->
+        <div class="referral-link">
+            <h3 class="referral-title">Seu Link de Indicação</h3>
+            <div class="link-container">
+                <input type="text" id="referralLink" class="link-input" readonly>
+                <button class="copy-btn" onclick="copyReferralLink()">
+                    <ion-icon name="copy-outline"></ion-icon>
+                    Copiar
+                </button>
+            </div>
+            <p style="color: #666; font-size: 0.9rem;">
+                Compartilhe este link e ganhe comissões sobre os investimentos dos seus amigos!
+            </p>
+        </div>
+        
+        <!-- Team Chart -->
+        <div class="chart-container">
+            <h3 class="chart-title">
+                <ion-icon name="stats-chart-outline"></ion-icon>
+                Crescimento da Equipe
+            </h3>
+            <canvas id="teamChart"></canvas>
+        </div>
+        
+        <!-- Commissions List -->
+        <div class="commission-list">
+            <h3 class="list-title">
+                <ion-icon name="list-outline"></ion-icon>
+                Histórico de Comissões
+            </h3>
+            <div id="commissionsList">
+                <!-- Commissions will be loaded dynamically -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <ion-icon name="home" class="nav-icon"></ion-icon>
+            <span class="nav-text">Início</span>
+        </a>
+        <a href="compra.html" class="nav-item">
+            <ion-icon name="cart" class="nav-icon"></ion-icon>
+            <span class="nav-text">Compra</span>
+        </a>
+        <a href="Menu.html" class="nav-item active">
+            <ion-icon name="person" class="nav-icon"></ion-icon>
+            <span class="nav-text">Minha Conta</span>
+        </a>
+    </div>
+    
+    <!-- Loading Screen -->
+    <div class="loading" id="loadingScreen">
+        <div class="spinner"></div>
+        <p>Carregando dados da equipe...</p>
+    </div>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBp8X1PPp3FqiQ6OXErr8Mu11GEp6MZ2-U",
+            authDomain: "ascend-34bf0.firebaseapp.com",
+            projectId: "ascend-34bf0",
+            storageBucket: "ascend-34bf0.firebasestorage.app",
+            messagingSenderId: "592623076677",
+            appId: "1:592623076677:web:c5615719870aefdabf6a2c"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let currentUser = null;
+        let userData = null;
+        let teamChart = null;
+
+        // Check authentication
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                currentUser = user;
+                await loadUserData(user.uid);
+                await loadTeamData();
+                await loadCommissions();
+                setupReferralLink();
+                document.getElementById('loadingScreen').style.display = 'none';
+            } else {
+                window.location.href = 'registo.html';
+            }
+        });
+
+        async function loadUserData(uid) {
+            try {
+                const doc = await db.collection('users').doc(uid).get();
+                if (doc.exists) {
+                    userData = doc.data();
+                    
+                    // Update stats
+                    document.getElementById('totalCommissions').textContent = 
+                        (userData.totalComissoes || 0).toLocaleString('pt-AO') + ' KZ';
+                    document.getElementById('pendingCommissions').textContent = 
+                        (userData.comissoesPendentes || 0).toLocaleString('pt-AO') + ' KZ';
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+
+        async function loadTeamData() {
+            try {
+                // Count direct referrals
+                const referralsSnapshot = await db.collection('users')
+                    .where('convite', '==', userData.userId)
+                    .get();
+                
+                const totalReferrals = referralsSnapshot.size;
+                document.getElementById('totalReferrals').textContent = totalReferrals;
+                
+                // Calculate team level based on referrals
+                const teamLevel = totalReferrals >= 50 ? 'Nível 5' :
+                                 totalReferrals >= 30 ? 'Nível 4' :
+                                 totalReferrals >= 15 ? 'Nível 3' :
+                                 totalReferrals >= 5 ? 'Nível 2' : 'Nível 1';
+                document.getElementById('teamLevel').textContent = teamLevel;
+                
+                // Prepare chart data
+                const monthlyData = await getMonthlyReferrals();
+                renderTeamChart(monthlyData);
+                
+            } catch (error) {
+                console.error('Error loading team data:', error);
+            }
+        }
+
+        async function getMonthlyReferrals() {
+            // Simulate monthly data - in production, query Firestore for actual data
+            const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+            const currentMonth = new Date().getMonth();
+            const data = [];
+            
+            for (let i = 0; i < 6; i++) {
+                const monthIndex = (currentMonth - 5 + i + 12) % 12;
+                data.push({
+                    month: months[monthIndex],
+                    referrals: Math.floor(Math.random() * 10) + 1 // Random data for demo
+                });
+            }
+            
+            return data;
+        }
+
+        function renderTeamChart(monthlyData) {
+            const ctx = document.getElementById('teamChart').getContext('2d');
+            
+            if (teamChart) {
+                teamChart.destroy();
+            }
+            
+            teamChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: monthlyData.map(d => d.month),
+                    datasets: [{
+                        label: 'Novos Membros',
+                        data: monthlyData.map(d => d.referrals),
+                        borderColor: '#2a5298',
+                        backgroundColor: 'rgba(42, 82, 152, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 2
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        async function loadCommissions() {
+            try {
+                const commissionsList = document.getElementById('commissionsList');
+                commissionsList.innerHTML = '';
+                
+                const snapshot = await db.collection('commissions')
+                    .where('referrerId', '==', currentUser.uid)
+                    .orderBy('createdAt', 'desc')
+                    .limit(10)
+                    .get();
+                
+                if (snapshot.empty) {
+                    commissionsList.innerHTML = `
+                        <div class="no-data">
+                            <ion-icon name="receipt-outline"></ion-icon>
+                            <p>Nenhuma comissão recebida ainda</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                snapshot.forEach(doc => {
+                    const commission = doc.data();
+                    const commissionItem = document.createElement('div');
+                    commissionItem.className = 'commission-item';
+                    
+                    const date = commission.createdAt ? 
+                        commission.createdAt.toDate().toLocaleDateString('pt-AO') : 'Data não disponível';
+                    
+                    commissionItem.innerHTML = `
+                        <div class="commission-info">
+                            <h4>Indicação #${doc.id.slice(-6)}</h4>
+                            <p>${date} | Investimento: ${commission.amount.toLocaleString('pt-AO')} KZ</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="commission-amount">+${commission.commission.toLocaleString('pt-AO')} KZ</div>
+                            <span class="commission-status status-${commission.status}">
+                                ${commission.status === 'paid' ? 'Pago' : 'Pendente'}
+                            </span>
+                        </div>
+                    `;
+                    
+                    commissionsList.appendChild(commissionItem);
+                });
+                
+            } catch (error) {
+                console.error('Error loading commissions:', error);
+            }
+        }
+
+        function setupReferralLink() {
+            const referralLink = document.getElementById('referralLink');
+            const baseUrl = window.location.origin;
+            const referralCode = userData.userId;
+            const link = `${baseUrl}/registo.html?ref=${referralCode}`;
+            
+            referralLink.value = link;
+        }
+
+        function copyReferralLink() {
+            const referralLink = document.getElementById('referralLink');
+            referralLink.select();
+            referralLink.setSelectionRange(0, 99999);
+            
+            navigator.clipboard.writeText(referralLink.value).then(() => {
+                showSuccess('Link copiado para a área de transferência!');
+            });
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // Show loading on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('loadingScreen').style.display = 'block';
+        });
+    </script>
+</body>
+</html>
